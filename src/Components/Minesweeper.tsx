@@ -68,7 +68,6 @@ const Minesweeper: React.FC = () => {
                     : e => {
                         let newBoard = board;
                         if (
-                          e.button === 1 &&
                           state === CellState.OPEN &&
                           cell.threatCount > 0 &&
                           !isMine
