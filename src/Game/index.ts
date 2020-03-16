@@ -198,22 +198,22 @@ export function visitNeighbours(
   }
 }
 
-export const OPEN = 'OPEN';
-export const FLAG = 'FLAG';
-export const NONE = 'NONE';
-
-export type Cmd = 'OPEN' | 'FLAG' | 'NONE';
+export enum Cmd {
+  OPEN,
+  FLAG,
+  NONE,
+}
 
 export function nextState(
   command: Cmd,
   [cell, board]: [GameCell, Game]
 ): [GameCell, Game] {
   switch (command) {
-    case NONE:
+    case Cmd.NONE:
       return [cell, board];
-    case OPEN:
+    case Cmd.OPEN:
       return toggleOpen([cell, board]);
-    case FLAG:
+    case Cmd.FLAG:
       return toggleFlagged([cell, board]);
     default:
       throw new Error(command);

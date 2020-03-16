@@ -14,9 +14,6 @@ import {
   visitNeighbours,
   nextState,
   randomInt,
-  OPEN,
-  FLAG,
-  NONE,
 } from '../Game';
 
 type ILevels = {
@@ -101,7 +98,7 @@ const Minesweeper: React.FC = () => {
                               c.state === CellState.NEW ||
                               c.state === CellState.UNCERTAIN
                             ) {
-                              [, newBoard] = nextState('OPEN', [c, newBoard]);
+                              [, newBoard] = nextState(Cmd.OPEN, [c, newBoard]);
                             }
                           });
                           setBoard(newBoard);
@@ -174,13 +171,13 @@ function handlePointerUp(
   let command: Cmd;
   switch (e.button) {
     case 0:
-      command = OPEN;
+      command = Cmd.OPEN;
       break;
     case 2:
-      command = FLAG;
+      command = Cmd.FLAG;
       break;
     default:
-      command = NONE;
+      command = Cmd.NONE;
       break;
   }
   return nextState(command, [cell, board]);
