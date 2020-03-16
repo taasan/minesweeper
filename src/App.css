@@ -36,3 +36,91 @@
     transform: rotate(360deg);
   }
 }
+
+.Minesweeper {
+  font-size: 64px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  background-color: #34495e;
+  color: #fff;
+  border: 6px solid #2c3e50;
+  border-radius: 10px;
+
+  display: grid;
+
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  grid-auto-flow: column;
+  text-align: center;
+  vertical-align: middle;
+}
+.Minesweeper button {
+  padding: 0;
+  margin: 0;
+}
+
+.Minesweeper button[data-state='EXPLODED'] {
+  background-color: #dc322f !important;
+}
+
+.Minesweeper button:disabled[data-state='NEW'],
+.Minesweeper button {
+  font-weight: bold;
+  font-family: 'Noto Color Emoji';
+  background-color: #839496;
+}
+
+.Minesweeper button[data-threats='0'] {
+  font-family: monospace;
+  color: #073642;
+}
+
+.Minesweeper button[data-threats='1'] {
+  font-family: monospace;
+  color: #268bd2;
+}
+
+.Minesweeper button[data-threats='2'] {
+  font-family: monospace;
+  color: #859900;
+}
+
+.Minesweeper button[data-threats='3'] {
+  font-family: monospace;
+  color: #dc322f;
+}
+
+.Minesweeper button[data-threats='4'] {
+  font-family: monospace;
+  color: #6c71c4;
+}
+
+.Minesweeper button[data-threats='5'] {
+  font-family: monospace;
+  color: #d33682;
+}
+
+.Minesweeper button[data-threats='6'] {
+  font-family: monospace;
+  color: #2aa198;
+}
+
+.Minesweeper button[data-threats='7'] {
+  font-family: monospace;
+  color: #b58900;
+}
+
+.Minesweeper button[data-threats='8'] {
+  font-family: monospace;
+  color: #cb4b16;
+}
+
+.Minesweeper button[data-state='OPEN'],
+.Minesweeper button:disabled {
+  background-color: #eee8d5;
+}
+
+button:hover {
+  background-color: pink;
+}
