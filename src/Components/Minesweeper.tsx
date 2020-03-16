@@ -1,12 +1,6 @@
 import * as React from 'react';
-import * as Board from '../Game/Board';
+import * as Board from '../Game';
 import Cell from './Cell';
-
-export const OPEN = 'OPEN';
-export const FLAG = 'FLAG';
-export const NONE = 'NONE';
-
-export type Cmd = 'OPEN' | 'FLAG' | 'NONE';
 
 type ILevels = {
   [keyof: string]: Board.Level;
@@ -26,31 +20,26 @@ const getLevel = (key: string) => {
 const Minesweeper: React.FC = () => {
   const [level, setLevel] = React.useState(LEVELS.BEGINNER);
   const { rows, cols } = level;
-  const [board, setBoard] = React.useState(
-    () => new Board.default(level).board
-  );
+  const [board, setBoard] = React.useState(() => Board.createGame(level));
   const gameOver = board.state === 'GAME_OVER';
 
   return (
-    <main>
+    <div>
       <div>
-        {' '}
         <aside>
           <button>{board.state}</button>
           <select
             onChange={e => {
               const level = getLevel(e.target.value);
               setLevel(level);
-              setBoard(new Board.default(level).board);
+              setBoard(Board.createGame(level));
             }}
           >
             {Object.keys(LEVELS).map(k => (
               <option key={k}>{k}</option>
             ))}
           </select>
-          <button onClick={() => setBoard(new Board.default(level).board)}>
-            New
-          </button>
+          <button onClick={() => setBoard(Board.createGame(level))}>New</button>
         </aside>
       </div>
       <div
@@ -59,16 +48,15 @@ const Minesweeper: React.FC = () => {
           gridTemplateColumns: `repeat(${cols}, .5em)`,
           gridTemplateRows: `repeat(${rows}, .5em)`,
         }}
+        data-state={board.state}
       >
         {board.get('cols').map((cols, col) => {
           return cols.map((cell, row) => {
             if (col !== cell.col || row !== cell.row) {
               throw new Error();
             }
-            const { threats, state } = cell;
+            const { threatCount: threats, state } = cell;
             const isMine = Board.isMine({ col, row }, board);
-            const gameOverState =
-              gameOver && isMine && state !== 'EXPLODED' ? 'OPEN' : state;
 
             return (
               <Cell
@@ -81,19 +69,24 @@ const Minesweeper: React.FC = () => {
                         if (
                           e.button === 1 &&
                           state === 'OPEN' &&
-                          cell.threats > 0 &&
+                          cell.threatCount > 0 &&
                           !isMine
                         ) {
+                          let flaggedNeighbours = 0;
+                          Board.visitNeighbours(newBoard, cell, c => {
+                            if (c.state === 'FLAGGED') {
+                              flaggedNeighbours++;
+                            }
+                          });
+                          if (flaggedNeighbours !== threats) {
+                            return;
+                          }
                           Board.visitNeighbours(newBoard, cell, c => {
                             if (c.state === 'NEW' || c.state === 'UNCERTAIN') {
-                              const [newCell, newGameState] = nextState(
-                                'OPEN',
-                                [c, newBoard]
-                              );
-                              newBoard = Board.updateCell(
-                                newGameState,
-                                newCell
-                              );
+                              [, newBoard] = Board.nextState('OPEN', [
+                                c,
+                                newBoard,
+                              ]);
                             }
                           });
                           setBoard(newBoard);
@@ -101,12 +94,12 @@ const Minesweeper: React.FC = () => {
                         }
 
                         const [newCell, newGameState] = handlePointerUp(e, [
-                          cell.set('state', gameOverState),
+                          cell.set('state', state),
                           newBoard,
                         ]);
                         newBoard = newGameState;
                         if (
-                          newCell.state === gameOverState &&
+                          newCell.state === state &&
                           newBoard.state === board.state
                         ) {
                           // No change
@@ -115,8 +108,8 @@ const Minesweeper: React.FC = () => {
                         setBoard(newBoard);
                       }
                 }
-                content={render(gameOverState, threats)}
-                state={gameOverState}
+                content={render(state, threats, board.state)}
+                state={state}
                 disabled={
                   board.state === 'GAME_OVER' ||
                   board.state === 'NOT_INITIALIZED' ||
@@ -128,7 +121,7 @@ const Minesweeper: React.FC = () => {
           });
         })}
       </div>
-    </main>
+    </div>
   );
 };
 
@@ -136,11 +129,14 @@ const MINES = ['🤒', '😷', '🤮', '🤢', '🤡', '🧟', '🤥', '🤕'];
 
 function render(
   state: Board.CellState,
-  threats: Board.NumThreats | Board.Mine
-) {
+  threats: Board.NumThreats | Board.Mine,
+  gameState: Board.GameState
+): string | Board.NumThreats {
   switch (state) {
     case 'FLAGGED':
-      return '🚩';
+      return gameState === 'GAME_OVER'
+        ? render('OPEN', threats, 'PLAYING')
+        : '🚩';
     case 'UNCERTAIN':
       return '❓';
     case 'OPEN':
@@ -158,97 +154,21 @@ function render(
 
 function handlePointerUp(
   e: React.MouseEvent,
-  [cell, board]: [Board.IImmutableCellRecord, Board.IImmutableBoardRecord]
-): [Board.IImmutableCellRecord, Board.IImmutableBoardRecord] {
-  let command: Cmd;
+  [cell, board]: [Board.GameCell, Board.Game]
+): [Board.GameCell, Board.Game] {
+  let command: Board.Cmd;
   switch (e.button) {
     case 0:
-      command = OPEN;
+      command = Board.OPEN;
       break;
     case 2:
-      command = FLAG;
+      command = Board.FLAG;
       break;
     default:
-      command = NONE;
+      command = Board.NONE;
       break;
   }
-  return nextState(command, [cell, board]);
-}
-
-function nextState(
-  command: Cmd,
-  [cell, board]: [Board.IImmutableCellRecord, Board.IImmutableBoardRecord]
-): [Board.IImmutableCellRecord, Board.IImmutableBoardRecord] {
-  switch (command) {
-    case NONE:
-      return [cell, board];
-    case OPEN:
-      return toggleOpen([cell, board]);
-    case FLAG:
-      return toggleFlagged([cell, board]);
-    default:
-      throw new Error(command);
-  }
-}
-
-function toggleOpen([cell, board]: [
-  Board.IImmutableCellRecord,
-  Board.IImmutableBoardRecord
-]): [Board.IImmutableCellRecord, Board.IImmutableBoardRecord] {
-  if (!(board.state === 'PLAYING' || board.state === 'INITIALIZED')) {
-    return [cell, board];
-  }
-  const oldCellState = cell.state;
-  let newState: Board.CellState = oldCellState;
-  if (oldCellState === 'NEW' || oldCellState === 'UNCERTAIN') {
-    newState = cell.threats === 0xff ? 'EXPLODED' : 'OPEN';
-  }
-  let newBoard = board;
-  if (board.state === 'INITIALIZED') {
-    newBoard = newBoard.set('state', 'PLAYING');
-  }
-  const newCell = cell.set('state', newState);
-  newBoard = Board.updateCell(newBoard, newCell);
-  const { col, row } = cell;
-  if (newCell.threats === 0) {
-    Board.collectZeroes(newBoard, {
-      col,
-      row,
-    }).forEach(c => {
-      newBoard = Board.updateCell(newBoard, c.set('state', 'OPEN'));
-    });
-  }
-  return [
-    newCell,
-    newState === 'EXPLODED' ? newBoard.set('state', 'GAME_OVER') : newBoard,
-  ];
-}
-
-function toggleFlagged([cell, board]: [
-  Board.IImmutableCellRecord,
-  Board.IImmutableBoardRecord
-]): [Board.IImmutableCellRecord, Board.IImmutableBoardRecord] {
-  if (!(board.state === 'PLAYING' || board.state === 'INITIALIZED')) {
-    return [cell, board];
-  }
-  let newCellState: Board.CellState = cell.state;
-  switch (cell.state) {
-    case 'FLAGGED':
-      newCellState = 'UNCERTAIN';
-      break;
-    case 'UNCERTAIN':
-      newCellState = 'NEW';
-      break;
-    case 'NEW':
-      newCellState = 'FLAGGED';
-      break;
-  }
-  const newCell = cell.set('state', newCellState);
-  let newBoard = board;
-  if (board.state === 'INITIALIZED') {
-    newBoard = newBoard.set('state', 'PLAYING');
-  }
-  return [newCell, Board.updateCell(newBoard, newCell)];
+  return Board.nextState(command, [cell, board]);
 }
 
 export default Minesweeper;
