@@ -10,6 +10,7 @@
     "@types/node": "^12.12.30",
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
+    "immutable": "^4.0.0-rc.12",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-scripts": "3.4.0",
@@ -22,7 +23,19 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "plugins": [
+      "prettier"
+    ],
+    "extends": [
+      "react-app",
+      "prettier/@typescript-eslint",
+      "plugin:prettier/recommended"
+    ]
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": true,
+    "singleQuote": true
   },
   "browserslist": {
     "production": [
@@ -35,5 +48,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1"
   }
 }
