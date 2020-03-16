@@ -2,7 +2,13 @@ import { List, Record, RecordOf } from 'immutable';
 
 export type NumThreats = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-export type CellState = 'OPEN' | 'FLAGGED' | 'UNCERTAIN' | 'NEW' | 'EXPLODED';
+export enum CellState {
+  OPEN,
+  FLAGGED,
+  UNCERTAIN,
+  NEW,
+  EXPLODED,
+}
 
 export type ICell = {
   readonly state: CellState;
@@ -10,7 +16,7 @@ export type ICell = {
 } & Coordinate;
 
 const createGameCell: Record.Factory<ICell> = Record<ICell>({
-  state: 'NEW',
+  state: CellState.NEW,
   threatCount: 0,
   col: 0,
   row: 0,
@@ -23,12 +29,13 @@ export type Coordinate = {
   readonly row: number;
 };
 
-export type GameState =
-  | 'PAUSED'
-  | 'GAME_OVER'
-  | 'INITIALIZED'
-  | 'PLAYING'
-  | 'NOT_INITIALIZED';
+export enum GameState {
+  PAUSED,
+  GAME_OVER,
+  INITIALIZED,
+  PLAYING,
+  NOT_INITIALIZED,
+}
 
 type IBoard = {
   cols: List<List<GameCell>>;
@@ -39,7 +46,7 @@ export type Game = RecordOf<IBoard>;
 
 const createBoard: Record.Factory<IBoard> = Record<IBoard>({
   cols: List.of(),
-  state: 'NOT_INITIALIZED',
+  state: GameState.NOT_INITIALIZED,
 });
 
 export type Level = {
@@ -97,7 +104,7 @@ export function createGame({ cols, rows, mines }: Level): Game {
     }
   }
 
-  return board.set('state', 'INITIALIZED');
+  return board.set('state', GameState.INITIALIZED);
 }
 
 export function updateCell(board: Game, newCell: GameCell): Game {
@@ -214,17 +221,21 @@ export function nextState(
 }
 
 function toggleOpen([cell, board]: [GameCell, Game]): [GameCell, Game] {
-  if (!(board.state === 'PLAYING' || board.state === 'INITIALIZED')) {
+  if (
+    !(
+      board.state === GameState.PLAYING || board.state === GameState.INITIALIZED
+    )
+  ) {
     return [cell, board];
   }
   const oldCellState = cell.state;
   let newState: CellState = oldCellState;
-  if (oldCellState === 'NEW' || oldCellState === 'UNCERTAIN') {
-    newState = cell.threatCount === 0xff ? 'EXPLODED' : 'OPEN';
+  if (oldCellState === CellState.NEW || oldCellState === CellState.UNCERTAIN) {
+    newState = cell.threatCount === 0xff ? CellState.EXPLODED : CellState.OPEN;
   }
   let newBoard = board;
-  if (board.state === 'INITIALIZED') {
-    newBoard = newBoard.set('state', 'PLAYING');
+  if (board.state === GameState.INITIALIZED) {
+    newBoard = newBoard.set('state', GameState.PLAYING);
   }
   const newCell = cell.set('state', newState);
   newBoard = updateCell(newBoard, newCell);
@@ -237,37 +248,43 @@ function toggleOpen([cell, board]: [GameCell, Game]): [GameCell, Game] {
       if (c.threatCount === 0xff) {
         throw new Error(`Expected 0-8 threatCount, got ${c.threatCount}`);
       }
-      if (c.state === 'NEW' || c.state === 'UNCERTAIN') {
-        newBoard = updateCell(newBoard, c.set('state', 'OPEN'));
+      if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
+        newBoard = updateCell(newBoard, c.set('state', CellState.OPEN));
       }
     });
   }
   return [
     newCell,
-    newState === 'EXPLODED' ? newBoard.set('state', 'GAME_OVER') : newBoard,
+    newState === CellState.EXPLODED
+      ? newBoard.set('state', GameState.GAME_OVER)
+      : newBoard,
   ];
 }
 
 function toggleFlagged([cell, board]: [GameCell, Game]): [GameCell, Game] {
-  if (!(board.state === 'PLAYING' || board.state === 'INITIALIZED')) {
+  if (
+    !(
+      board.state === GameState.PLAYING || board.state === GameState.INITIALIZED
+    )
+  ) {
     return [cell, board];
   }
   let newCellState: CellState = cell.state;
   switch (cell.state) {
-    case 'FLAGGED':
-      newCellState = 'UNCERTAIN';
+    case CellState.FLAGGED:
+      newCellState = CellState.UNCERTAIN;
       break;
-    case 'UNCERTAIN':
-      newCellState = 'NEW';
+    case CellState.UNCERTAIN:
+      newCellState = CellState.NEW;
       break;
-    case 'NEW':
-      newCellState = 'FLAGGED';
+    case CellState.NEW:
+      newCellState = CellState.FLAGGED;
       break;
   }
   const newCell = cell.set('state', newCellState);
   let newBoard = board;
-  if (board.state === 'INITIALIZED') {
-    newBoard = newBoard.set('state', 'PLAYING');
+  if (board.state === GameState.INITIALIZED) {
+    newBoard = newBoard.set('state', GameState.PLAYING);
   }
   return [newCell, updateCell(newBoard, newCell)];
 }

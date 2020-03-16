@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as Board from '../Game';
 import Cell from './Cell';
+import { CellState, GameState } from '../Game';
 
 type ILevels = {
   [keyof: string]: Board.Level;
@@ -21,13 +22,13 @@ const Minesweeper: React.FC = () => {
   const [level, setLevel] = React.useState(LEVELS.BEGINNER);
   const { rows, cols } = level;
   const [board, setBoard] = React.useState(() => Board.createGame(level));
-  const gameOver = board.state === 'GAME_OVER';
+  const gameOver = board.state === GameState.GAME_OVER;
 
   return (
     <div>
       <div>
         <aside>
-          <button>{board.state}</button>
+          <button>{GameState[board.state]}</button>
           <select
             onChange={e => {
               const level = getLevel(e.target.value);
@@ -68,13 +69,13 @@ const Minesweeper: React.FC = () => {
                         let newBoard = board;
                         if (
                           e.button === 1 &&
-                          state === 'OPEN' &&
+                          state === CellState.OPEN &&
                           cell.threatCount > 0 &&
                           !isMine
                         ) {
                           let flaggedNeighbours = 0;
                           Board.visitNeighbours(newBoard, cell, c => {
-                            if (c.state === 'FLAGGED') {
+                            if (c.state === CellState.FLAGGED) {
                               flaggedNeighbours++;
                             }
                           });
@@ -82,7 +83,10 @@ const Minesweeper: React.FC = () => {
                             return;
                           }
                           Board.visitNeighbours(newBoard, cell, c => {
-                            if (c.state === 'NEW' || c.state === 'UNCERTAIN') {
+                            if (
+                              c.state === CellState.NEW ||
+                              c.state === CellState.UNCERTAIN
+                            ) {
                               [, newBoard] = Board.nextState('OPEN', [
                                 c,
                                 newBoard,
@@ -111,9 +115,9 @@ const Minesweeper: React.FC = () => {
                 content={render(state, threats, board.state)}
                 state={state}
                 disabled={
-                  board.state === 'GAME_OVER' ||
-                  board.state === 'NOT_INITIALIZED' ||
-                  board.state === 'PAUSED'
+                  board.state === GameState.GAME_OVER ||
+                  board.state === GameState.NOT_INITIALIZED ||
+                  board.state === GameState.PAUSED
                 }
                 threats={threats !== 0xff ? threats : undefined}
               />
@@ -133,19 +137,19 @@ function render(
   gameState: Board.GameState
 ): string | Board.NumThreats {
   switch (state) {
-    case 'FLAGGED':
-      return gameState === 'GAME_OVER'
-        ? render('OPEN', threats, 'PLAYING')
+    case CellState.FLAGGED:
+      return gameState === GameState.GAME_OVER
+        ? render(CellState.OPEN, threats, GameState.PLAYING)
         : '🚩';
-    case 'UNCERTAIN':
+    case CellState.UNCERTAIN:
       return '❓';
-    case 'OPEN':
+    case CellState.OPEN:
       return threats === 0
         ? '\u00A0'
         : threats === 0xff
         ? MINES[Board.randomInt(MINES.length)]
         : threats;
-    case 'EXPLODED':
+    case CellState.EXPLODED:
       return '💀';
     default:
       return '\u00A0';

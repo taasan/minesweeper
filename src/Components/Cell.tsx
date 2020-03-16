@@ -18,8 +18,8 @@ const Cell: React.FC<IProps> = ({
 }) => {
   return (
     <button
-      data-state={state}
-      data-threats={state === 'OPEN' ? threats : undefined}
+      data-state={CellState[state]}
+      data-threats={state === CellState.OPEN ? threats : undefined}
       className="Cell"
       onPointerUp={onPointerUp}
       disabled={disabled}
