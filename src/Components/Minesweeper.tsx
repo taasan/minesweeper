@@ -1,10 +1,26 @@
 import * as React from 'react';
-import * as Board from '../Game';
 import Cell from './Cell';
-import { CellState, GameState } from '../Game';
+import {
+  CellState,
+  GameState,
+  Level,
+  NumThreats,
+  Mine,
+  GameCell,
+  Game,
+  Cmd,
+  createGame,
+  isMine,
+  visitNeighbours,
+  nextState,
+  randomInt,
+  OPEN,
+  FLAG,
+  NONE,
+} from '../Game';
 
 type ILevels = {
-  [keyof: string]: Board.Level;
+  [keyof: string]: Level;
 };
 
 const LEVELS: ILevels = {
@@ -21,7 +37,7 @@ const getLevel = (key: string) => {
 const Minesweeper: React.FC = () => {
   const [level, setLevel] = React.useState(LEVELS.BEGINNER);
   const { rows, cols } = level;
-  const [board, setBoard] = React.useState(() => Board.createGame(level));
+  const [board, setBoard] = React.useState(() => createGame(level));
   const gameOver = board.state === GameState.GAME_OVER;
 
   return (
@@ -33,14 +49,14 @@ const Minesweeper: React.FC = () => {
             onChange={e => {
               const level = getLevel(e.target.value);
               setLevel(level);
-              setBoard(Board.createGame(level));
+              setBoard(createGame(level));
             }}
           >
             {Object.keys(LEVELS).map(k => (
               <option key={k}>{k}</option>
             ))}
           </select>
-          <button onClick={() => setBoard(Board.createGame(level))}>New</button>
+          <button onClick={() => setBoard(createGame(level))}>New</button>
         </aside>
       </div>
       <div
@@ -57,7 +73,6 @@ const Minesweeper: React.FC = () => {
               throw new Error();
             }
             const { threatCount: threats, state } = cell;
-            const isMine = Board.isMine({ col, row }, board);
 
             return (
               <Cell
@@ -70,10 +85,10 @@ const Minesweeper: React.FC = () => {
                         if (
                           state === CellState.OPEN &&
                           cell.threatCount > 0 &&
-                          !isMine
+                          !isMine(cell, board)
                         ) {
                           let flaggedNeighbours = 0;
-                          Board.visitNeighbours(newBoard, cell, c => {
+                          visitNeighbours(newBoard, cell, c => {
                             if (c.state === CellState.FLAGGED) {
                               flaggedNeighbours++;
                             }
@@ -81,15 +96,12 @@ const Minesweeper: React.FC = () => {
                           if (flaggedNeighbours !== threats) {
                             return;
                           }
-                          Board.visitNeighbours(newBoard, cell, c => {
+                          visitNeighbours(newBoard, cell, c => {
                             if (
                               c.state === CellState.NEW ||
                               c.state === CellState.UNCERTAIN
                             ) {
-                              [, newBoard] = Board.nextState('OPEN', [
-                                c,
-                                newBoard,
-                              ]);
+                              [, newBoard] = nextState('OPEN', [c, newBoard]);
                             }
                           });
                           setBoard(newBoard);
@@ -131,10 +143,10 @@ const Minesweeper: React.FC = () => {
 const MINES = ['🤒', '😷', '🤮', '🤢', '🤡', '🧟', '🤥', '🤕'];
 
 function render(
-  state: Board.CellState,
-  threats: Board.NumThreats | Board.Mine,
-  gameState: Board.GameState
-): string | Board.NumThreats {
+  state: CellState,
+  threats: NumThreats | Mine,
+  gameState: GameState
+): string | NumThreats {
   switch (state) {
     case CellState.FLAGGED:
       return gameState === GameState.GAME_OVER
@@ -146,7 +158,7 @@ function render(
       return threats === 0
         ? '\u00A0'
         : threats === 0xff
-        ? MINES[Board.randomInt(MINES.length)]
+        ? MINES[randomInt(MINES.length)]
         : threats;
     case CellState.EXPLODED:
       return '💀';
@@ -157,21 +169,21 @@ function render(
 
 function handlePointerUp(
   e: React.MouseEvent,
-  [cell, board]: [Board.GameCell, Board.Game]
-): [Board.GameCell, Board.Game] {
-  let command: Board.Cmd;
+  [cell, board]: [GameCell, Game]
+): [GameCell, Game] {
+  let command: Cmd;
   switch (e.button) {
     case 0:
-      command = Board.OPEN;
+      command = OPEN;
       break;
     case 2:
-      command = Board.FLAG;
+      command = FLAG;
       break;
     default:
-      command = Board.NONE;
+      command = NONE;
       break;
   }
-  return Board.nextState(command, [cell, board]);
+  return nextState(command, [cell, board]);
 }
 
 export default Minesweeper;
