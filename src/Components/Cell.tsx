@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { NumThreats, CellState } from '../Game';
+import { NumThreats, CellState, GameState, Mine } from '../Game';
 
 type IProps = {
   content: string | NumThreats;
   disabled?: boolean;
   onPointerUp?: (e: React.MouseEvent) => void;
-  state: CellState;
-  threats: NumThreats | undefined;
+  state: [CellState, GameState];
+  threats: NumThreats | Mine;
 };
 
 const Cell: React.FC<IProps> = ({
@@ -16,10 +16,15 @@ const Cell: React.FC<IProps> = ({
   state,
   threats,
 }) => {
+  const [cellState, gameState] = state;
   return (
     <button
-      data-state={CellState[state]}
-      data-threats={state === CellState.OPEN ? threats : undefined}
+      data-state={CellState[cellState]}
+      data-threats={
+        cellState === CellState.OPEN || gameState === GameState.GAME_OVER
+          ? threats
+          : undefined
+      }
       className="Cell"
       onPointerUp={onPointerUp}
       disabled={disabled}

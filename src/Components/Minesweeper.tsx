@@ -121,13 +121,13 @@ const Minesweeper: React.FC = () => {
                       }
                 }
                 content={render(state, threats, board.state)}
-                state={state}
+                state={[state, board.state]}
                 disabled={
                   board.state === GameState.GAME_OVER ||
                   board.state === GameState.NOT_INITIALIZED ||
                   board.state === GameState.PAUSED
                 }
-                threats={threats !== 0xff ? threats : undefined}
+                threats={threats}
               />
             );
           });
@@ -146,8 +146,8 @@ function render(
 ): string | NumThreats {
   switch (state) {
     case CellState.FLAGGED:
-      return gameState === GameState.GAME_OVER
-        ? render(CellState.OPEN, threats, GameState.PLAYING)
+      return gameState === GameState.GAME_OVER && threats !== 0xff
+        ? '❌'
         : '🚩';
     case CellState.UNCERTAIN:
       return '❓';
