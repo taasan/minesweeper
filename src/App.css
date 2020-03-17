@@ -55,72 +55,88 @@
   text-align: center;
   vertical-align: middle;
 }
-.Minesweeper button {
+.Minesweeper[data-state='COMPLETE'] {
+  background-color: green !important;
+}
+
+.Minesweeper[data-state='GAME_OVER']
+  .Cell:not([data-threats='255'])[data-state='FLAGGED'] {
+  background-color: #cb4b16 !important;
+  color: #073642 !important;
+}
+
+.Minesweeper[data-state='COMPLETED'][data-state='FLAGGED'] .Cell,
+.Minesweeper[data-state='GAME_OVER'][data-state='FLAGGED'] .Cell {
+  background-color: #60a505 !important;
+  color: #073642 !important;
+}
+
+.Minesweeper .Cell {
   padding: 0;
   margin: 0;
 }
 
-.Minesweeper button[data-state='EXPLODED'] {
+.Minesweeper .Cell[data-state='EXPLODED'] {
   background-color: #dc322f !important;
 }
 
-.Minesweeper button:disabled[data-state='NEW'],
-.Minesweeper button {
+.Minesweeper .Cell:disabled[data-state='NEW'],
+.Minesweeper .Cell {
   font-weight: bold;
   font-family: 'Noto Color Emoji';
   background-color: #839496;
 }
 
-.Minesweeper button[data-threats='0'] {
+.Minesweeper .Cell[data-threats='0'] {
   font-family: monospace;
   color: #073642;
 }
 
-.Minesweeper button[data-threats='1'] {
+.Minesweeper .Cell[data-threats='1'] {
   font-family: monospace;
   color: #268bd2;
 }
 
-.Minesweeper button[data-threats='2'] {
+.Minesweeper .Cell[data-threats='2'] {
   font-family: monospace;
   color: #859900;
 }
 
-.Minesweeper button[data-threats='3'] {
+.Minesweeper .Cell[data-threats='3'] {
   font-family: monospace;
   color: #dc322f;
 }
 
-.Minesweeper button[data-threats='4'] {
+.Minesweeper .Cell[data-threats='4'] {
   font-family: monospace;
   color: #6c71c4;
 }
 
-.Minesweeper button[data-threats='5'] {
+.Minesweeper .Cell[data-threats='5'] {
   font-family: monospace;
   color: #d33682;
 }
 
-.Minesweeper button[data-threats='6'] {
+.Minesweeper .Cell[data-threats='6'] {
   font-family: monospace;
   color: #2aa198;
 }
 
-.Minesweeper button[data-threats='7'] {
+.Minesweeper .Cell[data-threats='7'] {
   font-family: monospace;
   color: #b58900;
 }
 
-.Minesweeper button[data-threats='8'] {
+.Minesweeper .Cell[data-threats='8'] {
   font-family: monospace;
   color: #cb4b16;
 }
 
-.Minesweeper button[data-state='OPEN'],
-.Minesweeper button:disabled {
+.Minesweeper .Cell[data-state='OPEN'],
+.Minesweeper .Cell:disabled {
   background-color: #eee8d5;
 }
 
-button:hover {
+.Minesweeper .Cell:hover {
   background-color: pink;
 }

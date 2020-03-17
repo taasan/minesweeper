@@ -14,6 +14,7 @@ import {
   visitNeighbours,
   nextState,
   randomInt,
+  getCellStates,
 } from '../Game';
 
 type ILevels = {
@@ -36,11 +37,14 @@ const Minesweeper: React.FC = () => {
   const { rows, cols } = level;
   const [board, setBoard] = React.useState(() => createGame(level));
   const gameOver = board.state === GameState.GAME_OVER;
+  const cellStates = getCellStates(board);
 
   return (
     <div>
       <div>
         <aside>
+          <button>{cellStates[CellState.FLAGGED]}</button>
+          <button>{board.level.mines - cellStates[CellState.FLAGGED]}</button>
           <button>{GameState[board.state]}</button>
           <select
             onChange={e => {
@@ -56,82 +60,88 @@ const Minesweeper: React.FC = () => {
           <button onClick={() => setBoard(createGame(level))}>New</button>
         </aside>
       </div>
-      <div
-        className="Minesweeper"
-        style={{
-          gridTemplateColumns: `repeat(${cols}, .5em)`,
-          gridTemplateRows: `repeat(${rows}, .5em)`,
-        }}
-        data-state={board.state}
-      >
-        {board.get('cols').map((cols, col) => {
-          return cols.map((cell, row) => {
-            if (col !== cell.col || row !== cell.row) {
-              throw new Error();
-            }
-            const { threatCount: threats, state } = cell;
+      <div>
+        <div
+          className="Minesweeper"
+          style={{
+            gridTemplateColumns: `repeat(${cols}, .5em)`,
+            gridTemplateRows: `repeat(${rows}, .5em)`,
+          }}
+          data-state={GameState[board.state]}
+        >
+          {board.get('cells').map((cols, col) => {
+            return cols.map((cell, row) => {
+              if (col !== cell.col || row !== cell.row) {
+                throw new Error();
+              }
+              const { threatCount: threats, state } = cell;
 
-            return (
-              <Cell
-                key={`${row}-${col}`}
-                onPointerUp={
-                  gameOver
-                    ? undefined
-                    : e => {
-                        let newBoard = board;
-                        if (
-                          state === CellState.OPEN &&
-                          cell.threatCount > 0 &&
-                          !isMine(cell, board)
-                        ) {
-                          let flaggedNeighbours = 0;
-                          visitNeighbours(newBoard, cell, c => {
-                            if (c.state === CellState.FLAGGED) {
-                              flaggedNeighbours++;
+              return (
+                <Cell
+                  key={`${row}-${col}`}
+                  onPointerUp={
+                    gameOver
+                      ? undefined
+                      : e => {
+                          let newBoard = board;
+                          if (
+                            state === CellState.OPEN &&
+                            cell.threatCount > 0 &&
+                            !isMine(cell, board)
+                          ) {
+                            let flaggedNeighbours = 0;
+                            visitNeighbours(newBoard, cell, c => {
+                              if (c.state === CellState.FLAGGED) {
+                                flaggedNeighbours++;
+                              }
+                            });
+                            if (flaggedNeighbours !== threats) {
+                              return;
                             }
-                          });
-                          if (flaggedNeighbours !== threats) {
+                            visitNeighbours(newBoard, cell, c => {
+                              if (
+                                c.state === CellState.NEW ||
+                                c.state === CellState.UNCERTAIN
+                              ) {
+                                [, newBoard] = nextState(Cmd.OPEN, [
+                                  c,
+                                  newBoard,
+                                ]);
+                              }
+                            });
+                            setBoard(newBoard);
                             return;
                           }
-                          visitNeighbours(newBoard, cell, c => {
-                            if (
-                              c.state === CellState.NEW ||
-                              c.state === CellState.UNCERTAIN
-                            ) {
-                              [, newBoard] = nextState(Cmd.OPEN, [c, newBoard]);
-                            }
-                          });
-                          setBoard(newBoard);
-                          return;
-                        }
 
-                        const [newCell, newGameState] = handlePointerUp(e, [
-                          cell.set('state', state),
-                          newBoard,
-                        ]);
-                        newBoard = newGameState;
-                        if (
-                          newCell.state === state &&
-                          newBoard.state === board.state
-                        ) {
-                          // No change
-                          return;
+                          const [newCell, newGameState] = handlePointerUp(e, [
+                            cell.set('state', state),
+                            newBoard,
+                          ]);
+                          newBoard = newGameState;
+                          if (
+                            newCell.state === state &&
+                            newBoard.state === board.state
+                          ) {
+                            // No change
+                            return;
+                          }
+                          setBoard(newBoard);
                         }
-                        setBoard(newBoard);
-                      }
-                }
-                content={render(state, threats, board.state)}
-                state={[state, board.state]}
-                disabled={
-                  board.state === GameState.GAME_OVER ||
-                  board.state === GameState.NOT_INITIALIZED ||
-                  board.state === GameState.PAUSED
-                }
-                threats={threats}
-              />
-            );
-          });
-        })}
+                  }
+                  content={render(state, threats, board.state)}
+                  state={[state, board.state]}
+                  disabled={
+                    board.state === GameState.COMPLETED ||
+                    board.state === GameState.GAME_OVER ||
+                    board.state === GameState.NOT_INITIALIZED ||
+                    board.state === GameState.PAUSED
+                  }
+                  threats={threats}
+                />
+              );
+            });
+          })}
+        </div>
       </div>
     </div>
   );
@@ -144,6 +154,9 @@ function render(
   threats: NumThreats | Mine,
   gameState: GameState
 ): string | NumThreats {
+  if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
+    return render(CellState.OPEN, threats, GameState.PLAYING);
+  }
   switch (state) {
     case CellState.FLAGGED:
       return gameState === GameState.GAME_OVER && threats !== 0xff

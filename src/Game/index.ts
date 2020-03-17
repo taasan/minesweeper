@@ -32,21 +32,35 @@ export type Coordinate = {
 export enum GameState {
   PAUSED,
   GAME_OVER,
+  COMPLETED,
   INITIALIZED,
   PLAYING,
   NOT_INITIALIZED,
 }
 
-type IBoard = {
-  cols: List<List<GameCell>>;
+type IGame = Readonly<{
+  cells: List<List<GameCell>>;
   state: GameState;
-};
+  level: Level;
+}>;
 
-export type Game = RecordOf<IBoard>;
+export type Game = RecordOf<IGame>;
 
-const createBoard: Record.Factory<IBoard> = Record<IBoard>({
-  cols: List.of(),
+export function* getCellGenerator(game: Game) {
+  const cols = game.cells.size;
+  const rows = game.cells.get(0)!.size;
+  for (let col = 0; col < cols; col++) {
+    for (let row = 0; row < rows; row++) {
+      const c = game.cells.get(col)!.get(row) as GameCell;
+      yield c;
+    }
+  }
+}
+
+const createBoard: Record.Factory<IGame> = Record<IGame>({
+  cells: List.of(),
   state: GameState.NOT_INITIALIZED,
+  level: { cols: 0, rows: 0, mines: 0 },
 });
 
 export type Level = {
@@ -57,15 +71,33 @@ export type Level = {
 
 export type Mine = 0xff;
 
+type CellStateStats = { [key in CellState]: number };
+
+export function getCellStates(game: Game): CellStateStats {
+  return [...getCellGenerator(game)].reduce(
+    (result, item) => ({
+      ...result,
+      [item.state]: result[item.state] + 1,
+    }),
+    {
+      [CellState.OPEN]: 0,
+      [CellState.FLAGGED]: 0,
+      [CellState.UNCERTAIN]: 0,
+      [CellState.NEW]: 0,
+      [CellState.EXPLODED]: 0,
+    }
+  );
+}
+
 export function createGame({ cols, rows, mines }: Level): Game {
-  let board: Game = createBoard();
+  let board: Game = createBoard().set('level', { cols, rows, mines });
 
   for (let col = 0; col < cols; col++) {
     let cells: List<GameCell> = List.of();
     for (let row = 0; row < rows; row++) {
       cells = cells.push(createGameCell({ row, col }));
     }
-    board = board.set('cols', board.get('cols').push(cells));
+    board = board.set('cells', board.get('cells').push(cells));
   }
   let minesSet = 0;
   do {
@@ -77,7 +109,7 @@ export function createGame({ cols, rows, mines }: Level): Game {
       board = updateCell(
         board,
         board
-          .get('cols')
+          .get('cells')
           .get(col)!
           .get(row)!
           .set('threatCount', 0xff)
@@ -95,7 +127,7 @@ export function createGame({ cols, rows, mines }: Level): Game {
       if (isMine({ col: col, row: row }, board)) {
         continue;
       }
-      const cells = board.get('cols').get(col)!;
+      const cells = board.get('cells').get(col)!;
       const cell = cells.get(row)!;
       board = updateCell(
         board,
@@ -109,10 +141,10 @@ export function createGame({ cols, rows, mines }: Level): Game {
 
 export function updateCell(board: Game, newCell: GameCell): Game {
   const { row, col } = newCell;
-  const cols = board.get('cols');
+  const cols = board.get('cells');
   const cells = cols.get(col)!;
   const newCells = cells.set(row, newCell);
-  return board.set('cols', cols.set(col, newCells));
+  return board.set('cells', cols.set(col, newCells));
 }
 
 function collectSafeCells(board: Game, origin: Coordinate): Set<GameCell> {
@@ -134,7 +166,7 @@ function collectSafeCells(board: Game, origin: Coordinate): Set<GameCell> {
 export function isMine(p: Coordinate, board: Game): boolean {
   return (
     board
-      .get('cols')
+      .get('cells')
       .get(p.col)
       ?.get(p.row)?.threatCount === 0xff
   );
@@ -167,8 +199,8 @@ export function visitNeighbours(
   p: Coordinate,
   callback: (cell: GameCell) => void
 ) {
-  const width = board.get('cols').size;
-  const height = board.get('cols').get(0)!.size;
+  const width = board.get('cells').size;
+  const height = board.get('cells').get(0)!.size;
 
   for (let col = -1; col <= 1; col++) {
     const col1 = p.col + col;
@@ -189,7 +221,7 @@ export function visitNeighbours(
       }
 
       const cell = board
-        .get('cols')
+        .get('cells')
         .get(col1)!
         .get(row1)!;
 
@@ -215,8 +247,6 @@ export function nextState(
       return toggleOpen([cell, board]);
     case Cmd.FLAG:
       return toggleFlagged([cell, board]);
-    default:
-      throw new Error(command);
   }
 }
 
@@ -253,10 +283,19 @@ function toggleOpen([cell, board]: [GameCell, Game]): [GameCell, Game] {
       }
     });
   }
+  const stats = getCellStates(newBoard);
   return [
     newCell,
     newState === CellState.EXPLODED
       ? newBoard.set('state', GameState.GAME_OVER)
+      : newState === CellState.OPEN
+      ? newBoard.set(
+          'state',
+          newBoard.level.mines + stats[CellState.OPEN] ===
+            newBoard.level.cols * newBoard.level.rows
+            ? GameState.COMPLETED
+            : newBoard.state
+        )
       : newBoard,
   ];
 }
