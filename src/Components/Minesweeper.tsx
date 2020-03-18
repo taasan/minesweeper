@@ -153,6 +153,13 @@ function render(
   threats: NumThreats | Mine,
   gameState: GameState
 ): string | NumThreats {
+  if (
+    gameState === GameState.GAME_OVER &&
+    state !== CellState.EXPLODED &&
+    threats === 0xff
+  ) {
+    return MINES[randomInt(MINES.length)];
+  }
   if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
     return render(CellState.OPEN, threats, GameState.PLAYING);
   }
