@@ -247,10 +247,10 @@ export enum Cmd {
 export function nextState(
   command: Cmd,
   [[coordinate, cell], board]: [[Coordinate, GameCell], Game]
-): [[Coordinate, GameCell], Game] {
+): [GameCell, Game] {
   switch (command) {
     case Cmd.NONE:
-      return [[coordinate, cell], board];
+      return [cell, board];
     case Cmd.OPEN:
       return toggleOpen([[coordinate, cell], board]);
     case Cmd.FLAG:
@@ -261,13 +261,13 @@ export function nextState(
 function toggleOpen([[coordinate, cell], board]: [
   [Coordinate, GameCell],
   Game
-]): [[Coordinate, GameCell], Game] {
+]): [GameCell, Game] {
   if (
     !(
       board.state === GameState.PLAYING || board.state === GameState.INITIALIZED
     )
   ) {
-    return [[coordinate, cell], board];
+    return [cell, board];
   }
   const oldCellState = cell.state;
   let newState: CellState = oldCellState;
@@ -297,7 +297,7 @@ function toggleOpen([[coordinate, cell], board]: [
 
   const stats = getCellStates(newBoard);
   return [
-    [coordinate, newCell],
+    newCell,
     newState === CellState.EXPLODED
       ? newBoard.set('state', GameState.GAME_OVER)
       : newState === CellState.OPEN
@@ -315,13 +315,13 @@ function toggleOpen([[coordinate, cell], board]: [
 function toggleFlagged([[coordinate, cell], board]: [
   [Coordinate, GameCell],
   Game
-]): [[Coordinate, GameCell], Game] {
+]): [GameCell, Game] {
   if (
     !(
       board.state === GameState.PLAYING || board.state === GameState.INITIALIZED
     )
   ) {
-    return [[coordinate, cell], board];
+    return [cell, board];
   }
   let newCellState: CellState = cell.state;
   switch (cell.state) {
@@ -340,6 +340,5 @@ function toggleFlagged([[coordinate, cell], board]: [
   if (board.state === GameState.INITIALIZED) {
     newBoard = newBoard.set('state', GameState.PLAYING);
   }
-  const value: [Coordinate, GameCell] = [coordinate, newCell];
-  return [value, updateCell(newBoard, value)];
+  return [newCell, updateCell(newBoard, [coordinate, newCell])];
 }

@@ -113,7 +113,7 @@ const Minesweeper: React.FC = () => {
                           return;
                         }
 
-                        const [[, newCell], newGameState] = handlePointerUp(e, [
+                        const [newCell, newGameState] = handlePointerUp(e, [
                           [coordinate, cell.set('state', state)],
                           newBoard,
                         ]);
@@ -186,7 +186,7 @@ function render(
 function handlePointerUp(
   e: React.MouseEvent,
   [cell, board]: [[Coordinate, GameCell], Game]
-): [[Coordinate, GameCell], Game] {
+): [GameCell, Game] {
   let command: Cmd;
   switch (e.button) {
     case 0:
