@@ -6,16 +6,13 @@ import {
   Level,
   NumThreats,
   Mine,
-  GameCell,
-  Game,
+  CellRecord,
+  GameRecord,
   Cmd,
   createGame,
-  isMine,
-  visitNeighbours,
-  nextState,
   randomInt,
-  getCellStates,
   Coordinate,
+  NextStateFunction,
 } from '../Game';
 
 type ILevels = {
@@ -36,15 +33,25 @@ const getLevel = (key: string) => {
 const Minesweeper: React.FC = () => {
   const [level, setLevel] = React.useState(LEVELS.BEGINNER);
   const { rows, cols } = level;
-  const [board, setBoard] = React.useState(() => createGame(level));
+  const [[board, nextState], setBoard] = React.useState(() =>
+    createGame(level)
+  );
   const gameOver = board.state === GameState.GAME_OVER;
-  const cellStates = getCellStates(board);
+
   return (
     <div>
       <div>
         <aside>
-          <button>{cellStates[CellState.FLAGGED]}</button>
-          <button>{board.level.mines - cellStates[CellState.FLAGGED]}</button>
+          <button>
+            {board.level.cols * board.level.rows -
+              board.level.mines -
+              board.cellStates[CellState.OPEN]}
+          </button>
+          <button>
+            {board.level.mines -
+              board.cellStates[CellState.FLAGGED] -
+              board.cellStates[CellState.UNCERTAIN]}
+          </button>
           <button>{GameState[board.state]}</button>
           <select
             onChange={e => {
@@ -79,53 +86,14 @@ const Minesweeper: React.FC = () => {
                   gameOver
                     ? undefined
                     : e => {
-                        let newBoard = board;
-                        if (
-                          state === CellState.OPEN &&
-                          cell.threatCount > 0 &&
-                          !isMine(coordinate, board)
-                        ) {
-                          let flaggedNeighbours = 0;
-                          visitNeighbours(newBoard, coordinate, ([, c]) => {
-                            if (c.state === CellState.FLAGGED) {
-                              flaggedNeighbours++;
-                            }
-                          });
-                          if (flaggedNeighbours !== threats) {
-                            return;
-                          }
-                          visitNeighbours(
-                            newBoard,
-                            coordinate,
-                            ([coord, c]) => {
-                              if (
-                                c.state === CellState.NEW ||
-                                c.state === CellState.UNCERTAIN
-                              ) {
-                                [, newBoard] = nextState(Cmd.OPEN, [
-                                  [coord, c],
-                                  newBoard,
-                                ]);
-                              }
-                            }
-                          );
-                          setBoard(newBoard);
-                          return;
-                        }
-
-                        const [newCell, newGameState] = handlePointerUp(e, [
-                          [coordinate, cell.set('state', state)],
-                          newBoard,
-                        ]);
+                        let newBoard: GameRecord = board;
+                        const [, newGameState] = handlePointerUp(
+                          e,
+                          [[coordinate, cell.set('state', state)], newBoard],
+                          nextState
+                        );
                         newBoard = newGameState;
-                        if (
-                          newCell.state === state &&
-                          newBoard.state === board.state
-                        ) {
-                          // No change
-                          return;
-                        }
-                        setBoard(newBoard);
+                        setBoard([newBoard, nextState]);
                       }
                 }
                 content={render(state, threats, board.state)}
@@ -185,8 +153,9 @@ function render(
 
 function handlePointerUp(
   e: React.MouseEvent,
-  [cell, board]: [[Coordinate, GameCell], Game]
-): [GameCell, Game] {
+  [cell, board]: [[Coordinate, CellRecord], GameRecord],
+  nextState: NextStateFunction
+): [CellRecord, GameRecord] {
   let command: Cmd;
   switch (e.button) {
     case 0:
