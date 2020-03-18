@@ -200,10 +200,15 @@ export function randomInt(max: number) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
+export type GameCellCallback = ([coordinate, cell]: [
+  Coordinate,
+  GameCell
+]) => void;
+
 export function visitNeighbours(
   board: Game,
   p: Coordinate,
-  callback: ([coordinate, cell]: [Coordinate, GameCell]) => void
+  ...callbacks: Array<GameCellCallback>
 ) {
   const width = board.level.cols;
   const height = board.level.rows;
@@ -228,7 +233,7 @@ export function visitNeighbours(
       const coordinate = new Coordinate({ row, col });
       const cell = board.cells.get(coordinate)!;
 
-      callback([coordinate, cell]);
+      callbacks.forEach(cb => cb([coordinate, cell]));
     }
   }
 }
