@@ -15,6 +15,7 @@ import {
   nextState,
   randomInt,
   getCellStates,
+  Coordinate,
 } from '../Game';
 
 type ILevels = {
@@ -38,7 +39,6 @@ const Minesweeper: React.FC = () => {
   const [board, setBoard] = React.useState(() => createGame(level));
   const gameOver = board.state === GameState.GAME_OVER;
   const cellStates = getCellStates(board);
-
   return (
     <div>
       <div>
@@ -48,9 +48,9 @@ const Minesweeper: React.FC = () => {
           <button>{GameState[board.state]}</button>
           <select
             onChange={e => {
-              const level = getLevel(e.target.value);
-              setLevel(level);
-              setBoard(createGame(level));
+              const l = getLevel(e.target.value);
+              setLevel(l);
+              setBoard(createGame(l));
             }}
           >
             {Object.keys(LEVELS).map(k => (
@@ -69,77 +69,76 @@ const Minesweeper: React.FC = () => {
           }}
           data-state={GameState[board.state]}
         >
-          {board.get('cells').map((cols, col) => {
-            return cols.map((cell, row) => {
-              if (col !== cell.col || row !== cell.row) {
-                throw new Error();
-              }
-              const { threatCount: threats, state } = cell;
+          {[...board.cells.entries()].map(([coordinate, cell]) => {
+            const { threatCount: threats, state } = cell;
 
-              return (
-                <Cell
-                  key={`${row}-${col}`}
-                  onPointerUp={
-                    gameOver
-                      ? undefined
-                      : e => {
-                          let newBoard = board;
-                          if (
-                            state === CellState.OPEN &&
-                            cell.threatCount > 0 &&
-                            !isMine(cell, board)
-                          ) {
-                            let flaggedNeighbours = 0;
-                            visitNeighbours(newBoard, cell, c => {
-                              if (c.state === CellState.FLAGGED) {
-                                flaggedNeighbours++;
-                              }
-                            });
-                            if (flaggedNeighbours !== threats) {
-                              return;
+            return (
+              <Cell
+                key={`${coordinate.row}-${coordinate.col}`}
+                onPointerUp={
+                  gameOver
+                    ? undefined
+                    : e => {
+                        let newBoard = board;
+                        if (
+                          state === CellState.OPEN &&
+                          cell.threatCount > 0 &&
+                          !isMine(coordinate, board)
+                        ) {
+                          let flaggedNeighbours = 0;
+                          visitNeighbours(newBoard, coordinate, ([, c]) => {
+                            if (c.state === CellState.FLAGGED) {
+                              flaggedNeighbours++;
                             }
-                            visitNeighbours(newBoard, cell, c => {
+                          });
+                          if (flaggedNeighbours !== threats) {
+                            return;
+                          }
+                          visitNeighbours(
+                            newBoard,
+                            coordinate,
+                            ([coord, c]) => {
                               if (
                                 c.state === CellState.NEW ||
                                 c.state === CellState.UNCERTAIN
                               ) {
                                 [, newBoard] = nextState(Cmd.OPEN, [
-                                  c,
+                                  [coord, c],
                                   newBoard,
                                 ]);
                               }
-                            });
-                            setBoard(newBoard);
-                            return;
-                          }
-
-                          const [newCell, newGameState] = handlePointerUp(e, [
-                            cell.set('state', state),
-                            newBoard,
-                          ]);
-                          newBoard = newGameState;
-                          if (
-                            newCell.state === state &&
-                            newBoard.state === board.state
-                          ) {
-                            // No change
-                            return;
-                          }
+                            }
+                          );
                           setBoard(newBoard);
+                          return;
                         }
-                  }
-                  content={render(state, threats, board.state)}
-                  state={[state, board.state]}
-                  disabled={
-                    board.state === GameState.COMPLETED ||
-                    board.state === GameState.GAME_OVER ||
-                    board.state === GameState.NOT_INITIALIZED ||
-                    board.state === GameState.PAUSED
-                  }
-                  threats={threats}
-                />
-              );
-            });
+
+                        const [[, newCell], newGameState] = handlePointerUp(e, [
+                          [coordinate, cell.set('state', state)],
+                          newBoard,
+                        ]);
+                        newBoard = newGameState;
+                        if (
+                          newCell.state === state &&
+                          newBoard.state === board.state
+                        ) {
+                          // No change
+                          return;
+                        }
+                        setBoard(newBoard);
+                      }
+                }
+                content={render(state, threats, board.state)}
+                state={[state, board.state]}
+                disabled={
+                  board.state === GameState.COMPLETED ||
+                  board.state === GameState.GAME_OVER ||
+                  board.state === GameState.NOT_INITIALIZED ||
+                  board.state === GameState.PAUSED
+                }
+                threats={threats}
+              />
+            );
           })}
         </div>
       </div>
@@ -179,8 +178,8 @@ function render(
 
 function handlePointerUp(
   e: React.MouseEvent,
-  [cell, board]: [GameCell, Game]
-): [GameCell, Game] {
+  [cell, board]: [[Coordinate, GameCell], Game]
+): [[Coordinate, GameCell], Game] {
   let command: Cmd;
   switch (e.button) {
     case 0:

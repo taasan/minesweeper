@@ -30,7 +30,10 @@
       "react-app",
       "prettier/@typescript-eslint",
       "plugin:prettier/recommended"
-    ]
+    ],
+    "rules": {
+      "no-shadow": "error"
+    }
   },
   "prettier": {
     "trailingComma": "es5",
