@@ -122,6 +122,7 @@ function initialize(level: Level): GameRecord {
 
   const mineSet: Set<Coordinate> = Set().asMutable();
   let iterations = 0;
+  const pos = ({ row, col }: Coordinate) => col + cols * row;
   do {
     if (iterations++ > mines * 10) {
       return createBoard({ state: GameState.ERROR });
@@ -134,7 +135,7 @@ function initialize(level: Level): GameRecord {
     });
     if (!mineSet.has(coordinate)) {
       mineSet.add(coordinate);
-      cells[col * cols + row][1].threatCount = 0xff;
+      cells[pos(coordinate)][1].threatCount = 0xff;
     }
   } while (mineSet.size < mines);
 
@@ -143,10 +144,7 @@ function initialize(level: Level): GameRecord {
       const mappedCell = {
         ...cell,
         threatCount: countThreats({ rows, cols }, coord, {
-          get: c1 => {
-            const { row, col } = c1;
-            return cells[col * cols + row][1];
-          },
+          get: c1 => cells[pos(c1)][1],
         }),
       };
       return [coord, createGameCell(mappedCell)];
