@@ -111,6 +111,16 @@ function renderBoard(
       }}
       data-state={GameState[board.state]}
     >
+      {gameOver ? (
+        <header
+          className="overlay"
+          onClick={() => setBoard(createGame(board.level))}
+        >
+          Game over
+        </header>
+      ) : (
+        <></>
+      )}
       {[...board.cells.entries()].map(
         ([coordinate, { threatCount: threats, state }]) => {
           return (
