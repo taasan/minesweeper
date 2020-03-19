@@ -444,18 +444,7 @@ export type NextStateFunction = (
 ) => GameRecord;
 
 export function createGame(level: Level): [GameRecord, NextStateFunction] {
-  const newGame = initialize(level);
-
-  return [
-    newGame,
-    (
-      cmd = Cmd.NONE,
-      game: [[Coordinate, CellRecord], GameRecord] = [
-        [new Coordinate({ row: 0, col: 0 }), createGameCell()],
-        newGame,
-      ]
-    ) => nextState(cmd, game),
-  ];
+  return [initialize(level), (cmd, game) => nextState(cmd, game)];
 }
 
 function calculateIndex(cols: number, { row, col }: Coordinate) {
