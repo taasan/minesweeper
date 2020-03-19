@@ -74,6 +74,8 @@
 .Minesweeper .Cell {
   padding: 0;
   margin: 0;
+  transition: color 0.2s linear;
+  transition: background-color 0.2s linear;
 }
 
 .Minesweeper .Cell[data-state='EXPLODED'] {
