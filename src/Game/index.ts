@@ -234,7 +234,7 @@ function visitNeighbours<T>(
   for (let c = -1; c <= 1; c++) {
     const col = p.col + c;
 
-    if (col >= rows || col < 0) {
+    if (col >= cols || col < 0) {
       continue;
     }
 
@@ -245,7 +245,7 @@ function visitNeighbours<T>(
 
       const row = p.row + r;
 
-      if (row >= cols || row < 0) {
+      if (row >= rows || row < 0) {
         continue;
       }
       const coordinate = new Coordinate({ row, col });
