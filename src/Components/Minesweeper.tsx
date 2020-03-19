@@ -185,16 +185,20 @@ function handlePointerUp(
   nextState: NextStateFunction
 ): GameRecord {
   let command: Cmd;
-  switch (e.button) {
-    case 0:
-      command = Cmd.OPEN;
-      break;
-    case 2:
-      command = Cmd.FLAG;
-      break;
-    default:
-      command = Cmd.NONE;
-      break;
+  if (cell[1].state === CellState.OPEN) {
+    command = Cmd.OPEN;
+  } else {
+    switch (e.button) {
+      case 0:
+        command = Cmd.OPEN;
+        break;
+      case 2:
+        command = Cmd.FLAG;
+        break;
+      default:
+        command = Cmd.NONE;
+        break;
+    }
   }
 
   return nextState(command, [
