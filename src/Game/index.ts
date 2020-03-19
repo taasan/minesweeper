@@ -76,6 +76,7 @@ type IGame = Readonly<{
   state: GameState;
   level: Level;
   cellStates: CellStateStats;
+  error: Error | null;
 }>;
 
 export type GameRecord = RecordOf<IGame>;
@@ -85,6 +86,7 @@ const createBoard: Record.Factory<IGame> = Record<IGame>({
   state: GameState.NOT_INITIALIZED,
   level: { cols: 0, rows: 0, mines: 0 },
   cellStates: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
+  error: null,
 });
 
 export type Level = {
@@ -129,7 +131,7 @@ function initialize(level: Level): GameRecord {
   const pos = (c: Coordinate) => calculateIndex(cols, c);
   do {
     if (iterations++ > mines * 10) {
-      return createBoard({ state: GameState.ERROR });
+      throw new Error('Infinite loop?');
     }
     const col = randomInt(cols);
     const row = randomInt(rows);
@@ -440,11 +442,26 @@ function toggleFlagged([[coordinate, cell], board]: [
 
 export type NextStateFunction = (
   cmd: Cmd,
-  currentState: [[Coordinate, CellRecord], GameRecord]
+  currentState: [Coordinate, GameRecord]
 ) => GameRecord;
 
 export function createGame(level: Level): [GameRecord, NextStateFunction] {
-  return [initialize(level), (cmd, game) => nextState(cmd, game)];
+  const cells = OrderedMap(
+    createEmptyCells(level).map(([pos, cell]) => [pos, createGameCell(cell)])
+  );
+  return [
+    createBoard({ level, cells }),
+    (cmd, game) => {
+      try {
+        return nextState(cmd, game);
+      } catch (err) {
+        return game[1].withMutations(mutable => {
+          mutable.set('error', err instanceof Error ? err : new Error());
+          mutable.set('state', GameState.ERROR);
+        });
+      }
+    },
+  ];
 }
 
 function calculateIndex(cols: number, { row, col }: Coordinate) {

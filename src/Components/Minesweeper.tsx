@@ -84,8 +84,11 @@ function renderBoard(
     case GameState.ERROR:
       return (
         <main>
-          <h1>Error</h1>
-          <p>Something went wrong</p>
+          <header>
+            <h1>Error</h1>
+            <p>Something went wrong</p>
+          </header>
+          {board.error ? board.error.message : 'Unknown error'}
         </main>
       );
     case GameState.NOT_INITIALIZED:
