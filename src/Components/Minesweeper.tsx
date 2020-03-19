@@ -6,7 +6,6 @@ import {
   Level,
   NumThreats,
   Mine,
-  CellRecord,
   GameRecord,
   Cmd,
   createGame,
@@ -46,6 +45,7 @@ const Minesweeper: React.FC = () => {
               board.level.mines -
               board.cellStates[CellState.OPEN]}
           </button>
+          <button>{board.cellStates[CellState.OPEN]}</button>
           <button>
             {board.level.mines -
               board.cellStates[CellState.FLAGGED] -
@@ -92,7 +92,6 @@ function renderBoard(
         </main>
       );
     case GameState.NOT_INITIALIZED:
-      return <></>;
     case GameState.COMPLETED:
     case GameState.GAME_OVER:
     case GameState.INITIALIZED:
@@ -112,38 +111,37 @@ function renderBoard(
       }}
       data-state={GameState[board.state]}
     >
-      {[...board.cells.entries()].map(([coordinate, cell]) => {
-        const { threatCount: threats, state } = cell;
-
-        return (
-          <Cell
-            key={`${coordinate.row}-${coordinate.col}`}
-            onPointerUp={
-              gameOver
-                ? undefined
-                : e => {
-                    let newBoard: GameRecord = board;
-                    const newGameState = handlePointerUp(
-                      e,
-                      [[coordinate, cell.set('state', state)], newBoard],
-                      nextState
-                    );
-                    newBoard = newGameState;
-                    setBoard([newBoard, nextState]);
-                  }
-            }
-            content={render(state, threats, board.state)}
-            state={[state, board.state]}
-            disabled={
-              board.state === GameState.COMPLETED ||
-              board.state === GameState.GAME_OVER ||
-              board.state === GameState.NOT_INITIALIZED ||
-              board.state === GameState.PAUSED
-            }
-            threats={threats}
-          />
-        );
-      })}
+      {[...board.cells.entries()].map(
+        ([coordinate, { threatCount: threats, state }]) => {
+          return (
+            <Cell
+              key={`${coordinate.row}-${coordinate.col}`}
+              onPointerUp={
+                gameOver
+                  ? undefined
+                  : e => {
+                      let newBoard: GameRecord = board;
+                      const newGameState = handlePointerUp(
+                        e,
+                        [coordinate, newBoard],
+                        nextState
+                      );
+                      newBoard = newGameState;
+                      setBoard([newBoard, nextState]);
+                    }
+              }
+              content={render(state, threats, board.state)}
+              state={[state, board.state]}
+              disabled={
+                board.state === GameState.COMPLETED ||
+                board.state === GameState.GAME_OVER ||
+                board.state === GameState.PAUSED
+              }
+              threats={threats}
+            />
+          );
+        }
+      )}
     </div>
   );
 }
@@ -184,16 +182,17 @@ function render(
 
 function handlePointerUp(
   e: React.MouseEvent,
-  [cell, board]: [[Coordinate, CellRecord], GameRecord],
+  [coordinate, board]: [Coordinate, GameRecord],
   nextState: NextStateFunction
 ): GameRecord {
+  const cell = board.cells.get(coordinate)!;
   let command: Cmd;
-  if (cell[1].state === CellState.OPEN) {
-    command = Cmd.OPEN;
+  if (cell.state === CellState.OPEN) {
+    command = Cmd.POKE;
   } else {
     switch (e.button) {
       case 0:
-        command = Cmd.OPEN;
+        command = Cmd.POKE;
         break;
       case 2:
         command = Cmd.FLAG;
@@ -204,14 +203,7 @@ function handlePointerUp(
     }
   }
 
-  return nextState(command, [
-    cell,
-    board.withMutations(b => {
-      if (board.state === GameState.INITIALIZED) {
-        b.set('state', GameState.PLAYING);
-      }
-    }),
-  ]);
+  return nextState(command, [coordinate, board]);
 }
 
 export default Minesweeper;

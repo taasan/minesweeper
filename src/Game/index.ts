@@ -111,8 +111,7 @@ function getCellStates(
   );
 }
 
-function initialize(level: Level): GameRecord {
-  const { cols, rows, mines } = level;
+function createEmptyCells({ cols, rows }: Level): Array<[Coordinate, ICell]> {
   const cells: Array<[Coordinate, ICell]> = [];
   for (let col = 0; col < cols; col++) {
     for (let row = 0; row < rows; row++) {
@@ -125,8 +124,17 @@ function initialize(level: Level): GameRecord {
       ]);
     }
   }
+  return cells;
+}
 
-  const mineSet: Set<Coordinate> = Set().asMutable();
+function initialize(level: Level, origin: Coordinate): GameRecord {
+  const cells = createEmptyCells(level);
+  const { cols, rows, mines } = level;
+
+  const mineSet: Set<Coordinate> = Set()
+    .asMutable()
+    // Make sure we don't start with a bang
+    .add(origin);
   let iterations = 0;
   const pos = (c: Coordinate) => calculateIndex(cols, c);
   do {
@@ -261,7 +269,7 @@ function visitNeighbours<T>(
 }
 
 export enum Cmd {
-  OPEN,
+  POKE,
   FLAG,
   NONE,
 }
@@ -297,14 +305,22 @@ function openNeighbours(
 
 function nextState(
   command: Cmd,
-  [[coordinate, cell], board]: [[Coordinate, CellRecord], GameRecord]
+  [coordinate, board]: [Coordinate, GameRecord]
 ): GameRecord {
+  if (board.state === GameState.NOT_INITIALIZED) {
+    return nextState(command, [
+      coordinate,
+      initialize(board.level, coordinate).set('state', GameState.PLAYING),
+    ]);
+  }
+
   if (command === Cmd.NONE) {
     return board;
   }
+  const cell = board.cells.get(coordinate)!;
   return board.withMutations(mutable => {
     switch (command) {
-      case Cmd.OPEN:
+      case Cmd.POKE:
         toggleOpen([[coordinate, cell], mutable]);
         break;
       case Cmd.FLAG:
@@ -317,18 +333,13 @@ function nextState(
     if (mutable !== board) {
       const stats = getCellStates(mutable.cells);
       mutable.set('cellStates', stats);
-      const newCell = mutable.cells.get(coordinate)!;
-      const newState = newCell.state;
       if (stats[CellState.EXPLODED] > 0) {
         mutable.set('state', GameState.GAME_OVER);
-      } else if (newState === CellState.OPEN) {
-        mutable.set(
-          'state',
-          mutable.level.mines + stats[CellState.OPEN] ===
-            mutable.level.cols * mutable.level.rows
-            ? GameState.COMPLETED
-            : mutable.state
-        );
+      } else if (mutable.cells.get(coordinate)!.state === CellState.OPEN) {
+        const openPlusMines = mutable.level.mines + stats[CellState.OPEN];
+        const numCells = mutable.level.cols * mutable.level.rows;
+        const done = openPlusMines === numCells;
+        mutable.set('state', done ? GameState.COMPLETED : mutable.state);
       }
     }
   });
