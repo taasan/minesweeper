@@ -141,7 +141,7 @@ function initialize(level: Level): GameRecord {
       mineSet.add(coordinate);
       cells[pos(coordinate)][1].threatCount = 0xff;
     }
-  } while (mineSet.size < mines);
+  } while (mineSet.size <= mines);
 
   const cellRecords: OrderedMap<Coordinate, CellRecord> = OrderedMap(
     cells.map(([coord, cell]) => {
