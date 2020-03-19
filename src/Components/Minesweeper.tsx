@@ -13,6 +13,7 @@ import {
   randomInt,
   Coordinate,
   NextStateFunction,
+  assertNever,
 } from '../Game';
 
 type ILevels = {
@@ -32,11 +33,9 @@ const getLevel = (key: string) => {
 
 const Minesweeper: React.FC = () => {
   const [level, setLevel] = React.useState(LEVELS.BEGINNER);
-  const { rows, cols } = level;
   const [[board, nextState], setBoard] = React.useState(() =>
     createGame(level)
   );
-  const gameOver = board.state === GameState.GAME_OVER;
 
   return (
     <div>
@@ -67,55 +66,84 @@ const Minesweeper: React.FC = () => {
           <button onClick={() => setBoard(createGame(level))}>New</button>
         </aside>
       </div>
-      <div>
-        <div
-          className="Minesweeper"
-          style={{
-            gridTemplateColumns: `repeat(${cols}, .5em)`,
-            gridTemplateRows: `repeat(${rows}, .5em)`,
-          }}
-          data-state={GameState[board.state]}
-        >
-          {[...board.cells.entries()].map(([coordinate, cell]) => {
-            const { threatCount: threats, state } = cell;
-
-            return (
-              <Cell
-                key={`${coordinate.row}-${coordinate.col}`}
-                onPointerUp={
-                  gameOver
-                    ? undefined
-                    : e => {
-                        let newBoard: GameRecord = board;
-                        const [, newGameState] = handlePointerUp(
-                          e,
-                          [[coordinate, cell.set('state', state)], newBoard],
-                          nextState
-                        );
-                        newBoard = newGameState;
-                        setBoard([newBoard, nextState]);
-                      }
-                }
-                content={render(state, threats, board.state)}
-                state={[state, board.state]}
-                disabled={
-                  board.state === GameState.COMPLETED ||
-                  board.state === GameState.GAME_OVER ||
-                  board.state === GameState.NOT_INITIALIZED ||
-                  board.state === GameState.PAUSED
-                }
-                threats={threats}
-              />
-            );
-          })}
-        </div>
-      </div>
+      <div>{renderBoard(board, nextState, setBoard)}</div>
     </div>
   );
 };
 
 const MINES = ['🤒', '😷', '🤮', '🤢', '🤡', '🧟', '🤥', '🤕'];
 
+function renderBoard(
+  board: GameRecord,
+  nextState: NextStateFunction,
+  setBoard: ([b, n]: [GameRecord, NextStateFunction]) => void
+): JSX.Element {
+  const { rows, cols } = board.level;
+  const gameOver = board.state === GameState.GAME_OVER;
+  switch (board.state) {
+    case GameState.ERROR:
+      return (
+        <main>
+          <h1>Error</h1>
+          <p>Something went wrong</p>
+        </main>
+      );
+    case GameState.NOT_INITIALIZED:
+      return <></>;
+    case GameState.COMPLETED:
+    case GameState.GAME_OVER:
+    case GameState.INITIALIZED:
+    case GameState.PLAYING:
+    case GameState.PAUSED:
+      break;
+    default:
+      return assertNever(board.state);
+  }
+
+  return (
+    <div
+      className="Minesweeper"
+      style={{
+        gridTemplateColumns: `repeat(${cols}, .5em)`,
+        gridTemplateRows: `repeat(${rows}, .5em)`,
+      }}
+      data-state={GameState[board.state]}
+    >
+      {[...board.cells.entries()].map(([coordinate, cell]) => {
+        const { threatCount: threats, state } = cell;
+
+        return (
+          <Cell
+            key={`${coordinate.row}-${coordinate.col}`}
+            onPointerUp={
+              gameOver
+                ? undefined
+                : e => {
+                    let newBoard: GameRecord = board;
+                    const newGameState = handlePointerUp(
+                      e,
+                      [[coordinate, cell.set('state', state)], newBoard],
+                      nextState
+                    );
+                    newBoard = newGameState;
+                    setBoard([newBoard, nextState]);
+                  }
+            }
+            content={render(state, threats, board.state)}
+            state={[state, board.state]}
+            disabled={
+              board.state === GameState.COMPLETED ||
+              board.state === GameState.GAME_OVER ||
+              board.state === GameState.NOT_INITIALIZED ||
+              board.state === GameState.PAUSED
+            }
+            threats={threats}
+          />
+        );
+      })}
+    </div>
+  );
+}
 function render(
   state: CellState,
   threats: NumThreats | Mine,
@@ -155,7 +183,7 @@ function handlePointerUp(
   e: React.MouseEvent,
   [cell, board]: [[Coordinate, CellRecord], GameRecord],
   nextState: NextStateFunction
-): [CellRecord, GameRecord] {
+): GameRecord {
   let command: Cmd;
   switch (e.button) {
     case 0:
@@ -168,7 +196,15 @@ function handlePointerUp(
       command = Cmd.NONE;
       break;
   }
-  return nextState(command, [cell, board]);
+
+  return nextState(command, [
+    cell,
+    board.withMutations(b => {
+      if (board.state === GameState.INITIALIZED) {
+        b.set('state', GameState.PLAYING);
+      }
+    }),
+  ]);
 }
 
 export default Minesweeper;
