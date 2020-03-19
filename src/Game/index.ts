@@ -440,7 +440,7 @@ function toggleFlagged([[coordinate, cell], board]: [
 
 export type NextStateFunction = (
   cmd: Cmd,
-  [[coordinate, GameCell], Game]: [[Coordinate, CellRecord], GameRecord]
+  currentState: [[Coordinate, CellRecord], GameRecord]
 ) => GameRecord;
 
 export function createGame(level: Level): [GameRecord, NextStateFunction] {
