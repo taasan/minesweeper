@@ -137,8 +137,9 @@
   color: var(--cell-threats-8-color);
 }
 
-.Cell[data-threats] {
+.Cell[data-threats][data-state='OPEN'] {
   font-family: monospace;
+  animation: font-fade-in 0.4s ease 0s 1;
 }
 
 .Cell[data-state='OPEN'],
@@ -153,4 +154,16 @@
 .Cell[data-pressed] {
   border-style: inset;
   background-color: var(--cell-pressed-color) !important;
+}
+
+@keyframes font-fade-in {
+  0% {
+    font-size: 0px;
+  }
+  50% {
+    font-size: 60%;
+  }
+  100% {
+    font-size: 100%;
+  }
 }
