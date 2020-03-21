@@ -32,7 +32,11 @@
       "plugin:prettier/recommended"
     ],
     "rules": {
-      "no-shadow": "error"
+      "no-shadow": "error",
+      "@typescript-eslint/strict-boolean-expressions": "error"
+    },
+    "parserOptions": {
+      "project": "./tsconfig.json"
     }
   },
   "prettier": {
