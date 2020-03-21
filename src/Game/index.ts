@@ -272,6 +272,7 @@ export enum Cmd {
   POKE,
   FLAG,
   NONE,
+  TOGGLE_PAUSE,
 }
 
 function openNeighbours(
@@ -303,6 +304,16 @@ function openNeighbours(
   return newBoard;
 }
 
+function expectUnPause(command: Cmd, board: GameRecord): GameRecord {
+  if (command !== Cmd.TOGGLE_PAUSE) {
+    throw new Error(`Illegal command: expected ${Cmd[Cmd.TOGGLE_PAUSE]}`);
+  }
+  if (board.state !== GameState.PAUSED) {
+    throw new Error(`Invalid state: expected ${GameState.PAUSED}`);
+  }
+  return board.set('state', GameState.PLAYING);
+}
+
 function nextState(
   command: Cmd,
   [coordinate, board]: [Coordinate, GameRecord]
@@ -316,6 +327,12 @@ function nextState(
 
   if (command === Cmd.NONE) {
     return board;
+  }
+  if (command === Cmd.TOGGLE_PAUSE) {
+    return board.set(
+      'state',
+      board.state === GameState.PAUSED ? GameState.PLAYING : GameState.PAUSED
+    );
   }
   const cell = board.cells.get(coordinate)!;
   return board.withMutations(mutable => {
@@ -460,19 +477,25 @@ export function createGame(level: Level): [GameRecord, NextStateFunction] {
   const cells = OrderedMap(
     createEmptyCells(level).map(([pos, cell]) => [pos, createGameCell(cell)])
   );
-  return [
-    createBoard({ level, cells }),
-    (cmd, game) => {
-      try {
-        return nextState(cmd, game);
-      } catch (err) {
-        return game[1].withMutations(mutable => {
-          mutable.set('error', err instanceof Error ? err : new Error());
-          mutable.set('state', GameState.ERROR);
-        });
-      }
-    },
-  ];
+
+  const func: NextStateFunction = (cmd, [coordinate, game]) => {
+    switch (game.state) {
+      case GameState.PAUSED:
+        return expectUnPause(cmd, game);
+    }
+    if (game.state === GameState.ERROR || cmd === Cmd.NONE) {
+      return game;
+    }
+    try {
+      return nextState(cmd, [coordinate, game]);
+    } catch (err) {
+      return game.withMutations(mutable => {
+        mutable.set('error', err instanceof Error ? err : new Error());
+        mutable.set('state', GameState.ERROR);
+      });
+    }
+  };
+  return [createBoard({ level, cells }), func];
 }
 
 function calculateIndex(cols: number, { row, col }: Coordinate) {

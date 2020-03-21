@@ -1,0 +1,106 @@
+.Minesweeper {
+  height: 100vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  cursor: var(--board-cursor), crosshair;
+  font-weight: bold;
+  --cell-size: 32px;
+  /*
+  --cell-size: min(
+    calc(
+      (100vh - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
+        var(--board-rows)
+    ),
+    calc(
+      (100vw - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
+        var(--board-columns)
+    ),
+    32px
+  );
+  */
+  font-size: calc(var(--cell-size) * 0.6);
+}
+
+@supports (width: min(12px, 3px)) {
+  .Minesweeper {
+    --cell-size: min(
+      calc(
+        (100vh - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
+          var(--board-rows)
+      ),
+      calc(
+        (100vw - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
+          var(--board-columns)
+      ),
+      64px
+    );
+  }
+}
+
+.Minesweeper[data-state='GAME_OVER'] {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.Board {
+  padding: var(--board-padding);
+
+  margin: 0 auto;
+  background-color: #34495e;
+  color: #fff;
+  border: var(--board-border-width) solid #2c3e50;
+  border-radius: 10px;
+
+  display: grid;
+
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(var(--board-columns), var(--cell-size));
+  grid-template-rows: repeat(var(--board-rows), var(--cell-size));
+  text-align: center;
+  vertical-align: middle;
+}
+/*
+.Cell {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #c0c0c0;
+  list-style: none;
+  font-family: 'VT323';
+  font-size: 1.5em;
+  border: 1px solid #808080;
+}
+*/
+.Minesweeper[data-state='COMPLETE'] {
+  background-color: green !important;
+}
+
+.Minesweeper.overlay {
+  position: fixed;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 2;
+  cursor: pointer;
+}

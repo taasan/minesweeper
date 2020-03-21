@@ -1,0 +1,156 @@
+.Cell {
+  padding: 3px;
+  margin: 0;
+  transition: color 0.2s linear;
+  transition: background-color 0.2s linear;
+  border-color: var(--cell-border);
+
+  border-width: 2px;
+  border-radius: 5px;
+
+  border-style: outset;
+  background-color: var(--cell-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Cell[mined] {
+  font-family: 'Noto Color Emoji';
+}
+
+.Cell {
+  /* transparent, will use background-image */
+  color: rgba(0, 0, 0, 0);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.Cell[data-state='FLAGGED']:not([data-mined]) {
+  background-image: var(--cell-flagged);
+}
+
+.Cell[data-state='UNCERTAIN']:not([data-mined]) {
+  background-image: var(--cell-flagged-uncertain);
+}
+
+.Cell[data-state='FLAGGED'][data-mined] {
+  background-image: var(--mine-disarmed);
+}
+
+.Minesweeper[data-state='GAME_OVER']
+  .Cell[data-state='FLAGGED']:not([data-mined]) {
+  background-image: var(--cell-flagged-wrong);
+  background-color: var(--cell-background-flagged-wrong);
+  color: rgba(0, 0, 0, 0);
+}
+
+.Cell[data-state='UNCERTAIN'][data-mined] {
+  background-image: var(--mine-uncertain-disarmed);
+}
+
+.Cell[data-mine-type='0'][data-state='NEW'] {
+  background-image: var(--mine-0);
+}
+
+.Cell[data-mine-type='1'][data-state='NEW'] {
+  background-image: var(--mine-1);
+}
+
+.Cell[data-mine-type='2'][data-state='NEW'] {
+  background-image: var(--mine-2);
+}
+
+.Cell[data-mine-type='3'][data-state='NEW'] {
+  background-image: var(--mine-3);
+}
+
+.Cell[data-mine-type='4'][data-state='NEW'] {
+  background-image: var(--mine-4);
+}
+
+.Cell[data-mine-type='5'][data-state='NEW'] {
+  background-image: var(--mine-5);
+}
+
+.Cell[data-mine-type='6'][data-state='NEW'] {
+  background-image: var(--mine-6);
+}
+
+.Cell[data-mine-type='7'][data-state='NEW'] {
+  background-image: var(--mine-7);
+}
+
+.Cell[data-mine-type='8'][data-state='NEW'] {
+  background-image: var(--mine-8);
+}
+
+.Cell[data-mine-type='9'][data-state='NEW'] {
+  background-image: var(--mine-9);
+}
+
+.Cell[data-mine-type][data-state='NEW'] {
+  background-color: var(--mine-detonated-background);
+}
+
+.Cell[data-state='EXPLODED'] {
+  background-image: var(--mine-detonated);
+  background-color: var(--mine-detonated-background);
+  animation: var(--mine-detonated-animation) !important;
+  z-index: 1;
+}
+
+.Cell[data-threats='0'][data-state='OPEN'] {
+  font-family: monospace;
+  color: rgba(0, 0, 0, 0);
+}
+
+.Cell[data-threats='1'] {
+  color: var(--cell-threats-1-color);
+}
+
+.Cell[data-threats='2'] {
+  color: var(--cell-threats-2-color);
+}
+
+.Cell[data-threats='3'] {
+  color: var(--cell-threats-3-color);
+}
+
+.Cell[data-threats='4'] {
+  color: var(--cell-threats-4-color);
+}
+
+.Cell[data-threats='5'] {
+  color: var(--cell-threats-5-color);
+}
+
+.Cell[data-threats='6'] {
+  color: var(--cell-threats-6-color);
+}
+
+.Cell[data-threats='7'] {
+  color: var(--cell-threats-7-color);
+}
+
+.Cell[data-threats='8'] {
+  color: var(--cell-threats-8-color);
+}
+
+.Cell[data-threats] {
+  font-family: monospace;
+}
+
+.Cell[data-state='OPEN'],
+.Cell:disabled {
+  background-color: var(--cell-background-open);
+}
+
+.Minesweeper[data-state='PLAYING'] .Cell[data-state='NEW']:hover {
+  background-color: var(--cell-hover);
+}
+
+.Cell[data-pressed] {
+  border-style: inset;
+  background-color: var(--cell-pressed-color) !important;
+}

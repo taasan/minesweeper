@@ -1,4 +1,5 @@
 import * as React from 'react';
+import './Minesweeper.css';
 import Cell from './Cell';
 import {
   CellState,
@@ -26,8 +27,9 @@ const LEVELS: ILevels = {
 };
 
 const getLevel = (key: string) => {
-  const v = LEVELS[key] || undefined;
-  return v ? v : LEVELS.BEGINNER;
+  const lvl = LEVELS[key];
+  const v = lvl != null ? lvl : undefined;
+  return v != null ? v : LEVELS.BEGINNER;
 };
 
 const Minesweeper: React.FC = () => {
@@ -35,15 +37,61 @@ const Minesweeper: React.FC = () => {
   const [[board, nextState], setBoard] = React.useState(() =>
     createGame(level)
   );
+  // const [seconds, setSeconds] = React.useState(0);
+  /*
 
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      switch (board.state) {
+        case GameState.PLAYING:
+          setSeconds(s => s + 1);
+          break;
+        case GameState.PAUSED:
+          break;
+        default:
+          clearInterval(interval);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [board.state]);
+  */
+  const { rows, cols, mines } = board.level;
+  const togglePause = () => {
+    switch (board.state) {
+      case GameState.PAUSED:
+      case GameState.PLAYING:
+        setBoard([
+          nextState(Cmd.TOGGLE_PAUSE, [
+            new Coordinate({ row: -1, col: -1 }),
+            board,
+          ]),
+          nextState,
+        ]);
+        break;
+    }
+  };
+  /*
+  if (board.state === GameState.PAUSED) {
+    return ;
+  }*/
+  const renderPause = () => {
+    return board.state === GameState.PAUSED ? (
+      <main className="Minesweeper overlay" onClick={togglePause}>
+        <header>
+          <h1>Pause</h1>
+        </header>
+      </main>
+    ) : (
+      <></>
+    );
+  };
   return (
-    <div>
+    <div style={{ display: 'flex' }}>
       <div>
-        <aside>
+        <aside className="Control">
+          {/*<button>{seconds}</button>*/}
           <button>
-            {board.level.cols * board.level.rows -
-              board.level.mines -
-              board.cellStates[CellState.OPEN]}
+            {cols * rows - mines - board.cellStates[CellState.OPEN]}
           </button>
           <button>{board.cellStates[CellState.OPEN]}</button>
           <button>
@@ -51,7 +99,7 @@ const Minesweeper: React.FC = () => {
               board.cellStates[CellState.FLAGGED] -
               board.cellStates[CellState.UNCERTAIN]}
           </button>
-          <button>{GameState[board.state]}</button>
+          <button onClick={togglePause}>{GameState[board.state]}</button>
           <select
             onChange={e => {
               const l = getLevel(e.target.value);
@@ -66,19 +114,28 @@ const Minesweeper: React.FC = () => {
           <button onClick={() => setBoard(createGame(level))}>New</button>
         </aside>
       </div>
-      <div>{renderBoard(board, nextState, setBoard)}</div>
+      <div
+        style={{
+          ['--board-columns' as any]: cols,
+          ['--board-rows' as any]: rows,
+        }}
+        className="Minesweeper"
+        data-state={GameState[board.state]}
+      >
+        {renderPause()}
+        {renderBoard(board, nextState, setBoard)}
+      </div>
     </div>
   );
 };
 
-const MINES = ['🤒', '😷', '🤮', '🤢', '🤡', '🧟', '🤥', '🤕'];
+const MINES = ['🤒', '😷', '🤮', '🤢', '🤡', '🧟', '🤥', '🤕', '🤧'];
 
 function renderBoard(
   board: GameRecord,
   nextState: NextStateFunction,
   setBoard: ([b, n]: [GameRecord, NextStateFunction]) => void
 ): JSX.Element {
-  const { rows, cols } = board.level;
   const gameOver = board.state === GameState.GAME_OVER;
   switch (board.state) {
     case GameState.ERROR:
@@ -88,7 +145,7 @@ function renderBoard(
             <h1>Error</h1>
             <p>Something went wrong</p>
           </header>
-          {board.error ? board.error.message : 'Unknown error'}
+          {board.error != null ? board.error.message : 'Unknown error'}
         </main>
       );
     case GameState.NOT_INITIALIZED:
@@ -103,15 +160,8 @@ function renderBoard(
   }
 
   return (
-    <div
-      className="Minesweeper"
-      style={{
-        gridTemplateColumns: `repeat(${cols}, .5em)`,
-        gridTemplateRows: `repeat(${rows}, .5em)`,
-      }}
-      data-state={GameState[board.state]}
-    >
-      {gameOver ? (
+    <div onPointerDown={e => e.preventDefault()} className="Board">
+      {/*gameOver ? (
         <header
           className="overlay"
           onClick={() => setBoard(createGame(board.level))}
@@ -120,13 +170,13 @@ function renderBoard(
         </header>
       ) : (
         <></>
-      )}
+      )*/}
       {[...board.cells.entries()].map(
         ([coordinate, { threatCount: threats, state }]) => {
           return (
             <Cell
               key={`${coordinate.row}-${coordinate.col}`}
-              onPointerUp={
+              onAction={
                 gameOver
                   ? undefined
                   : e => {
@@ -147,7 +197,8 @@ function renderBoard(
                 board.state === GameState.GAME_OVER ||
                 board.state === GameState.PAUSED
               }
-              threats={threats}
+              threats={threats !== 0xff ? threats : undefined}
+              mined={threats === 0xff}
             />
           );
         }
@@ -160,11 +211,17 @@ function render(
   threats: NumThreats | Mine,
   gameState: GameState
 ): string | NumThreats {
-  if (
-    gameState === GameState.GAME_OVER &&
-    state !== CellState.EXPLODED &&
-    threats === 0xff
-  ) {
+  const isMined = threats === 0xff;
+  const gameWon = gameState === GameState.COMPLETED;
+  const gameOver = gameState === GameState.GAME_OVER;
+  const done = gameOver || gameWon;
+  const isFlagged = state === CellState.FLAGGED;
+  const isDisarmed = done && isMined && (gameWon || (gameOver && isFlagged));
+
+  if (isDisarmed) {
+    return '🤩';
+  }
+  if (gameOver && state !== CellState.EXPLODED && threats === 0xff) {
     return MINES[randomInt(MINES.length)];
   }
   if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
@@ -172,17 +229,11 @@ function render(
   }
   switch (state) {
     case CellState.FLAGGED:
-      return gameState === GameState.GAME_OVER && threats !== 0xff
-        ? '❌'
-        : '🚩';
+      return gameOver && !isMined ? '❌' : '🚩';
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:
-      return threats === 0
-        ? '\u00A0'
-        : threats === 0xff
-        ? MINES[randomInt(MINES.length)]
-        : threats;
+      return threats === 0xff ? MINES[randomInt(MINES.length)] : threats;
     case CellState.EXPLODED:
       return '💀';
     default:

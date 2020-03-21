@@ -1,0 +1,54 @@
+@keyframes pulse {
+  0% {
+    background-color: var(--cell-background);
+    background-size: 110%;
+  }
+  50% {
+    background-color: var(--mine-detonated-background);
+    background-size: 85%;
+  }
+  100% {
+    background-color: var(--cell-background);
+    background-size: 110%;
+  }
+}
+
+.Minesweeper {
+  --mine-detonated: url('../../svg/NotoEmoji/emoji_u1f480.svg');
+  --mine-detonated-background: #dc322f;
+  --mine-detonated-animation: pulse 1.2s ease-in-out infinite alternate;
+
+  --mine-disarmed: url('../../svg/NotoEmoji/emoji_u1f929.svg');
+  --mine-uncertain-disarmed: url('../../svg/NotoEmoji/emoji_u1f60e.svg');
+  --mine-0: url('../../svg/NotoEmoji/emoji_u1f921.svg');
+  --mine-1: url('../../svg/NotoEmoji/emoji_u1f637.svg');
+  --mine-2: url('../../svg/NotoEmoji/emoji_u1f912.svg');
+  --mine-3: url('../../svg/NotoEmoji/emoji_u1f915.svg');
+  --mine-4: url('../../svg/NotoEmoji/emoji_u1f925.svg');
+  --mine-5: url('../../svg/NotoEmoji/emoji_u1f927.svg');
+  --mine-6: url('../../svg/NotoEmoji/emoji_u1f92e.svg');
+  --mine-7: url('../../svg/NotoEmoji/emoji_u1f975.svg');
+  --mine-8: url('../../svg/NotoEmoji/emoji_u1f976.svg');
+  --mine-9: url('../../svg/NotoEmoji/emoji_u1f9df.svg');
+
+  --cell-border: var(--cell-background-open);
+  --cell-background: #839496;
+  --cell-background-open: #eee8d5;
+  --cell-background-flagged-wrong: var(--mine-detonated-background);
+  --cell-threats-1-color: #268bd2;
+  --cell-threats-2-color: #859900;
+  --cell-threats-3-color: #dc322f;
+  --cell-threats-4-color: #6c71c4;
+  --cell-threats-5-color: #d33682;
+  --cell-threats-6-color: #2aa198;
+  --cell-threats-7-color: #b58900;
+  --cell-threats-8-color: #cb4b16;
+  --cell-flagged: url('../../svg/NotoEmoji/emoji_u1f6a9.svg');
+  --cell-flagged-uncertain: url('../../svg/NotoEmoji/emoji_u2753.svg');
+  --cell-flagged-wrong: url('../../svg/NotoEmoji/emoji_u1f4a9.svg');
+  --cell-pressed-color: #d336827f;
+
+  --board-border-width: 6px;
+  --board-padding: 3px;
+  --board-cursor: url('../../svg/NotoEmoji/emoji_u1f489.svg');
+}
