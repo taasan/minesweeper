@@ -12,22 +12,9 @@
   cursor: var(--board-cursor), crosshair;
   font-weight: bold;
   --cell-size: 32px;
-  /*
-  --cell-size: min(
-    calc(
-      (100vh - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
-        var(--board-rows)
-    ),
-    calc(
-      (100vw - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
-        var(--board-columns)
-    ),
-    32px
-  );
-  */
   font-size: calc(var(--cell-size) * 0.6);
 }
-
+/*
 @supports (width: min(12px, 3px)) {
   .Minesweeper {
     --cell-size: min(
@@ -40,10 +27,10 @@
           var(--board-columns)
       ),
       64px
-    );
+    ) !important;
   }
 }
-
+*/
 .Minesweeper[data-state='GAME_OVER'] {
   pointer-events: none;
   cursor: not-allowed;
@@ -55,19 +42,31 @@
   margin: 0 auto;
   background-color: #34495e;
   color: #fff;
-  border: var(--board-border-width) solid #2c3e50;
+  border-width: var(--board-border-width);
+  border-style: var(--board-border-style, solid);
+  border-style: var(--board-border-color, inherit);
   border-radius: 10px;
 
   display: grid;
-
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
+  gap: 0;
   grid-auto-flow: column;
   grid-template-columns: repeat(var(--board-columns), var(--cell-size));
   grid-template-rows: repeat(var(--board-rows), var(--cell-size));
   text-align: center;
   vertical-align: middle;
+  /* Disable selcting text */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
+/*
+.Minesweeper[data-state='GAME_OVER'] .Board {
+  opacity: 0.5;
+}
+
 /*
 .Cell {
   display: -webkit-box;
@@ -103,4 +102,9 @@
   background-color: rgba(0, 0, 0, 0.75);
   z-index: 2;
   cursor: pointer;
+}
+
+.Control {
+  position: absolute;
+  left: 0;
 }

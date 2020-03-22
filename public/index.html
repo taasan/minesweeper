@@ -5,11 +5,29 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <link rel="stylesheet" href="themes/corona/theme.css" title="theme" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
+    <link
+      rel="stylesheet"
+      href="%PUBLIC_URL%/themes/corona/theme.css"
+      title="Corona"
     />
+
+    <link
+      rel="alternate stylesheet"
+      href="%PUBLIC_URL%/themes/default.css"
+      title="No images"
+    />
+
+    <link
+      rel="alternate stylesheet"
+      href="%PUBLIC_URL%/themes/gnome-mines/theme.css"
+      title="Gnome mines classic"
+    />
+    <style title="TEST HEAD">
+      body {
+        background-color: darkslategray !important;
+      }
+    </style>
+    <meta name="description" content="Minesweeper game" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -25,20 +43,44 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>Minesweeper</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
+  <script>
+    'strict';
+    const BASESS = '__DEFAULT_STYLESHEET__';
+    const NOSTYLE = '__NO_STYLESHEET__';
+
+    const stylelinks = [];
+
+    for (
+      let i = 0, links = document.head.querySelectorAll('link[rel*=style]');
+      i < links.length;
+      i++
+    ) {
+      if (
+        !links[i].getAttribute('media') ||
+        links[i].media == 'all' ||
+        links[i].media == 'screen'
+      ) {
+        if (links[i]) stylelinks.push(links[i]);
+      }
+    }
+
+    window.setStylesheet = function(ssname) {
+      for (let i = 0; i < stylelinks.length; i++) {
+        console.log(stylelinks[i].constructor.name);
+        const sstitle = stylelinks[i].title;
+        if (sstitle == ssname) {
+          stylelinks[i].disabled = true; // hack around style not loading at first
+          stylelinks[i].disabled = false;
+        } else {
+          stylelinks[i].disabled = true;
+        }
+      }
+    };
+  </script>
 </html>

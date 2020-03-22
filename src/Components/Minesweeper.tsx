@@ -15,13 +15,14 @@ import {
   NextStateFunction,
   assertNever,
 } from '../Game';
+import ErrorBoundary from './ErrorBoundary';
 
 type ILevels = {
   [keyof: string]: Level;
 };
 
 const LEVELS: ILevels = {
-  BEGINNER: { rows: 10, cols: 10, mines: 10 },
+  BEGINNER: { rows: 8, cols: 8, mines: 10 },
   INTERMEDIATE: { rows: 16, cols: 16, mines: 40 },
   EXPERT: { mines: 99, rows: 16, cols: 30 },
 };
@@ -129,8 +130,6 @@ const Minesweeper: React.FC = () => {
   );
 };
 
-const MINES = ['🤒', '😷', '🤮', '🤢', '🤡', '🧟', '🤥', '🤕', '🤧'];
-
 function renderBoard(
   board: GameRecord,
   nextState: NextStateFunction,
@@ -160,50 +159,47 @@ function renderBoard(
   }
 
   return (
-    <div onPointerDown={e => e.preventDefault()} className="Board">
-      {/*gameOver ? (
-        <header
-          className="overlay"
-          onClick={() => setBoard(createGame(board.level))}
-        >
-          Game over
-        </header>
-      ) : (
-        <></>
-      )*/}
-      {[...board.cells.entries()].map(
-        ([coordinate, { threatCount: threats, state }]) => {
-          return (
-            <Cell
-              key={`${coordinate.row}-${coordinate.col}`}
-              onAction={
-                gameOver
-                  ? undefined
-                  : e => {
-                      let newBoard: GameRecord = board;
-                      const newGameState = handlePointerUp(
-                        e,
-                        [coordinate, newBoard],
-                        nextState
-                      );
-                      newBoard = newGameState;
-                      setBoard([newBoard, nextState]);
-                    }
-              }
-              content={render(state, threats, board.state)}
-              state={[state, board.state]}
-              disabled={
-                board.state === GameState.COMPLETED ||
-                board.state === GameState.GAME_OVER ||
-                board.state === GameState.PAUSED
-              }
-              threats={threats !== 0xff ? threats : undefined}
-              mined={threats === 0xff}
-            />
-          );
-        }
-      )}
-    </div>
+    <ErrorBoundary>
+      <div onPointerDown={e => e.preventDefault()} className="Board">
+        {[...board.cells.entries()].map(
+          ([
+            coordinate,
+            { threatCount: threats, state, flaggedNeighboursCount },
+          ]) => {
+            return (
+              <Cell
+                key={`${coordinate.row}-${coordinate.col}`}
+                onAction={
+                  gameOver
+                    ? undefined
+                    : e => {
+                        let newBoard: GameRecord = board;
+                        const newGameState = handlePointerUp(
+                          e,
+                          [coordinate, newBoard],
+                          nextState
+                        );
+                        newBoard = newGameState;
+                        setBoard([newBoard, nextState]);
+                      }
+                }
+                content={render(state, threats, board.state)}
+                state={[state, board.state]}
+                disabled={
+                  board.state === GameState.COMPLETED ||
+                  board.state === GameState.GAME_OVER ||
+                  board.state === GameState.PAUSED
+                }
+                threats={threats !== 0xff ? threats : undefined}
+                flaggedNeighbours={flaggedNeighboursCount}
+                mined={threats === 0xff}
+                randomMinetype={() => randomInt(10)}
+              />
+            );
+          }
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 function render(
@@ -211,6 +207,7 @@ function render(
   threats: NumThreats | Mine,
   gameState: GameState
 ): string | NumThreats {
+  const [disarmedMine, explodedMine] = ['💣', '💥'];
   const isMined = threats === 0xff;
   const gameWon = gameState === GameState.COMPLETED;
   const gameOver = gameState === GameState.GAME_OVER;
@@ -219,10 +216,10 @@ function render(
   const isDisarmed = done && isMined && (gameWon || (gameOver && isFlagged));
 
   if (isDisarmed) {
-    return '🤩';
+    return disarmedMine;
   }
   if (gameOver && state !== CellState.EXPLODED && threats === 0xff) {
-    return MINES[randomInt(MINES.length)];
+    return explodedMine;
   }
   if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
     return render(CellState.OPEN, threats, GameState.PLAYING);
@@ -233,7 +230,7 @@ function render(
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:
-      return threats === 0xff ? MINES[randomInt(MINES.length)] : threats;
+      return threats === 0xff ? disarmedMine : threats;
     case CellState.EXPLODED:
       return '💀';
     default:

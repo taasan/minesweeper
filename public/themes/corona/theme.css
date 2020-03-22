@@ -16,7 +16,7 @@
 .Minesweeper {
   --mine-detonated: url('../../svg/NotoEmoji/emoji_u1f480.svg');
   --mine-detonated-background: #dc322f;
-  --mine-detonated-animation: pulse 1.2s ease-in-out infinite alternate;
+  --mine-detonated-animation: pulse 0.2s ease-in-out 5;
 
   --mine-disarmed: url('../../svg/NotoEmoji/emoji_u1f929.svg');
   --mine-uncertain-disarmed: url('../../svg/NotoEmoji/emoji_u1f60e.svg');
@@ -32,6 +32,7 @@
   --mine-9: url('../../svg/NotoEmoji/emoji_u1f9df.svg');
 
   --cell-border: var(--cell-background-open);
+  --cell-color: transparent;
   --cell-background: #839496;
   --cell-background-open: #eee8d5;
   --cell-background-flagged-wrong: var(--mine-detonated-background);
@@ -43,6 +44,9 @@
   --cell-threats-6-color: #2aa198;
   --cell-threats-7-color: #b58900;
   --cell-threats-8-color: #cb4b16;
+
+  --cell-mined-color: transparent;
+  --cell-flagged-color: transparent;
   --cell-flagged: url('../../svg/NotoEmoji/emoji_u1f6a9.svg');
   --cell-flagged-uncertain: url('../../svg/NotoEmoji/emoji_u2753.svg');
   --cell-flagged-wrong: url('../../svg/NotoEmoji/emoji_u1f4a9.svg');
@@ -50,5 +54,4 @@
 
   --board-border-width: 6px;
   --board-padding: 3px;
-  --board-cursor: url('../../svg/NotoEmoji/emoji_u1f489.svg');
 }

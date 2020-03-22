@@ -13,6 +13,10 @@ export function assertNever(x: never): never {
 
 export type NumThreats = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
+export function isNumThreats(n: number): n is NumThreats {
+  return n >= 0 || n <= 8;
+}
+
 export enum CellState {
   OPEN,
   FLAGGED,
@@ -28,11 +32,13 @@ type IMap<K, V> = {
 type ICell = {
   state: CellState;
   threatCount: NumThreats | Mine;
+  flaggedNeighboursCount: NumThreats;
 };
 
 const createGameCell: Record.Factory<ICell> = Record<ICell>({
   state: CellState.NEW,
   threatCount: 0,
+  flaggedNeighboursCount: 0,
 });
 
 export type CellRecord = RecordOf<ICell>;
@@ -120,6 +126,7 @@ function createEmptyCells({ cols, rows }: Level): Array<[Coordinate, ICell]> {
         {
           state: CellState.NEW,
           threatCount: 0,
+          flaggedNeighboursCount: 0,
         },
       ]);
     }
@@ -230,7 +237,7 @@ function countThreats(
   return threats;
 }
 
-export function randomInt(max: number) {
+export function randomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
@@ -281,13 +288,7 @@ function openNeighbours(
 ): GameRecord {
   let newBoard = board;
 
-  let flaggedNeighbours = 0;
-  visitNeighbours(board.level, board.cells, coordinate, ([, c]) => {
-    if (c.state === CellState.FLAGGED) {
-      flaggedNeighbours++;
-    }
-  });
-  if (flaggedNeighbours !== cell.threatCount) {
+  if (cell.flaggedNeighboursCount !== cell.threatCount) {
     return board;
   }
   visitNeighbours<CellRecord>(
@@ -460,11 +461,33 @@ function toggleFlagged([[coordinate, cell], board]: [
       assertNever(cell.state);
   }
   return board.withMutations(newBoard => {
-    const newCell = cell.set('state', newCellState);
     if (board.state === GameState.INITIALIZED) {
-      newBoard = newBoard.set('state', GameState.PLAYING);
+      newBoard.set('state', GameState.PLAYING);
     }
-    updateCell(newBoard, [coordinate, newCell]);
+    updateCell(newBoard, [coordinate, cell.set('state', newCellState)]);
+
+    // Update flaggedNeighboursCount?
+    let delta = 0;
+    if (newCellState === CellState.FLAGGED) {
+      delta = 1;
+    } else if (newCellState === CellState.UNCERTAIN) {
+      delta = -1;
+    }
+    if (delta === 0) {
+      return;
+    }
+    newBoard.set(
+      'cells',
+      newBoard.cells.withMutations(newCells => {
+        visitNeighbours(newBoard.level, newCells, coordinate, ([coord, c]) => {
+          const newCount = c.flaggedNeighboursCount + delta;
+          if (!isNumThreats(newCount)) {
+            throw new Error();
+          }
+          newCells.set(coord, c.set('flaggedNeighboursCount', newCount));
+        });
+      })
+    );
   });
 }
 

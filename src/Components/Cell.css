@@ -3,27 +3,33 @@
   margin: 0;
   transition: color 0.2s linear;
   transition: background-color 0.2s linear;
-  border-color: var(--cell-border);
+  border-color: var(--cell-border, black);
 
   border-width: 2px;
   border-radius: 5px;
 
   border-style: outset;
-  background-color: var(--cell-background);
+  background-color: var(--cell-background, grey);
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.Cell[mined] {
-  font-family: 'Noto Color Emoji';
+  background-size: cover;
 }
 
 .Cell {
-  /* transparent, will use background-image */
-  color: rgba(0, 0, 0, 0);
+  font-family: 'Noto Color Emoji';
+  color: var(--cell-color, inherit);
   background-repeat: no-repeat;
   background-position: center;
+}
+
+.Cell[data-state='FLAGGED'],
+.Cell[data-state='UNCERTAIN'] {
+  color: var(--cell-flagged-color);
+}
+
+.Cell[data-state='MINED'] {
+  color: var(--cell-mined-color);
 }
 
 .Cell[data-state='FLAGGED']:not([data-mined]) {
@@ -42,7 +48,7 @@
   .Cell[data-state='FLAGGED']:not([data-mined]) {
   background-image: var(--cell-flagged-wrong);
   background-color: var(--cell-background-flagged-wrong);
-  color: rgba(0, 0, 0, 0);
+  animation: var(--mine-detonated-animation) !important;
 }
 
 .Cell[data-state='UNCERTAIN'][data-mined] {
@@ -106,35 +112,35 @@
 }
 
 .Cell[data-threats='1'] {
-  color: var(--cell-threats-1-color);
+  color: var(--cell-threats-1-color, blue);
 }
 
 .Cell[data-threats='2'] {
-  color: var(--cell-threats-2-color);
+  color: var(--cell-threats-2-color, green);
 }
 
 .Cell[data-threats='3'] {
-  color: var(--cell-threats-3-color);
+  color: var(--cell-threats-3-color, red);
 }
 
 .Cell[data-threats='4'] {
-  color: var(--cell-threats-4-color);
+  color: var(--cell-threats-4-color, indigo);
 }
 
 .Cell[data-threats='5'] {
-  color: var(--cell-threats-5-color);
+  color: var(--cell-threats-5-color, darkslateblue);
 }
 
 .Cell[data-threats='6'] {
-  color: var(--cell-threats-6-color);
+  color: var(--cell-threats-6-color, orange);
 }
 
 .Cell[data-threats='7'] {
-  color: var(--cell-threats-7-color);
+  color: var(--cell-threats-7-color, brown);
 }
 
 .Cell[data-threats='8'] {
-  color: var(--cell-threats-8-color);
+  color: var(--cell-threats-8-color, black);
 }
 
 .Cell[data-threats][data-state='OPEN'] {
@@ -144,10 +150,10 @@
 
 .Cell[data-state='OPEN'],
 .Cell:disabled {
-  background-color: var(--cell-background-open);
+  background-color: var(--cell-background-open, white);
 }
 
-.Minesweeper[data-state='PLAYING'] .Cell[data-state='NEW']:hover {
+.Cell[data-state='NEW']:hover {
   background-color: var(--cell-hover);
 }
 
