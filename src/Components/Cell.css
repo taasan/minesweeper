@@ -36,69 +36,91 @@
   color: var(--cell-mined-color);
 }
 
-.Cell[data-state='FLAGGED']:not([data-mined]) {
+.Cell[data-state='FLAGGED'] {
   background-image: var(--cell-flagged);
 }
 
-.Cell[data-state='UNCERTAIN']:not([data-mined]) {
+.Cell[data-state='UNCERTAIN'] {
   background-image: var(--cell-flagged-uncertain);
 }
 
-.Cell[data-state='FLAGGED'][data-mined] {
+.Board[data-state='GAME_OVER']
+  .Cell:not([data-state='OPEN']):not([data-state='EXPLODED']) {
+  background-color: var(
+    --cell-background-game-over,
+    var(--cell-background, initial)
+  );
+}
+
+.Board[data-state='GAME_OVER'] .Cell[data-state='FLAGGED'][data-mined],
+.Board[data-state='COMPLETED'] .Cell[data-state='FLAGGED'][data-mined] {
   background-image: var(--mine-disarmed);
 }
 
-.Game[data-state='GAME_OVER'] .Cell[data-state='FLAGGED']:not([data-mined]) {
+.Board[data-state='GAME_OVER'] .Cell[data-state='FLAGGED']:not([data-mined]) {
   background-image: var(--cell-flagged-wrong);
   background-color: var(--cell-background-flagged-wrong);
+  color: var(--cell-color-flagged-wrong, initial);
   animation: var(--mine-detonated-animation) !important;
 }
 
-.Cell[data-state='UNCERTAIN'][data-mined] {
+.Board[data-state='GAME_OVER'] .Cell[data-state='UNCERTAIN'][data-mined],
+.Board[data-state='COMPLETED'] .Cell[data-state='UNCERTAIN'][data-mined] {
   background-image: var(--mine-uncertain-disarmed);
 }
 
-.Cell[data-mine-type='0'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='0'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='0'][data-state='NEW'] {
   background-image: var(--mine-0);
 }
 
-.Cell[data-mine-type='1'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='1'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='1'][data-state='NEW'] {
   background-image: var(--mine-1);
 }
 
-.Cell[data-mine-type='2'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='2'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='2'][data-state='NEW'] {
   background-image: var(--mine-2);
 }
 
-.Cell[data-mine-type='3'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='3'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='3'][data-state='NEW'] {
   background-image: var(--mine-3);
 }
 
-.Cell[data-mine-type='4'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='4'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='4'][data-state='NEW'] {
   background-image: var(--mine-4);
 }
 
-.Cell[data-mine-type='5'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='5'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='5'][data-state='NEW'] {
   background-image: var(--mine-5);
 }
 
-.Cell[data-mine-type='6'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='6'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='6'][data-state='NEW'] {
   background-image: var(--mine-6);
 }
 
-.Cell[data-mine-type='7'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='7'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='7'][data-state='NEW'] {
   background-image: var(--mine-7);
 }
 
-.Cell[data-mine-type='8'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='8'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='8'][data-state='NEW'] {
   background-image: var(--mine-8);
 }
 
-.Cell[data-mine-type='9'][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type='9'][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type='9'][data-state='NEW'] {
   background-image: var(--mine-9);
 }
 
-.Cell[data-mine-type][data-state='NEW'] {
+.Board[data-state='GAME_OVER'] .Cell[data-mine-type][data-state='NEW'],
+.Board[data-state='COMPLETED'] .Cell[data-mine-type][data-state='NEW'] {
   background-color: var(--mine-detonated-background);
 }
 
@@ -112,7 +134,7 @@
 
 .Cell[data-threats='0'][data-state='OPEN'] {
   font-family: monospace;
-  color: rgba(0, 0, 0, 0);
+  color: transparent;
 }
 
 .Cell[data-threats='1'] {

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import './Board.css';
-import Cell from './Cell';
 import {
   CellState,
   GameState,
@@ -9,9 +8,11 @@ import {
   GameRecord,
   assertNever,
   calculateIndex,
+  isNumThreats,
 } from '../Game';
 import { Dispatch } from 'react';
 import { Action } from './Minesweeper';
+import Cell from './Cell';
 
 type IProps = {
   board: GameRecord;
@@ -22,7 +23,6 @@ const Board: React.FC<IProps> = (props: IProps) => {
   const { board, dispatch } = props;
 
   const boardState = board.state;
-  const gameOver = boardState === GameState.GAME_OVER;
   switch (board.state) {
     case GameState.ERROR:
       return (
@@ -64,13 +64,8 @@ const Board: React.FC<IProps> = (props: IProps) => {
               dispatch={dispatch}
               content={getContent(cellState, threats, boardState)}
               state={cellState}
-              threats={threats}
-              done={
-                (threats === 0xff ||
-                  (cellState !== CellState.NEW &&
-                    cellState !== CellState.OPEN)) &&
-                (gameOver || boardState === GameState.COMPLETED)
-              }
+              threats={isNumThreats(threats) ? threats : undefined}
+              mined={threats === 0xff}
             />
           );
         }

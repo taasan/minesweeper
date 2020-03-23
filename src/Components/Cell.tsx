@@ -1,67 +1,22 @@
-import React, {
-  PointerEvent,
-  FC,
-  useState,
-  PointerEventHandler,
-  Dispatch,
-  SetStateAction,
-  memo,
-  useMemo,
-} from 'react';
+import React, { PointerEvent, FC, Dispatch, memo, useMemo } from 'react';
 import './Cell.css';
-import { NumThreats, CellState, CmdName, Mine, randomInt } from '../Game';
+import { NumThreats, CellState, CmdName, randomInt } from '../Game';
 
 import { Action } from './Minesweeper';
 
-type IProps = {
+type ICellProps = {
   coordinate: number;
   dispatch: Dispatch<Action>;
   content: string | NumThreats;
   state: CellState;
-  threats: NumThreats | Mine;
-  done: boolean;
+  threats?: NumThreats;
+  mined: boolean;
 };
 
-type CellStateName = keyof typeof CellState;
-
-type ICellProps = {
-  className: string;
-  'data-state'?: CellStateName;
-  'data-pressed'?: true;
-  'data-disabled'?: true;
-  role: 'button';
-  'data-mined'?: true;
-  'data-mine-type'?: number;
-  'data-threats'?: NumThreats;
-};
-
-const createHandlers = (
-  setPressed: Dispatch<SetStateAction<boolean>>,
-  handlePointerDown: PointerEventHandler,
-  handlePointerUp: PointerEventHandler,
-  handlePointerOver: PointerEventHandler
-) => ({
-  onPointerUp: handlePointerUp,
-  onPointerDown: handlePointerDown,
-  onPointerLeave: (() => setPressed(false)) as PointerEventHandler,
-  onPointerOver: handlePointerOver,
-});
-
-const Cell: FC<IProps> = props => {
-  console.log('Rendering: Cell');
-  const [pressed, setPressed] = useState(false);
+const Cell: FC<ICellProps> = props => {
   const random = useMemo(() => randomInt(10), []);
 
-  const cellProps: ICellProps = {
-    className: 'Cell',
-    role: 'button',
-    'data-state': 'NEW',
-    'data-pressed': pressed ? true : undefined,
-  };
-
-  const { dispatch, state, coordinate } = props;
-
-  cellProps['data-state'] = CellState[state] as CellStateName;
+  const { dispatch, state, coordinate, threats, content, mined } = props;
 
   const getCommand = (e: React.PointerEvent): CmdName => {
     if (state === CellState.OPEN) {
@@ -79,45 +34,25 @@ const Cell: FC<IProps> = props => {
   };
 
   const handlePointerUp = (e: PointerEvent) => {
-    if (pressed) {
-      setPressed(() => false);
-      if (dispatch != null) {
-        dispatch({
-          type: getCommand(e),
-          coordinate: coordinate,
-          dispatch,
-        });
-      }
+    if (dispatch != null) {
+      dispatch({
+        type: getCommand(e),
+        coordinate: coordinate,
+        dispatch,
+      });
     }
   };
-  const { threats, content, done } = props;
-
-  const handlePointerDown = (e: PointerEvent) => {
-    e.preventDefault();
-    setPressed(true);
-  };
-
-  const handlePointerOver = (e: PointerEvent) => {
-    setPressed(e.buttons > 0);
-  };
-
-  const handlers = done
-    ? {}
-    : createHandlers(
-        setPressed,
-        handlePointerDown,
-        handlePointerUp,
-        handlePointerOver
-      );
-
-  const mined = threats === 0xff;
-  cellProps['data-mined'] = done && mined ? true : undefined;
-  cellProps['data-mine-type'] = done && mined ? random : undefined;
-  cellProps['data-threats'] = threats as NumThreats;
-  // threats === 0xff || state !== CellState.OPEN ? undefined : threats;
 
   return (
-    <div {...handlers} {...cellProps}>
+    <div
+      role="button"
+      onPointerUp={handlePointerUp}
+      className="Cell"
+      data-state={CellState[state]}
+      data-threats={threats}
+      data-mined={mined ? true : undefined}
+      data-mine-type={mined ? random : undefined}
+    >
       <span>{content}</span>
     </div>
   );

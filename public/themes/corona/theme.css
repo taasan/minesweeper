@@ -44,6 +44,7 @@
   --cell-background: #839496;
   --cell-background-open: #eee8d5;
   --cell-background-flagged-wrong: var(--mine-detonated-background);
+  --cell-color-flagged-wrong: transparent;
   --cell-threats-1-color: #268bd2;
   --cell-threats-2-color: #859900;
   --cell-threats-3-color: #dc322f;

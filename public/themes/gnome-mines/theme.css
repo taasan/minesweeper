@@ -18,10 +18,11 @@
 
   --cell-border: transparent;
   --cell-color: transparent !important;
-  --cell-background: #888a85;
+  --cell-background: #d3d7cf;
+  --cell-background-game-over: #888a85;
   --cell-background-open: #d3d7cf;
   --cell-hover: #d3d7cf;
-  --cell-background-flagged-wrong: var(--mine-detonated-background);
+  --cell-background-flagged-wrong: #cc0000;
   --cell-threats-1-color: transparent;
   --cell-threats-2-color: transparent;
   --cell-threats-3-color: transparent;
