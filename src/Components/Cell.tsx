@@ -92,18 +92,13 @@ const Cell: FC<IProps> = props => {
   };
   const { threats, content, done } = props;
 
-  const okToSetPressed = done
-    ? false
-    : [CellState.NEW, CellState.FLAGGED, CellState.UNCERTAIN].includes(state) ||
-      (state === CellState.OPEN && threats !== 0);
-
   const handlePointerDown = (e: PointerEvent) => {
     e.preventDefault();
-    setPressed(() => okToSetPressed);
+    setPressed(true);
   };
 
   const handlePointerOver = (e: PointerEvent) => {
-    setPressed(e.buttons > 0 && okToSetPressed);
+    setPressed(e.buttons > 0);
   };
 
   const handlers = done

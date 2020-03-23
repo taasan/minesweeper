@@ -23,6 +23,10 @@
   background-position: center;
 }
 
+.Cell[data-state='OPEN'][data-threats='0'] {
+  pointer-events: none;
+}
+
 .Cell[data-state='FLAGGED'],
 .Cell[data-state='UNCERTAIN'] {
   color: var(--cell-flagged-color);
@@ -104,6 +108,7 @@
   background-color: var(--mine-detonated-background);
   animation: var(--mine-detonated-animation) !important;
   z-index: 1;
+  pointer-events: none;
 }
 
 .Cell[data-threats='0'][data-state='OPEN'] {
