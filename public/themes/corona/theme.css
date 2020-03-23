@@ -2,21 +2,29 @@
   0% {
     background-color: var(--cell-background);
     background-size: 110%;
+    transform: scale(1.2);
+    rotate: 120deg;
   }
   50% {
-    background-color: var(--mine-detonated-background);
-    background-size: 85%;
+    background-size: 55%;
+    transform: scale(0.5);
+    rotate: 240deg;
   }
   100% {
-    background-color: var(--cell-background);
-    background-size: 110%;
+    background-color: var(--mine-detonated-background);
+    background-size: 100%;
+    transform: scale(1.5);
+    opacity: 0.75;
+    rotate: 360deg;
   }
 }
 
 .Minesweeper {
   --mine-detonated: url('../../svg/NotoEmoji/emoji_u1f480.svg');
   --mine-detonated-background: #dc322f;
-  --mine-detonated-animation: pulse 0.2s ease-in-out 5;
+  --mine-detonated-animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11
+    alternate both running pulse;
+  /*--mine-detonated-animation: pulse 0.2s ease-in-out 5;*/
 
   --mine-disarmed: url('../../svg/NotoEmoji/emoji_u1f929.svg');
   --mine-uncertain-disarmed: url('../../svg/NotoEmoji/emoji_u1f60e.svg');

@@ -157,9 +157,28 @@
   background-color: var(--cell-hover);
 }
 
+@keyframes pressed {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(0.9);
+    background-color: var(--cell-pressed-color) !important;
+  }
+}
+
 .Cell[data-pressed] {
   border-style: inset;
+  /*background-color: var(--cell-pressed-color) !important;*/
+  /*transform: scale(0.75);*/
+  transform: scale(0.9);
   background-color: var(--cell-pressed-color) !important;
+  /*transition: transform 0.5s ease-in-out 1;*/
+}
+
+.Cell[data-pressed][data-state='FLAGGED'] {
+  background-image: var(--cell-flagged-uncertain);
 }
 
 @keyframes font-fade-in {
