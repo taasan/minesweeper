@@ -24,6 +24,7 @@ export enum CellState {
   NEW,
   EXPLODED,
 }
+export type CellStateName = keyof typeof CellState;
 
 type IMap<K, V> = {
   get: (i: K) => V | undefined;
@@ -282,6 +283,12 @@ export enum Cmd {
   TOGGLE_PAUSE,
 }
 
+export type CmdName = keyof typeof Cmd;
+
+export function isCmdName(s: string): s is CmdName {
+  return Cmd[s as CmdName] != null;
+}
+
 function openNeighbours(
   [coordinate, cell]: [Coordinate, CellRecord],
   board: GameRecord
@@ -317,8 +324,15 @@ function expectUnPause(command: Cmd, board: GameRecord): GameRecord {
 
 function nextState(
   command: Cmd,
-  [coordinate, board]: [Coordinate, GameRecord]
+  [c, board]: [Coordinate | number, GameRecord]
 ): GameRecord {
+  let coordinate: Coordinate;
+  if (c instanceof Coordinate) {
+    coordinate = c;
+  } else {
+    coordinate = calculateCoordinate(board.level.cols, c);
+  }
+
   if (board.state === GameState.NOT_INITIALIZED) {
     return nextState(command, [
       coordinate,
@@ -493,10 +507,12 @@ function toggleFlagged([[coordinate, cell], board]: [
 
 export type NextStateFunction = (
   cmd: Cmd,
-  currentState: [Coordinate, GameRecord]
+  currentState: [Coordinate | number, GameRecord]
 ) => GameRecord;
 
-export function createGame(level: Level): [GameRecord, NextStateFunction] {
+export function createGame(
+  level: Level
+): { board: GameRecord; nextState: NextStateFunction } {
   const cells = OrderedMap(
     createEmptyCells(level).map(([pos, cell]) => [pos, createGameCell(cell)])
   );
@@ -518,9 +534,16 @@ export function createGame(level: Level): [GameRecord, NextStateFunction] {
       });
     }
   };
-  return [createBoard({ level, cells }), func];
+  return { board: createBoard({ level, cells }), nextState: func };
 }
 
-function calculateIndex(cols: number, { row, col }: Coordinate) {
+export function calculateIndex(cols: number, { row, col }: Coordinate) {
   return col + cols * row;
+}
+
+export function calculateCoordinate(cols: number, index: number): Coordinate {
+  const n = cols;
+  const col = index % cols;
+  const row = (index - col) / n;
+  return new Coordinate({ col, row });
 }

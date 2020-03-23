@@ -1,64 +1,26 @@
 import React, {
   PointerEvent,
-  MouseEvent,
   FC,
   useState,
   PointerEventHandler,
   Dispatch,
   SetStateAction,
+  memo,
+  useMemo,
 } from 'react';
 import './Cell.css';
-import { NumThreats, CellState, GameState, assertNever } from '../Game';
-import Assert from 'assert';
+import { NumThreats, CellState, CmdName, Mine, randomInt } from '../Game';
 
-type IPropsPaused = {
-  state: [never, GameState];
-};
+import { Action } from './Minesweeper';
 
-type IPropsNotInitialized = {
-  onAction?: (e: MouseEvent) => void;
-  state: [CellState.NEW, GameState];
-  disabled: false;
-  threats: undefined;
-  flaggedNeighbours: undefined;
-  content?: string | NumThreats;
-};
-
-const isPaused = (props: IProps): props is IPropsPaused =>
-  props.state[1] === GameState.PAUSED;
-
-const isNotInitialized = (props: IProps): props is IPropsNotInitialized =>
-  props.state[1] === GameState.NOT_INITIALIZED;
-
-type IPropsPlaying = {
+type IProps = {
+  coordinate: number;
+  dispatch: Dispatch<Action>;
   content: string | NumThreats;
-  disabled: boolean;
-  onAction?: (e: MouseEvent) => void;
-  state: [CellState, GameState];
-  threats?: NumThreats;
-  flaggedNeighbours?: NumThreats;
+  state: CellState;
+  threats: NumThreats | Mine;
+  done: boolean;
 };
-
-const isPlaying = (props: IProps): props is IPropsPlaying =>
-  props.state[1] === GameState.PLAYING;
-
-type IPropsDone = {
-  content: string | NumThreats;
-  disabled: boolean;
-  onAction?: (e: MouseEvent) => void;
-  state: [CellState, GameState];
-  threats?: NumThreats;
-  flaggedNeighbours?: NumThreats;
-  mined: boolean;
-  randomMinetype: () => number;
-};
-
-const isDone = (props: IProps): props is IPropsDone => {
-  const state = props.state[1];
-  return state === GameState.GAME_OVER || state === GameState.COMPLETED;
-};
-
-type IProps = IPropsPaused | IPropsPlaying | IPropsDone | IPropsNotInitialized;
 
 type CellStateName = keyof typeof CellState;
 
@@ -74,34 +36,21 @@ type ICellProps = {
 };
 
 const createHandlers = (
-  disabled: boolean,
   setPressed: Dispatch<SetStateAction<boolean>>,
   handlePointerDown: PointerEventHandler,
   handlePointerUp: PointerEventHandler,
   handlePointerOver: PointerEventHandler
 ) => ({
-  onPointerUp: disabled ? undefined : handlePointerUp,
-  onPointerDown: disabled ? undefined : handlePointerDown,
-  onPointerLeave: disabled
-    ? undefined
-    : ((() => setPressed(false)) as PointerEventHandler),
-  onPointerOver: disabled ? undefined : handlePointerOver,
+  onPointerUp: handlePointerUp,
+  onPointerDown: handlePointerDown,
+  onPointerLeave: (() => setPressed(false)) as PointerEventHandler,
+  onPointerOver: handlePointerOver,
 });
 
 const Cell: FC<IProps> = props => {
-  Assert.equal(
-    [
-      isPaused(props),
-      isPlaying(props),
-      isDone(props),
-      isNotInitialized(props),
-    ].reduce((p, c) => (c ? p + 1 : p), 0),
-    1,
-    'Illegal state'
-  );
-
+  console.log('Rendering: Cell');
   const [pressed, setPressed] = useState(false);
-  const [random, setRandom] = useState(undefined as number | undefined);
+  const random = useMemo(() => randomInt(10), []);
 
   const cellProps: ICellProps = {
     className: 'Cell',
@@ -110,34 +59,43 @@ const Cell: FC<IProps> = props => {
     'data-pressed': pressed ? true : undefined,
   };
 
-  if (isPaused(props)) {
-    return (
-      <div {...cellProps}>
-        <span>&nbsp;</span>
-      </div>
-    );
-  }
+  const { dispatch, state, coordinate } = props;
 
-  const { onAction, state } = props;
+  cellProps['data-state'] = CellState[state] as CellStateName;
 
-  const [cellState, gameState] = state;
-  cellProps['data-state'] = CellState[cellState] as CellStateName;
+  const getCommand = (e: React.PointerEvent): CmdName => {
+    if (state === CellState.OPEN) {
+      return 'POKE';
+    } else {
+      switch (e.button) {
+        case 0:
+          return 'POKE';
+        case 2:
+          return 'FLAG';
+        default:
+          return 'NONE';
+      }
+    }
+  };
 
   const handlePointerUp = (e: PointerEvent) => {
     if (pressed) {
       setPressed(() => false);
-      if (onAction != null) {
-        onAction(e);
+      if (dispatch != null) {
+        dispatch({
+          type: getCommand(e),
+          coordinate: coordinate,
+          dispatch,
+        });
       }
     }
   };
-  const { disabled, threats, content } = props;
+  const { threats, content, done } = props;
 
-  const okToSetPressed =
-    [CellState.NEW, CellState.FLAGGED, CellState.UNCERTAIN].includes(
-      cellState
-    ) ||
-    (cellState === CellState.OPEN && threats !== 0);
+  const okToSetPressed = done
+    ? false
+    : [CellState.NEW, CellState.FLAGGED, CellState.UNCERTAIN].includes(state) ||
+      (state === CellState.OPEN && threats !== 0);
 
   const handlePointerDown = (e: PointerEvent) => {
     e.preventDefault();
@@ -145,56 +103,29 @@ const Cell: FC<IProps> = props => {
   };
 
   const handlePointerOver = (e: PointerEvent) => {
-    if (disabled) {
-      return;
-    }
     setPressed(e.buttons > 0 && okToSetPressed);
   };
 
-  const handlers = createHandlers(
-    disabled,
-    setPressed,
-    handlePointerDown,
-    handlePointerUp,
-    handlePointerOver
+  const handlers = done
+    ? {}
+    : createHandlers(
+        setPressed,
+        handlePointerDown,
+        handlePointerUp,
+        handlePointerOver
+      );
+
+  const mined = threats === 0xff;
+  cellProps['data-mined'] = done && mined ? true : undefined;
+  cellProps['data-mine-type'] = done && mined ? random : undefined;
+  cellProps['data-threats'] = threats as NumThreats;
+  // threats === 0xff || state !== CellState.OPEN ? undefined : threats;
+
+  return (
+    <div {...handlers} {...cellProps}>
+      <span>{content}</span>
+    </div>
   );
-
-  if (isNotInitialized(props)) {
-    return (
-      <div {...cellProps} {...handlers}>
-        <span>&nbsp;</span>
-      </div>
-    );
-  }
-
-  const open = cellState === CellState.OPEN;
-
-  cellProps['data-disabled'] = disabled ? true : undefined;
-
-  const dataThreats =
-    open || gameState === GameState.GAME_OVER ? threats : undefined;
-
-  if (isDone(props)) {
-    if (random == null) {
-      setRandom(props.randomMinetype());
-    }
-    cellProps['data-mined'] = props.mined ? true : undefined;
-    cellProps['data-mine-type'] = props.mined ? random : undefined;
-    return renderDone();
-  }
-
-  if (isPlaying(props)) {
-    return renderDone();
-  }
-  assertNever(props);
-
-  function renderDone() {
-    return (
-      <div {...handlers} {...cellProps} data-threats={dataThreats}>
-        <span>{content}</span>
-      </div>
-    );
-  }
 };
 
-export default Cell;
+export default memo(Cell);

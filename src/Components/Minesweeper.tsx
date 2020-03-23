@@ -10,12 +10,14 @@ import {
   GameRecord,
   Cmd,
   createGame,
-  randomInt,
-  Coordinate,
   NextStateFunction,
   assertNever,
+  CmdName,
+  isCmdName,
+  calculateIndex,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
+import { useReducer, Dispatch } from 'react';
 
 type ILevels = {
   [keyof: string]: Level;
@@ -33,48 +35,89 @@ const getLevel = (key: string) => {
   return v != null ? v : LEVELS.BEGINNER;
 };
 
-const Minesweeper: React.FC = () => {
-  const [level, setLevel] = React.useState(LEVELS.BEGINNER);
-  const [[board, nextState], setBoard] = React.useState(() =>
-    createGame(level)
-  );
-  // const [seconds, setSeconds] = React.useState(0);
-  /*
+type IState = {
+  board: GameRecord;
+  nextState: NextStateFunction;
+  loading: boolean;
+};
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      switch (board.state) {
-        case GameState.PLAYING:
-          setSeconds(s => s + 1);
-          break;
-        case GameState.PAUSED:
-          break;
-        default:
-          clearInterval(interval);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [board.state]);
-  */
+type CmdAction = {
+  type: CmdName;
+  coordinate: number;
+  dispatch: Dispatch<Action>;
+};
+
+function isCmdAction(s: Action): s is CmdAction {
+  return isCmdName(s.type);
+}
+
+export type Action =
+  | { type: 'setLevel'; level: Level; dispatch: Dispatch<Action> }
+  | {
+      type: 'setBoard';
+      board: GameRecord;
+    }
+  | CmdAction;
+
+function setBoardAction(
+  f: () => object,
+  state: IState,
+  dispatch: Dispatch<Action>
+) {
+  new Promise<IState>((resolve, _reject) => {
+    const s = { ...state, ...f() };
+    resolve(s);
+  })
+    .then(s => dispatch({ type: 'setBoard', board: s.board }))
+    .catch(err => ({
+      ...state,
+      board: state.board.set('error', err).set('state', GameState.ERROR),
+    }));
+}
+
+function reducer(state: IState, action: Action): IState {
+  if (isCmdAction(action)) {
+    setBoardAction(
+      () => ({
+        board: state.nextState(Cmd[action.type], [
+          action.coordinate,
+          state.board,
+        ]),
+      }),
+      state,
+      action.dispatch
+    );
+    return state; // { ...state };
+  }
+  switch (action.type) {
+    case 'setLevel':
+      setBoardAction(() => createGame(action.level), state, action.dispatch);
+      return { ...state, loading: true };
+    case 'setBoard':
+      return { ...state, board: action.board, loading: false };
+  }
+  // assertNever(action);
+}
+
+const initialState = { ...createGame(LEVELS.BEGINNER), loading: false };
+
+const Minesweeper: React.FC = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { board, loading } = state;
   const { rows, cols, mines } = board.level;
+
   const togglePause = () => {
     switch (board.state) {
       case GameState.PAUSED:
       case GameState.PLAYING:
-        setBoard([
-          nextState(Cmd.TOGGLE_PAUSE, [
-            new Coordinate({ row: -1, col: -1 }),
-            board,
-          ]),
-          nextState,
-        ]);
+        dispatch({
+          type: Cmd[Cmd.TOGGLE_PAUSE] as CmdName,
+          coordinate: -1,
+          dispatch,
+        });
         break;
     }
   };
-  /*
-  if (board.state === GameState.PAUSED) {
-    return ;
-  }*/
   const renderPause = () => {
     return board.state === GameState.PAUSED ? (
       <main className="Minesweeper overlay" onClick={togglePause}>
@@ -100,19 +143,26 @@ const Minesweeper: React.FC = () => {
               board.cellStates[CellState.FLAGGED] -
               board.cellStates[CellState.UNCERTAIN]}
           </button>
-          <button onClick={togglePause}>{GameState[board.state]}</button>
+          <button onClick={togglePause}>
+            {loading ? 'LOADING' : GameState[board.state]}
+          </button>
           <select
             onChange={e => {
-              const l = getLevel(e.target.value);
-              setLevel(l);
-              setBoard(createGame(l));
+              const level = getLevel(e.target.value);
+              dispatch({ type: 'setLevel', level, dispatch });
             }}
           >
             {Object.keys(LEVELS).map(k => (
               <option key={k}>{k}</option>
             ))}
           </select>
-          <button onClick={() => setBoard(createGame(level))}>New</button>
+          <button
+            onClick={() =>
+              dispatch({ type: 'setLevel', level: board.level, dispatch })
+            }
+          >
+            New
+          </button>
         </aside>
       </div>
       <div
@@ -124,7 +174,7 @@ const Minesweeper: React.FC = () => {
         data-state={GameState[board.state]}
       >
         {renderPause()}
-        {renderBoard(board, nextState, setBoard)}
+        {renderBoard(board, dispatch)}
       </div>
     </div>
   );
@@ -132,10 +182,10 @@ const Minesweeper: React.FC = () => {
 
 function renderBoard(
   board: GameRecord,
-  nextState: NextStateFunction,
-  setBoard: ([b, n]: [GameRecord, NextStateFunction]) => void
+  dispatch: Dispatch<Action>
 ): JSX.Element {
-  const gameOver = board.state === GameState.GAME_OVER;
+  const boardState = board.state;
+  const gameOver = boardState === GameState.GAME_OVER;
   switch (board.state) {
     case GameState.ERROR:
       return (
@@ -162,38 +212,20 @@ function renderBoard(
     <ErrorBoundary>
       <div onPointerDown={e => e.preventDefault()} className="Board">
         {[...board.cells.entries()].map(
-          ([
-            coordinate,
-            { threatCount: threats, state, flaggedNeighboursCount },
-          ]) => {
+          ([coordinate, { threatCount: threats, state }]) => {
             return (
               <Cell
+                coordinate={calculateIndex(board.level.cols, coordinate)}
                 key={`${coordinate.row}-${coordinate.col}`}
-                onAction={
-                  gameOver
-                    ? undefined
-                    : e => {
-                        let newBoard: GameRecord = board;
-                        const newGameState = handlePointerUp(
-                          e,
-                          [coordinate, newBoard],
-                          nextState
-                        );
-                        newBoard = newGameState;
-                        setBoard([newBoard, nextState]);
-                      }
+                dispatch={dispatch}
+                content={render(state, threats, boardState)}
+                state={state}
+                threats={threats}
+                done={
+                  (threats === 0xff ||
+                    (state !== CellState.NEW && state !== CellState.OPEN)) &&
+                  (gameOver || boardState === GameState.COMPLETED)
                 }
-                content={render(state, threats, board.state)}
-                state={[state, board.state]}
-                disabled={
-                  board.state === GameState.COMPLETED ||
-                  board.state === GameState.GAME_OVER ||
-                  board.state === GameState.PAUSED
-                }
-                threats={threats !== 0xff ? threats : undefined}
-                flaggedNeighbours={flaggedNeighboursCount}
-                mined={threats === 0xff}
-                randomMinetype={() => randomInt(10)}
               />
             );
           }
@@ -202,6 +234,7 @@ function renderBoard(
     </ErrorBoundary>
   );
 }
+
 function render(
   state: CellState,
   threats: NumThreats | Mine,
@@ -236,32 +269,6 @@ function render(
     default:
       return '\u00A0';
   }
-}
-
-function handlePointerUp(
-  e: React.MouseEvent,
-  [coordinate, board]: [Coordinate, GameRecord],
-  nextState: NextStateFunction
-): GameRecord {
-  const cell = board.cells.get(coordinate)!;
-  let command: Cmd;
-  if (cell.state === CellState.OPEN) {
-    command = Cmd.POKE;
-  } else {
-    switch (e.button) {
-      case 0:
-        command = Cmd.POKE;
-        break;
-      case 2:
-        command = Cmd.FLAG;
-        break;
-      default:
-        command = Cmd.NONE;
-        break;
-    }
-  }
-
-  return nextState(command, [coordinate, board]);
 }
 
 export default Minesweeper;
