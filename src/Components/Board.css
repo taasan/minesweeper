@@ -25,6 +25,11 @@
   user-select: none;
 }
 
-.Board[data-state='GAME_OVER'] {
+.Board {
   pointer-events: none;
+}
+
+.Board[data-state='PLAYING'],
+.Board[data-state='NOT_INITIALIZED'] {
+  pointer-events: initial;
 }
