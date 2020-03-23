@@ -1,23 +1,19 @@
 import * as React from 'react';
 import './Minesweeper.css';
-import Cell from './Cell';
 import {
   CellState,
   GameState,
   Level,
-  NumThreats,
-  Mine,
   GameRecord,
   Cmd,
   createGame,
   NextStateFunction,
-  assertNever,
   CmdName,
   isCmdName,
-  calculateIndex,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
 import { useReducer, Dispatch } from 'react';
+import Board from './Board';
 
 type ILevels = {
   [keyof: string]: Level;
@@ -174,101 +170,12 @@ const Minesweeper: React.FC = () => {
         data-state={GameState[board.state]}
       >
         {renderPause()}
-        {renderBoard(board, dispatch)}
+        <ErrorBoundary>
+          <Board dispatch={dispatch} board={board} />
+        </ErrorBoundary>
       </div>
     </div>
   );
 };
-
-function renderBoard(
-  board: GameRecord,
-  dispatch: Dispatch<Action>
-): JSX.Element {
-  const boardState = board.state;
-  const gameOver = boardState === GameState.GAME_OVER;
-  switch (board.state) {
-    case GameState.ERROR:
-      return (
-        <main>
-          <header>
-            <h1>Error</h1>
-            <p>Something went wrong</p>
-          </header>
-          {board.error != null ? board.error.message : 'Unknown error'}
-        </main>
-      );
-    case GameState.NOT_INITIALIZED:
-    case GameState.COMPLETED:
-    case GameState.GAME_OVER:
-    case GameState.INITIALIZED:
-    case GameState.PLAYING:
-    case GameState.PAUSED:
-      break;
-    default:
-      return assertNever(board.state);
-  }
-
-  return (
-    <ErrorBoundary>
-      <div onPointerDown={e => e.preventDefault()} className="Board">
-        {[...board.cells.entries()].map(
-          ([coordinate, { threatCount: threats, state }]) => {
-            return (
-              <Cell
-                coordinate={calculateIndex(board.level.cols, coordinate)}
-                key={`${coordinate.row}-${coordinate.col}`}
-                dispatch={dispatch}
-                content={render(state, threats, boardState)}
-                state={state}
-                threats={threats}
-                done={
-                  (threats === 0xff ||
-                    (state !== CellState.NEW && state !== CellState.OPEN)) &&
-                  (gameOver || boardState === GameState.COMPLETED)
-                }
-              />
-            );
-          }
-        )}
-      </div>
-    </ErrorBoundary>
-  );
-}
-
-function render(
-  state: CellState,
-  threats: NumThreats | Mine,
-  gameState: GameState
-): string | NumThreats {
-  const [disarmedMine, explodedMine] = ['💣', '💥'];
-  const isMined = threats === 0xff;
-  const gameWon = gameState === GameState.COMPLETED;
-  const gameOver = gameState === GameState.GAME_OVER;
-  const done = gameOver || gameWon;
-  const isFlagged = state === CellState.FLAGGED;
-  const isDisarmed = done && isMined && (gameWon || (gameOver && isFlagged));
-
-  if (isDisarmed) {
-    return disarmedMine;
-  }
-  if (gameOver && state !== CellState.EXPLODED && threats === 0xff) {
-    return explodedMine;
-  }
-  if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
-    return render(CellState.OPEN, threats, GameState.PLAYING);
-  }
-  switch (state) {
-    case CellState.FLAGGED:
-      return gameOver && !isMined ? '❌' : '🚩';
-    case CellState.UNCERTAIN:
-      return '❓';
-    case CellState.OPEN:
-      return threats === 0xff ? disarmedMine : threats;
-    case CellState.EXPLODED:
-      return '💀';
-    default:
-      return '\u00A0';
-  }
-}
 
 export default Minesweeper;
