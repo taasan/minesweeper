@@ -44,9 +44,17 @@ const Board: React.FC<IProps> = (props: IProps) => {
     default:
       return assertNever(board.state);
   }
-
+  const { cols, rows } = board.level;
   return (
-    <div onPointerDown={e => e.preventDefault()} className="Board">
+    <div
+      className="Board"
+      style={{
+        ['--board-columns' as any]: cols,
+        ['--board-rows' as any]: rows,
+      }}
+      data-state={GameState[board.state]}
+      onPointerDown={e => e.preventDefault()}
+    >
       {[...board.cells.entries()].map(
         ([coordinate, { threatCount: threats, state: cellState }]) => {
           return (

@@ -31,10 +31,6 @@
   }
 }
 */
-.Minesweeper[data-state='GAME_OVER'] {
-  pointer-events: none;
-  cursor: not-allowed;
-}
 
 /*
 .Minesweeper[data-state='GAME_OVER'] .Board {

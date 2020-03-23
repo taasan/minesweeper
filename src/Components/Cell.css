@@ -48,8 +48,7 @@
   background-image: var(--mine-disarmed);
 }
 
-.Minesweeper[data-state='GAME_OVER']
-  .Cell[data-state='FLAGGED']:not([data-mined]) {
+.Game[data-state='GAME_OVER'] .Cell[data-state='FLAGGED']:not([data-mined]) {
   background-image: var(--cell-flagged-wrong);
   background-color: var(--cell-background-flagged-wrong);
   animation: var(--mine-detonated-animation) !important;

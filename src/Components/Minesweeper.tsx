@@ -161,14 +161,7 @@ const Minesweeper: React.FC = () => {
           </button>
         </aside>
       </div>
-      <div
-        style={{
-          ['--board-columns' as any]: cols,
-          ['--board-rows' as any]: rows,
-        }}
-        className="Minesweeper"
-        data-state={GameState[board.state]}
-      >
+      <div className="Minesweeper">
         {renderPause()}
         <ErrorBoundary>
           <Board dispatch={dispatch} board={board} />

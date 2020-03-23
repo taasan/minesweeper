@@ -24,3 +24,7 @@
   -ms-user-select: none;
   user-select: none;
 }
+
+.Board[data-state='GAME_OVER'] {
+  pointer-events: none;
+}

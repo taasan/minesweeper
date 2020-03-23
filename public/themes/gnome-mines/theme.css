@@ -56,8 +56,7 @@
   border-style: solid !important;
 }
 
-.Minesweeper[data-state='GAME_OVER']
-  .Cell[data-mined]:not([data-state='EXPLODED']) {
+.Board[data-state='GAME_OVER'] .Cell[data-mined]:not([data-state='EXPLODED']) {
   background-color: var(--cell-background) !important;
 }
 
