@@ -295,7 +295,7 @@ function openNeighbours(
 ): GameRecord {
   let newBoard = board;
 
-  if (cell.flaggedNeighboursCount !== cell.threatCount) {
+  if (cell.flaggedNeighboursCount < cell.threatCount) {
     return board;
   }
   visitNeighbours<CellRecord>(
