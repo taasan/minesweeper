@@ -7,7 +7,6 @@ import {
   Mine,
   GameRecord,
   assertNever,
-  calculateIndex,
   isNumThreats,
 } from '../Game';
 import { Dispatch } from 'react';
@@ -56,11 +55,11 @@ const Board: React.FC<IProps> = (props: IProps) => {
       onPointerDown={e => e.preventDefault()}
     >
       {[...board.cells.entries()].map(
-        ([coordinate, { threatCount: threats, state: cellState }]) => {
+        ([index, { threatCount: threats, state: cellState }]) => {
           return (
             <Cell
-              coordinate={calculateIndex(board.level.cols, coordinate)}
-              key={`${coordinate.row}-${coordinate.col}`}
+              coordinate={index}
+              key={index}
               dispatch={dispatch}
               content={getContent(cellState, threats, boardState)}
               state={cellState}

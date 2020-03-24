@@ -1,11 +1,4 @@
-import {
-  OrderedMap,
-  Record,
-  RecordOf,
-  ValueObject,
-  Collection,
-  Set,
-} from 'immutable';
+import { OrderedMap, Record, RecordOf, Collection } from 'immutable';
 
 export function assertNever(x: never): never {
   throw new Error('Unexpected value: ' + x);
@@ -44,29 +37,7 @@ const createGameCell: Record.Factory<ICell> = Record<ICell>({
 
 export type CellRecord = RecordOf<ICell>;
 
-export class Coordinate implements ValueObject {
-  readonly col: number;
-  readonly row: number;
-
-  constructor({ row, col }: { row: number; col: number }) {
-    this.row = row;
-    this.col = col;
-  }
-
-  public hashCode() {
-    return 31 * this.col + this.row;
-  }
-
-  public equals(other: any) {
-    if (this === other) {
-      return true;
-    }
-    if (!('row' in other && 'col' in other)) {
-      return false;
-    }
-    return this.row === other.row && this.col === other.col;
-  }
-}
+type Coordinate = number;
 
 export enum GameState {
   PAUSED,
@@ -120,17 +91,16 @@ function getCellStates(
 
 function createEmptyCells({ cols, rows }: Level): Array<[Coordinate, ICell]> {
   const cells: Array<[Coordinate, ICell]> = [];
-  for (let col = 0; col < cols; col++) {
-    for (let row = 0; row < rows; row++) {
-      cells.push([
-        new Coordinate({ row, col }),
-        {
-          state: CellState.NEW,
-          threatCount: 0,
-          flaggedNeighboursCount: 0,
-        },
-      ]);
-    }
+  const dim = rows * cols;
+  for (let i = 0; i < dim; i++) {
+    cells.push([
+      i,
+      {
+        state: CellState.NEW,
+        threatCount: 0,
+        flaggedNeighboursCount: 0,
+      },
+    ]);
   }
   return cells;
 }
@@ -139,25 +109,19 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
   const cells = createEmptyCells(level);
   const { cols, rows, mines } = level;
 
-  const mineSet: Set<Coordinate> = Set()
-    .asMutable()
+  const mineSet = new Set<Coordinate>()
     // Make sure we don't start with a bang
     .add(origin);
   let iterations = 0;
-  const pos = (c: Coordinate) => calculateIndex(cols, c);
+  const dim = cols * rows;
   do {
     if (iterations++ > mines * 10) {
       throw new Error('Infinite loop?');
     }
-    const col = randomInt(cols);
-    const row = randomInt(rows);
-    const coordinate = new Coordinate({
-      col,
-      row,
-    });
+    const coordinate = randomInt(dim);
     if (!mineSet.has(coordinate)) {
       mineSet.add(coordinate);
-      cells[pos(coordinate)][1].threatCount = 0xff;
+      cells[coordinate][1].threatCount = 0xff;
     }
   } while (mineSet.size <= mines);
 
@@ -166,7 +130,7 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
       const mappedCell = {
         ...cell,
         threatCount: countThreats({ rows, cols }, coord, {
-          get: c1 => cells[pos(c1)][1],
+          get: c1 => cells[c1][1],
         }),
       };
       return [coord, createGameCell(mappedCell)];
@@ -201,20 +165,18 @@ function collectSafeCells(
   board: GameRecord,
   origin: Coordinate
 ): Array<[Coordinate, CellRecord]> {
-  const visited = new Map<number, [Coordinate, CellRecord]>();
+  const visited = new Map<Coordinate, CellRecord>();
   const visitor = ([coordinate, cell]: [Coordinate, CellRecord]) => {
-    const pos = calculateIndex(board.level.cols, coordinate);
-    if (visited.has(pos)) {
+    if (visited.has(coordinate)) {
       return;
     }
-    visited.set(pos, [coordinate, cell]);
+    visited.set(coordinate, cell);
     if (cell.threatCount === 0) {
       visitNeighbours(board.level, board.cells, coordinate, visitor);
     }
   };
-
   visitNeighbours(board.level, board.cells, origin, visitor);
-  return [...visited.values()];
+  return [...visited.entries()];
 }
 
 function countThreats(
@@ -247,10 +209,19 @@ export type GameCellCallback<T> = ([coordinate, cell]: [Coordinate, T]) => void;
 function visitNeighbours<T>(
   dimension: { rows: number; cols: number },
   cells: IMap<Coordinate, T>,
-  p: Coordinate,
+  ccc: Coordinate,
   ...callbacks: Array<GameCellCallback<T>>
 ) {
   const { rows, cols } = dimension;
+
+  const calculateCoordinate = (index: number) => {
+    const n = cols;
+    const col = index % cols;
+    const row = (index - col) / n;
+    return { col, row };
+  };
+
+  const p = calculateCoordinate(ccc);
   for (let c = -1; c <= 1; c++) {
     const col = p.col + c;
 
@@ -268,7 +239,7 @@ function visitNeighbours<T>(
       if (row >= rows || row < 0) {
         continue;
       }
-      const coordinate = new Coordinate({ row, col });
+      const coordinate = col + cols * row;
       const cell = cells.get(coordinate)!;
 
       callbacks.forEach(cb => cb([coordinate, cell]));
@@ -324,15 +295,8 @@ function expectUnPause(command: Cmd, board: GameRecord): GameRecord {
 
 function nextState(
   command: Cmd,
-  [c, board]: [Coordinate | number, GameRecord]
+  [coordinate, board]: [Coordinate, GameRecord]
 ): GameRecord {
-  let coordinate: Coordinate;
-  if (c instanceof Coordinate) {
-    coordinate = c;
-  } else {
-    coordinate = calculateCoordinate(board.level.cols, c);
-  }
-
   if (board.state === GameState.NOT_INITIALIZED) {
     return nextState(command, [
       coordinate,
@@ -507,7 +471,7 @@ function toggleFlagged([[coordinate, cell], board]: [
 
 export type NextStateFunction = (
   cmd: Cmd,
-  currentState: [Coordinate | number, GameRecord]
+  currentState: [Coordinate, GameRecord]
 ) => GameRecord;
 
 export function createGame(
@@ -535,15 +499,4 @@ export function createGame(
     }
   };
   return { board: createBoard({ level, cells }), nextState: func };
-}
-
-export function calculateIndex(cols: number, { row, col }: Coordinate) {
-  return col + cols * row;
-}
-
-export function calculateCoordinate(cols: number, index: number): Coordinate {
-  const n = cols;
-  const col = index % cols;
-  const row = (index - col) / n;
-  return new Coordinate({ col, row });
 }
