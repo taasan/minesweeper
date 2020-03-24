@@ -303,7 +303,7 @@ function openNeighbours(
     board.cells,
     coordinate,
     ([coord, c]) => {
-      if (c.state === CellState.NEW) {
+      if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
         newBoard = toggleOpen([[coord, c], newBoard]);
       }
     }
@@ -484,7 +484,7 @@ function toggleFlagged([[coordinate, cell], board]: [
     let delta = 0;
     if (newCellState === CellState.FLAGGED) {
       delta = 1;
-    } else if (newCellState === CellState.NEW) {
+    } else if (newCellState === CellState.UNCERTAIN) {
       delta = -1;
     }
     if (delta === 0) {
