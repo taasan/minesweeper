@@ -1,4 +1,4 @@
-import React, { PointerEvent, FC, Dispatch, memo, useMemo } from 'react';
+import React, { FC, Dispatch, memo, useMemo, MouseEvent } from 'react';
 import './Cell.css';
 import { NumThreats, CellState, CmdName, randomInt } from '../Game';
 import EmojiRegex from 'emoji-regex';
@@ -21,7 +21,7 @@ const Cell: FC<ICellProps> = props => {
 
   const { dispatch, state, coordinate, threats, content, mined } = props;
 
-  const getCommand = (e: React.PointerEvent): CmdName => {
+  const getCommand = (e: MouseEvent): CmdName => {
     if (state === CellState.OPEN) {
       return 'POKE';
     } else {
@@ -36,7 +36,7 @@ const Cell: FC<ICellProps> = props => {
     }
   };
 
-  const handlePointerUp = (e: PointerEvent) => {
+  const handleClick = (e: MouseEvent) => {
     if (dispatch != null) {
       dispatch({
         type: getCommand(e),
@@ -57,7 +57,7 @@ const Cell: FC<ICellProps> = props => {
   return (
     <div
       role="button"
-      onPointerUp={handlePointerUp}
+      onMouseDown={handleClick}
       className="Cell"
       data-state={CellState[state]}
       data-threats={threats}
