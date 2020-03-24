@@ -65,7 +65,6 @@ function StyleSelector() {
         getList(DEFAULT_STYLESHEET).push(e);
       }
     });
-    console.log('# stylesheets:', map.size);
     const isDefault = (title?: string) => defaultTitles.includes(title!);
     const titles = Object.freeze([...map.keys()]);
     setStylesheetMap({ map, isDefault, titles });
@@ -77,7 +76,6 @@ function StyleSelector() {
   }, [handleOnLoad]);
 
   useEffect(() => {
-    console.log('Changing stylesheet?');
     function disable(title: string, disabled: boolean) {
       const ss = styleSheetMap?.map.get(title);
       ss?.forEach(s => {
@@ -86,7 +84,6 @@ function StyleSelector() {
       });
     }
 
-      console.debug('Yes');
     if (css != null && styleSheetMap != null) {
       // Disable everyone else
       styleSheetMap.titles
@@ -94,8 +91,6 @@ function StyleSelector() {
         .forEach(t => disable(t, true));
       // Enable
       disable(css, false);
-    } else {
-      console.debug('No');
     }
   }, [css, styleSheetMap]);
 
