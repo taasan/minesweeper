@@ -1,8 +1,11 @@
 import React, { PointerEvent, FC, Dispatch, memo, useMemo } from 'react';
 import './Cell.css';
 import { NumThreats, CellState, CmdName, randomInt } from '../Game';
+import EmojiRegex from 'emoji-regex';
 
 import { Action } from './Minesweeper';
+
+const emojiRegex = EmojiRegex();
 
 type ICellProps = {
   coordinate: number;
@@ -43,6 +46,14 @@ const Cell: FC<ICellProps> = props => {
     }
   };
 
+  const ariaProps =
+    typeof content === 'string' && emojiRegex.test(content)
+      ? {
+          role: 'img',
+          'aria-label': mined ? 'MINE' : CellState[state],
+        }
+      : {};
+
   return (
     <div
       role="button"
@@ -53,7 +64,7 @@ const Cell: FC<ICellProps> = props => {
       data-mined={mined ? true : undefined}
       data-mine-type={mined ? random : undefined}
     >
-      <span>{content}</span>
+      <a {...ariaProps}>{content}</a>
     </div>
   );
 };
