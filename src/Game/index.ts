@@ -52,20 +52,10 @@ export enum GameState {
 type IGame = Readonly<{
   cells: OrderedMap<Coordinate, CellRecord>;
   state: GameState;
-  level: Level;
-  cellStates: CellStateStats;
-  error: Error | null;
+  level: RecordOf<Level>;
+  cellStates: RecordOf<CellStateStats>;
+  error: Readonly<Error> | null;
 }>;
-
-export type GameRecord = RecordOf<IGame>;
-
-const createBoard: Record.Factory<IGame> = Record<IGame>({
-  cells: OrderedMap(),
-  state: GameState.NOT_INITIALIZED,
-  level: { cols: 0, rows: 0, mines: 0 },
-  cellStates: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
-  error: null,
-});
 
 export type Level = {
   cols: number;
@@ -73,19 +63,41 @@ export type Level = {
   mines: number;
 };
 
+const createLevel: Record.Factory<Level> = Record<Level>({
+  cols: 0,
+  rows: 0,
+  mines: 0,
+});
+
+const createCellStateStats: Record.Factory<CellStateStats> = Record<
+  CellStateStats
+>({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 });
+
+export type GameRecord = RecordOf<IGame>;
+
+const createBoard: Record.Factory<IGame> = Record<IGame>({
+  cells: OrderedMap(),
+  state: GameState.NOT_INITIALIZED,
+  level: createLevel(),
+  cellStates: createCellStateStats(),
+  error: null,
+});
+
 export type Mine = 0xff;
 
 type CellStateStats = { [key in CellState]: number };
 
 function getCellStates(
   cells: Collection<Coordinate, CellRecord>
-): CellStateStats {
-  return cells.entrySeq().reduce(
-    (result, [, item]) => ({
-      ...result,
-      [item.state]: result[item.state] + 1,
-    }),
-    { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }
+): RecordOf<CellStateStats> {
+  return createCellStateStats(
+    cells.entrySeq().reduce(
+      (result, [, item]) => ({
+        ...result,
+        [item.state]: result[item.state] + 1,
+      }),
+      { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }
+    )
   );
 }
 
@@ -138,7 +150,7 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
   );
 
   return createBoard({
-    level: { cols, rows, mines },
+    level: createLevel({ cols, rows, mines }),
     cells: cellRecords,
     cellStates: getCellStates(cellRecords),
     state: GameState.INITIALIZED,
@@ -498,5 +510,8 @@ export function createGame(
       });
     }
   };
-  return { board: createBoard({ level, cells }), nextState: func };
+  return {
+    board: createBoard({ level: createLevel(level), cells }),
+    nextState: func,
+  };
 }
