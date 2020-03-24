@@ -68,7 +68,6 @@ const Board: React.FC<IProps> = (props: IProps) => {
         ['--board-rows' as any]: rows,
       }}
       data-state={GameState[board.state]}
-      onPointerDown={e => e.preventDefault()}
     >
       {[...board.cells.entries()].map(
         ([index, { threatCount: threats, state: cellState }]) => {
