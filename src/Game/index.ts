@@ -49,12 +49,20 @@ export enum GameState {
   ERROR,
 }
 
+class GameError extends Error {
+  readonly cause: Error;
+  constructor(msg: string, err: Error) {
+    super(msg);
+    this.cause = Object.freeze(err);
+  }
+}
+
 type IGame = Readonly<{
   cells: OrderedMap<Coordinate, CellRecord>;
   state: GameState;
   level: RecordOf<Level>;
   cellStates: RecordOf<CellStateStats>;
-  error: Readonly<Error> | null;
+  error: Readonly<GameError> | null;
 }>;
 
 export type Level = {
@@ -494,18 +502,25 @@ export function createGame(
   );
 
   const func: NextStateFunction = (cmd, [coordinate, game]) => {
-    switch (game.state) {
-      case GameState.PAUSED:
-        return expectUnPause(cmd, game);
-    }
-    if (game.state === GameState.ERROR || cmd === Cmd.NONE) {
-      return game;
-    }
     try {
+      switch (game.state) {
+        case GameState.PAUSED:
+          return expectUnPause(cmd, game);
+      }
+      if (game.state === GameState.ERROR || cmd === Cmd.NONE) {
+        return game;
+      }
       return nextState(cmd, [coordinate, game]);
     } catch (err) {
       return game.withMutations(mutable => {
-        mutable.set('error', err instanceof Error ? err : new Error());
+        mutable.set(
+          'error',
+          Object.freeze(
+            err instanceof GameError
+              ? err
+              : new GameError(`Command ${Cmd[cmd]} failed`, err)
+          )
+        );
         mutable.set('state', GameState.ERROR);
       });
     }

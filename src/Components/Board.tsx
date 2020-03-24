@@ -8,6 +8,7 @@ import {
   GameRecord,
   assertNever,
   isNumThreats,
+  randomInt,
 } from '../Game';
 import { Dispatch } from 'react';
 import { Action } from './Minesweeper';
@@ -24,13 +25,28 @@ const Board: React.FC<IProps> = (props: IProps) => {
   const boardState = board.state;
   switch (board.state) {
     case GameState.ERROR:
+      const error = board.error != null ? board.error.message : 'Unknown error';
+      const cause =
+        board.error != null &&
+        board.error.cause != null &&
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        board.error.cause.message ? (
+          <p>{board.error.cause.message}</p>
+        ) : (
+          undefined
+        );
       return (
-        <main>
+        <main className="Error">
           <header>
             <h1>Error</h1>
             <p>Something went wrong</p>
           </header>
-          {board.error != null ? board.error.message : 'Unknown error'}
+          <p>{error}</p>
+          <section>
+            <h2>Cause</h2>
+            {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions*/}
+            {cause || 'unknown'}
+          </section>
         </main>
       );
     case GameState.NOT_INITIALIZED:
