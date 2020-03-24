@@ -86,10 +86,10 @@ function StyleSelector() {
       });
     }
 
-    if (css !== undefined) {
       console.debug('Yes');
+    if (css != null && styleSheetMap != null) {
       // Disable everyone else
-      styleSheetMap?.titles
+      styleSheetMap.titles
         .filter(t => t !== css)
         .forEach(t => disable(t, true));
       // Enable
