@@ -60,7 +60,10 @@ function StyleSelector() {
       };
       const elts = getList(e.title);
       elts.push(e);
-      if (e instanceof HTMLLinkElement && !/alt/.test(e.rel)) {
+      if (
+        (e instanceof HTMLLinkElement && !/alt/.test(e.rel)) ||
+        e instanceof HTMLStyleElement
+      ) {
         defaultTitles.push(e.title);
         getList(DEFAULT_STYLESHEET).push(e);
       }
