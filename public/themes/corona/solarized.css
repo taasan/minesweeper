@@ -1,0 +1,33 @@
+:root {
+  --solarized-base03: #002b36;
+  --solarized-base02: #073642;
+  --solarized-base01: #586e75;
+  --solarized-base00: #657b83;
+  --solarized-base0: #839496;
+  --solarized-base1: #93a1a1;
+  --solarized-base2: #eee8d5;
+  --solarized-base3: #fdf6e3;
+  --solarized-yellow: #b58900;
+  --solarized-orange: #cb4b16;
+  --solarized-red: #dc322f;
+  --solarized-magenta: #d33682;
+  --solarized-violet: #6c71c4;
+  --solarized-blue: #268bd2;
+  --solarized-cyan: #2aa198;
+  --solarized-green: #859900;
+}
+
+.Minesweeper {
+  --mine-detonated-background: var(--solarized-red);
+  --cell-border: var(--cell-background-open);
+  --cell-background-flagged-wrong: var(--solarized-red);
+  --cell-threats-1-color: var(--solarized-blue);
+  --cell-threats-2-color: var(--solarized-green);
+  --cell-threats-3-color: var(--solarized-red);
+  --cell-threats-4-color: var(--solarized-violet);
+  --cell-threats-5-color: var(--solarized-magenta);
+  --cell-threats-6-color: var(--solarized-cyan);
+  --cell-threats-7-color: var(--solarized-yellow);
+  --cell-threats-8-color: var(--solarized-orange);
+  --cell-pressed-color: var(--cell-background-open);
+}
