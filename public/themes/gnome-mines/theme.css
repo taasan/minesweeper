@@ -16,11 +16,11 @@
   --mine-8: var(--mine-0);
   --mine-9: var(--mine-0);
 
-  --cell-border: transparent;
+  --cell-border: white;
   --cell-color: transparent !important;
-  --cell-background: #d3d7cf;
+  --cell-background: #babdb6;
   --cell-background-game-over: #888a85;
-  --cell-background-open: #d3d7cf;
+  --cell-background-open: #dededc;
   --cell-hover: #d3d7cf;
   --cell-background-flagged-wrong: #cc0000;
   --cell-threats-1-color: transparent;
@@ -46,7 +46,7 @@
 
 .Board {
   background-color: inherit !important;
-  gap: 1px !important;
+  /*gap: 1px !important;*/
 }
 
 .Cell {
@@ -66,7 +66,7 @@
   background-image: var(--cell-flagged);
 }
 
-.Minesweeper .Cell[data-threats] span {
+.Minesweeper .Cell[data-threats] * {
   color: transparent !important;
 }
 

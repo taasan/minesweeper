@@ -1,27 +1,27 @@
+@import url(solarized.css);
+@import url(light.css) screen;
+@import url(dark.css) screen and (prefers-color-scheme: dark);
+
 @keyframes pulse {
   0% {
     background-color: var(--cell-background);
     background-size: 110%;
     transform: scale(1.2);
-    rotate: 120deg;
   }
   50% {
     background-size: 55%;
     transform: scale(0.5);
-    rotate: 240deg;
   }
   100% {
     background-color: var(--mine-detonated-background);
     background-size: 100%;
     transform: scale(1.5);
     opacity: 0.75;
-    rotate: 360deg;
   }
 }
 
 .Minesweeper {
   --mine-detonated: url('../../svg/NotoEmoji/emoji_u1f480.svg');
-  --mine-detonated-background: #dc322f;
   --mine-detonated-animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11
     alternate both running pulse;
   /*--mine-detonated-animation: pulse 0.2s ease-in-out 5;*/
@@ -39,27 +39,14 @@
   --mine-8: url('../../svg/NotoEmoji/emoji_u1f976.svg');
   --mine-9: url('../../svg/NotoEmoji/emoji_u1f9df.svg');
 
-  --cell-border: var(--cell-background-open);
   --cell-color: transparent;
-  --cell-background: #839496;
-  --cell-background-open: #eee8d5;
-  --cell-background-flagged-wrong: var(--mine-detonated-background);
   --cell-color-flagged-wrong: transparent;
-  --cell-threats-1-color: #268bd2;
-  --cell-threats-2-color: #859900;
-  --cell-threats-3-color: #dc322f;
-  --cell-threats-4-color: #6c71c4;
-  --cell-threats-5-color: #d33682;
-  --cell-threats-6-color: #2aa198;
-  --cell-threats-7-color: #b58900;
-  --cell-threats-8-color: #cb4b16;
 
   --cell-mined-color: transparent;
   --cell-flagged-color: transparent;
   --cell-flagged: url('../../svg/NotoEmoji/emoji_u1f6a9.svg');
   --cell-flagged-uncertain: url('../../svg/NotoEmoji/emoji_u2753.svg');
   --cell-flagged-wrong: url('../../svg/NotoEmoji/emoji_u1f4a9.svg');
-  --cell-pressed-color: #d336827f;
 
   --board-border-width: 6px;
   --board-padding: 3px;

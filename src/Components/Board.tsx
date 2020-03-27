@@ -16,11 +16,13 @@ import Cell from './Cell';
 
 type IProps = {
   board: GameRecord;
+  rotated: boolean;
   dispatch: Dispatch<Action>;
 };
 
 const Board: React.FC<IProps> = (props: IProps) => {
-  const { board, dispatch } = props;
+  console.log('Render board');
+  const { board, dispatch, rotated } = props;
 
   const boardState = board.state;
   switch (board.state) {
@@ -55,21 +57,60 @@ const Board: React.FC<IProps> = (props: IProps) => {
     case GameState.INITIALIZED:
     case GameState.PLAYING:
     case GameState.PAUSED:
+    case GameState.DEMO:
       break;
     default:
       return assertNever(board.state);
   }
   const { cols, rows } = board.level;
+  const done =
+    boardState === GameState.GAME_OVER ||
+    boardState === GameState.COMPLETED ||
+    boardState === GameState.DEMO ||
+    boardState === GameState.ERROR;
+  const pointerEvents = done ? 'none' : 'initial';
   return (
     <div
+      onContextMenu={e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       className="Board"
       style={{
-        ['--board-columns' as any]: cols,
-        ['--board-rows' as any]: rows,
+        pointerEvents,
+        ['--board-columns' as any]: rotated ? rows : cols,
+        ['--board-rows' as any]: rotated ? cols : rows,
+        gridAutoFlow: rotated ? 'column' : 'row',
       }}
-      data-state={GameState[board.state]}
+      data-state={
+        boardState === GameState.DEMO
+          ? GameState[GameState.GAME_OVER]
+          : GameState[board.state]
+      }
     >
-      {[...board.cells.entries()].map(
+      {[...new Array(rows)].map((_, row) => {
+        const from = row + row * (cols - 1);
+        const to = from + cols;
+        console.log({ from, to });
+        return (
+          <div key={row} className="Row">
+            {[...board.cells.slice(from, to)].map(
+              ([index, { threatCount: threats, state: cellState }]) => (
+                <Cell
+                  coordinate={index}
+                  key={index}
+                  dispatch={dispatch}
+                  content={getContent(cellState, threats, boardState)}
+                  state={cellState}
+                  threats={isNumThreats(threats) ? threats : undefined}
+                  mined={threats === 0xff}
+                />
+              )
+            )}
+          </div>
+        );
+      })}
+      {/*[...board.cells.entries()].map(
         ([index, { threatCount: threats, state: cellState }]) => {
           return (
             <Cell
@@ -83,7 +124,7 @@ const Board: React.FC<IProps> = (props: IProps) => {
             />
           );
         }
-      )}
+      )*/}
     </div>
   );
 };
@@ -93,30 +134,51 @@ function getContent(
   threats: NumThreats | Mine,
   gameState: GameState
 ): string | NumThreats {
-  const [disarmedMine, explodedMine] = ['💣', '💥'];
+  const mines = [
+    '🤒',
+    '😷',
+    '🤮',
+    '🤢',
+    '🤡',
+    '🧟',
+    '🤥',
+    '🤕',
+    '🤧',
+    '👻',
+    '🥵',
+    '🥶',
+    '👺',
+  ];
+
+  const disarmedMine = '🥰';
   const isMined = threats === 0xff;
   const gameWon = gameState === GameState.COMPLETED;
   const gameOver = gameState === GameState.GAME_OVER;
-  const done = gameOver || gameWon;
+  const demo = gameState === GameState.DEMO;
+  const done = gameOver || gameWon || demo;
   const isFlagged = state === CellState.FLAGGED;
-  const isDisarmed = done && isMined && (gameWon || (gameOver && isFlagged));
+  const isDisarmed = done && isMined && isFlagged && (gameWon || gameOver);
+
+  if (gameWon && isMined && state !== CellState.FLAGGED) {
+    return '🥺';
+  }
 
   if (isDisarmed) {
     return disarmedMine;
   }
-  if (gameOver && state !== CellState.EXPLODED && threats === 0xff) {
-    return explodedMine;
+  if ((gameOver || demo) && state !== CellState.EXPLODED && threats === 0xff) {
+    return mines[randomInt(mines.length)];
   }
   if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
     return getContent(CellState.OPEN, threats, GameState.PLAYING);
   }
   switch (state) {
     case CellState.FLAGGED:
-      return gameOver && !isMined ? '❌' : '🚩';
+      return (demo || gameOver) && !isMined ? '💩' : '🚩';
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:
-      return threats === 0xff ? disarmedMine : threats;
+      return isNumThreats(threats) ? threats : '\u00A0';
     case CellState.EXPLODED:
       return '💀';
     default:
@@ -124,4 +186,4 @@ function getContent(
   }
 }
 
-export default Board;
+export default React.memo(Board);

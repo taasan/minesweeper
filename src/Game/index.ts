@@ -47,6 +47,7 @@ export enum GameState {
   PLAYING,
   NOT_INITIALIZED,
   ERROR,
+  DEMO,
 }
 
 class GameError extends Error {
@@ -374,6 +375,7 @@ function toggleOpen([[coordinate, cell], board]: [
     case GameState.COMPLETED:
     case GameState.NOT_INITIALIZED:
     case GameState.ERROR:
+    case GameState.DEMO:
       return board;
     default:
       assertNever(board.state);
@@ -436,6 +438,7 @@ function toggleFlagged([[coordinate, cell], board]: [
     case GameState.COMPLETED:
     case GameState.NOT_INITIALIZED:
     case GameState.ERROR:
+    case GameState.DEMO:
       return board;
     default:
       assertNever(board.state);
@@ -530,3 +533,56 @@ export function createGame(
     nextState: func,
   };
 }
+
+export const legend = () => {
+  const cells = [
+    ...[...new Array(8)].map((_, i) =>
+      createGameCell({
+        state: CellState.OPEN,
+        threatCount: (i + 1) as NumThreats,
+      })
+    ),
+    createGameCell({
+      state: CellState.NEW,
+    }),
+    createGameCell({
+      state: CellState.OPEN,
+      threatCount: 0,
+    }),
+
+    createGameCell({
+      state: CellState.FLAGGED,
+      threatCount: 0xff,
+    }),
+    createGameCell({
+      state: CellState.FLAGGED,
+      threatCount: 0,
+    }),
+    createGameCell({
+      state: CellState.UNCERTAIN,
+      threatCount: 0xff,
+    }),
+    createGameCell({
+      state: CellState.UNCERTAIN,
+      threatCount: 0,
+    }),
+    createGameCell({
+      state: CellState.EXPLODED,
+      threatCount: 0xff,
+    }),
+    createGameCell({
+      state: CellState.NEW,
+      threatCount: 0xff,
+    }),
+  ];
+  const cols = 4;
+  const board = createBoard({
+    cells: OrderedMap(cells.map((c, i) => [i, c])),
+    level: createLevel({ cols, rows: Math.ceil(cells.length / cols) }),
+    state: GameState.DEMO,
+  });
+  return {
+    board,
+    nextState: () => board,
+  };
+};

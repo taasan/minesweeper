@@ -1,8 +1,16 @@
+.Minesweeper.rotated .Cell {
+  rotate: -90deg;
+}
+
 .Cell {
+  rotate: 0deg;
   padding: 3px;
   margin: 0;
+  transition: color 0.2s linear, background-color 0.2s linear;
+  /*
   transition: color 0.2s linear;
   transition: background-color 0.2s linear;
+  */
   border-color: var(--cell-border, black);
 
   border-width: 2px;
@@ -44,12 +52,32 @@
   background-image: var(--cell-flagged-uncertain);
 }
 
+.Board[data-state='PAUSED'] .Cell {
+  background-color: var(--cell-background) !important;
+  background-image: none !important;
+  color: transparent !important;
+}
+
+.Board[data-state='PAUSED'] .Cell * {
+  visibility: hidden;
+}
+
 .Board[data-state='GAME_OVER']
   .Cell:not([data-state='OPEN']):not([data-state='EXPLODED']) {
   background-color: var(
     --cell-background-game-over,
-    var(--cell-background, initial)
+    var(--cell-background, revert)
   );
+}
+
+.Board[data-state='GAME_OVER'] .Cell[data-mined]:not([data-state='EXPLODED']),
+.Board[data-state='COMPLETED'] .Cell[data-mined]:not([data-state='EXPLODED']) {
+  background-image: var(--mine-disarmed);
+}
+
+.Board[data-state='GAME_OVER'] .Cell[data-mined],
+.Board[data-state='COMPLETED'] .Cell[data-mined] {
+  font-size: calc(var(--cell-size) * 0.75);
 }
 
 .Board[data-state='GAME_OVER'] .Cell[data-state='FLAGGED'][data-mined],
@@ -60,7 +88,7 @@
 .Board[data-state='GAME_OVER'] .Cell[data-state='FLAGGED']:not([data-mined]) {
   background-image: var(--cell-flagged-wrong);
   background-color: var(--cell-background-flagged-wrong);
-  color: var(--cell-color-flagged-wrong, initial);
+  color: var(--cell-color-flagged-wrong, revert);
   animation: var(--mine-detonated-animation) !important;
 }
 
@@ -134,7 +162,12 @@
 
 .Cell[data-threats='0'][data-state='OPEN'] {
   font-family: monospace;
-  color: transparent;
+  background-color: var(--cell-background-open, revert);
+}
+
+.Cell[data-threats='0']:not([data-state='FLAGGED']):not([data-state='UNCERTAIN'])
+  > * {
+  visibility: hidden;
 }
 
 .Cell[data-threats='1'] {
@@ -171,18 +204,18 @@
 
 .Cell[data-threats][data-state='OPEN'] {
   font-family: monospace;
-  animation: font-fade-in 0.4s ease 0s 1;
+  animation: font-fade-in 0.1s ease 0s 1;
 }
 
 .Cell[data-state='OPEN'],
 .Cell:disabled {
   background-color: var(--cell-background-open, white);
 }
-
+/*
 .Cell[data-state='NEW']:hover {
   background-color: var(--cell-hover);
 }
-
+*/
 @keyframes pressed {
   0% {
     transform: scale(1);
@@ -190,31 +223,34 @@
 
   100% {
     transform: scale(0.9);
-    background-color: var(--cell-pressed-color) !important;
+    background-color: var(--cell-pressed-color, revert) !important;
   }
 }
 
-.Cell[data-pressed] {
+.Cell:active {
   border-style: inset;
-  /*background-color: var(--cell-pressed-color) !important;*/
-  /*transform: scale(0.75);*/
   transform: scale(0.9);
-  background-color: var(--cell-pressed-color) !important;
-  /*transition: transform 0.5s ease-in-out 1;*/
+  background-color: var(--cell-pressed-color, revert) !important;
 }
 
-.Cell[data-pressed][data-state='FLAGGED'] {
+.Cell:active[data-state='FLAGGED'] {
   background-image: var(--cell-flagged-uncertain);
 }
 
 @keyframes font-fade-in {
   0% {
-    font-size: 0px;
+    transform: scale(0.75);
+  }
+  25% {
+    transform: scale(0.5);
   }
   50% {
-    font-size: 60%;
+    transform: scale(0.75);
+  }
+  75% {
+    transform: scale(1.25);
   }
   100% {
-    font-size: 100%;
+    transform: scale(1);
   }
 }

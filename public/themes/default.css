@@ -1,20 +1,20 @@
-.Minesweeper {
-  --mine-detonated-background: #dc322f;
+:root {
+  --mine-detonated-background: red;
   --mine-detonated-animation: none;
 
   --cell-border: var(--cell-background-open);
-  --cell-background: #839496;
-  --cell-background-open: #eee8d5;
+  --cell-background: grey;
+  --cell-background-open: white;
   --cell-background-flagged-wrong: var(--cell-background);
-  --cell-threats-1-color: #268bd2;
-  --cell-threats-2-color: #859900;
-  --cell-threats-3-color: #dc322f;
-  --cell-threats-4-color: #6c71c4;
-  --cell-threats-5-color: #d33682;
-  --cell-threats-6-color: #2aa198;
-  --cell-threats-7-color: #b58900;
-  --cell-threats-8-color: #cb4b16;
-  --cell-pressed-color: #d336827f;
+  --cell-threats-1-color: blue;
+  --cell-threats-2-color: green;
+  --cell-threats-3-color: red;
+  --cell-threats-4-color: violet;
+  --cell-threats-5-color: magenta;
+  --cell-threats-6-color: cyan;
+  --cell-threats-7-color: indigo;
+  --cell-threats-8-color: orange;
+  --cell-pressed-color: var(--cell-background-open);
 
   --cell-color: #002b36;
   --cell-mined-color: var(--cell-color);

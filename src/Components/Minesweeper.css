@@ -1,5 +1,6 @@
 .Minesweeper {
-  height: 100vh;
+  max-height: calc(100vh - 25px);
+  max-width: calc(100vw - 25px);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -12,8 +13,21 @@
   cursor: var(--board-cursor), crosshair;
   font-weight: bold;
   --cell-size: 32px;
-  font-size: calc(var(--cell-size) * 0.6);
+  font-size: calc(var(--cell-size, 32px) * 0.6);
+  position: relative;
 }
+
+.GameOver {
+  z-index: 3;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  background-color: transparent;
+  align-content: center;
+  opacity: 0.8;
+}
+
 /*
 @supports (width: min(12px, 3px)) {
   .Minesweeper {
@@ -26,12 +40,11 @@
         (100vw - calc((var(--board-padding) + var(--board-border-width)) * 2)) /
           var(--board-columns)
       ),
-      64px
+      32px
     ) !important;
   }
 }
 */
-
 /*
 .Minesweeper[data-state='GAME_OVER'] .Board {
   opacity: 0.5;
@@ -75,6 +88,8 @@
 }
 
 .Control {
-  position: absolute;
+  position: fixed;
   left: 0;
+  top: 0;
+  z-index: 2;
 }

@@ -1,12 +1,12 @@
 .Board {
   padding: var(--board-padding);
 
-  margin: 0 auto;
-  background-color: #34495e;
+  margin: 0;
+  background-color: var(--cell-background, inherit);
   color: #fff;
-  border-width: var(--board-border-width);
+  border-width: var(--board-border-width, thin);
   border-style: var(--board-border-style, solid);
-  border-style: var(--board-border-color, inherit);
+  border-color: var(--board-border-color, revert);
   border-radius: 10px;
 
   display: grid;
@@ -23,13 +23,18 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.Board {
-  pointer-events: none;
+  transform: scale(var(--board-scaling-factor, 1));
 }
 
 .Board[data-state='PLAYING'],
 .Board[data-state='NOT_INITIALIZED'] {
-  pointer-events: initial;
+  pointer-events: unset;
+}
+
+.Minesweeper.rotated .Board {
+  rotate: 90deg;
+}
+
+.Row {
+  display: contents;
 }

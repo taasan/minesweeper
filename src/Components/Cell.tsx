@@ -17,7 +17,9 @@ type ICellProps = {
 };
 
 const Cell: FC<ICellProps> = props => {
-  const random = useMemo(() => randomInt(10), []);
+  console.log('Render cell');
+
+  const random = useMemo(() => randomInt(12), []);
 
   const { dispatch, state, coordinate, threats, content, mined } = props;
 
@@ -64,7 +66,8 @@ const Cell: FC<ICellProps> = props => {
       data-mined={mined ? true : undefined}
       data-mine-type={mined ? random : undefined}
     >
-      <a {...ariaProps}>{content}</a>
+      <span {...ariaProps}>{content}</span>
+      {/*threats === 0 ? undefined : <span {...ariaProps}>{content}</span>*/}
     </div>
   );
 };

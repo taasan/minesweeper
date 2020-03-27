@@ -1,20 +1,15 @@
 import React from 'react';
 import './App.css';
-import Minesweeper from './Components/Minesweeper';
+import Minesweeper, { LEVELS } from './Components/Minesweeper';
 import StyleSelector from './Components/StyleSelector';
 
 function App() {
   return (
-    <div
-      className="App"
-      onContextMenu={e => {
-        e.preventDefault();
-        e.stopPropagation();
-        //return false;
-      }}
-    >
-      <StyleSelector />
-      <Minesweeper />
+    <div className="App">
+      <div style={{ position: 'fixed', top: 0, right: 0 }}>
+        <StyleSelector />
+      </div>
+      <Minesweeper level={LEVELS.BEGINNER} />
     </div>
   );
 }
