@@ -1,9 +1,9 @@
 import React, { FC, Dispatch, memo, useMemo, MouseEvent } from 'react';
 import './Cell.css';
-import { NumThreats, CellState, CmdName, randomInt } from '../Game';
+import { NumThreats, CellState, CmdName, randomInt } from '../../Game';
 import EmojiRegex from 'emoji-regex';
 
-import { Action } from './Minesweeper';
+import { Action } from '../Minesweeper';
 
 const emojiRegex = EmojiRegex();
 

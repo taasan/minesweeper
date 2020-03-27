@@ -14,7 +14,7 @@ import {
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
 import { useReducer, Dispatch, useCallback, useRef } from 'react';
-import Board from './Board';
+import Board from './Board/Board';
 //
 /*
 enum TimingEventType {

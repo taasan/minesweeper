@@ -9,9 +9,9 @@ import {
   assertNever,
   isNumThreats,
   randomInt,
-} from '../Game';
+} from '../../Game';
 import { Dispatch } from 'react';
-import { Action } from './Minesweeper';
+import { Action } from '../Minesweeper';
 import Cell from './Cell';
 
 type IProps = {
