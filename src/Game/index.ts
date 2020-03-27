@@ -534,7 +534,10 @@ export function createGame(
   };
 }
 
-export const legend = () => {
+export const legend: () => {
+  board: GameRecord;
+  nextState: NextStateFunction;
+} = () => {
   const cells = [
     ...[...new Array(8)].map((_, i) =>
       createGameCell({
@@ -583,6 +586,8 @@ export const legend = () => {
   });
   return {
     board,
-    nextState: () => board,
+    nextState: () => {
+      throw new Error();
+    },
   };
 };

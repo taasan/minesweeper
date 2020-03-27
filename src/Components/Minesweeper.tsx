@@ -65,7 +65,7 @@ export type Action =
   | { type: 'setLevel'; level: Level; dispatch: Dispatch<Action> }
   | {
       type: 'setBoard';
-      board: GameRecord;
+      game: { board: GameRecord; nextState: NextStateFunction };
     }
   | {
       type: 'setScalingFactor';
@@ -77,11 +77,8 @@ function setBoardAction(
   state: IState,
   dispatch: Dispatch<Action>
 ) {
-  new Promise<IState>((resolve, _reject) => {
-    const s = { ...state, ...f() };
-    resolve(s);
-  })
-    .then(s => dispatch({ type: 'setBoard', board: s.board }))
+  new Promise<IState>(resolve => resolve({ ...state, ...f() }))
+    .then(game => dispatch({ type: 'setBoard', game }))
     .then(() => dispatch({ type: 'setScalingFactor' }))
     .catch(err => ({
       ...state,
@@ -131,7 +128,7 @@ function reducer(state: IState, action: Action): IState {
     case 'setBoard':
       return {
         ...state,
-        board: action.board,
+        ...action.game,
         loading: false,
       };
     case 'setScalingFactor':
