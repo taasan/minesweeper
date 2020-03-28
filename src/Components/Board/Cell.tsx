@@ -1,14 +1,20 @@
 import React, { FC, Dispatch, memo, useMemo, MouseEvent } from 'react';
 import './Cell.css';
-import { NumThreats, CellState, CmdName, randomInt } from '../../Game';
+import {
+  NumThreats,
+  CellState,
+  CmdName,
+  randomInt,
+  Coordinate,
+} from '../../Game';
 import EmojiRegex from 'emoji-regex';
 
 import { Action } from '../Minesweeper';
 
 const emojiRegex = EmojiRegex();
 
-type ICellProps = {
-  coordinate: number;
+export type ICellProps = {
+  coordinate: Coordinate;
   dispatch: Dispatch<Action>;
   content: string | NumThreats;
   state: CellState;

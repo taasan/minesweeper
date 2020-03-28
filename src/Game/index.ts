@@ -23,7 +23,7 @@ type IMap<K, V> = {
   get: (i: K) => V | undefined;
 };
 
-type ICell = {
+export type ICell = {
   state: CellState;
   threatCount: NumThreats | Mine;
   flaggedNeighboursCount: NumThreats;
@@ -37,7 +37,7 @@ const createGameCell: Record.Factory<ICell> = Record<ICell>({
 
 export type CellRecord = RecordOf<ICell>;
 
-type Coordinate = number;
+export type Coordinate = number;
 
 export enum GameState {
   PAUSED,
