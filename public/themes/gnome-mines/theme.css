@@ -1,4 +1,4 @@
-.Minesweeper {
+:root {
   --mine-detonated: url('../../themes/gnome-mines/exploded.svg');
   --mine-detonated-background: var(--cell-background-open);
   --mine-detonated-animation: pulse 0.2s ease-in-out 5;

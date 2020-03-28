@@ -4,7 +4,7 @@
   background-color: var(--solarized-base03);
 }
 
-.Minesweeper {
+:root {
   --cell-background: var(--solarized-base0);
   --cell-background-open: var(--solarized-base02);
   --cell-border: var(--solarized-base02);

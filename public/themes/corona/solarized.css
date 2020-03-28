@@ -17,7 +17,7 @@
   --solarized-green: #859900;
 }
 
-.Minesweeper {
+:root {
   --mine-detonated-background: var(--solarized-red);
   --cell-border: var(--cell-background-open);
   --cell-background-flagged-wrong: var(--solarized-red);

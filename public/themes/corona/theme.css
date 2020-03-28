@@ -20,7 +20,7 @@
   }
 }
 
-.Minesweeper {
+:root {
   --mine-detonated: url('../../svg/NotoEmoji/emoji_u1f480.svg');
   --mine-detonated-animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11
     alternate both running pulse;

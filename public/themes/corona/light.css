@@ -1,6 +1,6 @@
 @import url(solarized.css);
 
-.Minesweeper {
+:root {
   --cell-background: var(--solarized-base00);
   --cell-background-open: var(--solarized-base2);
   --cell-border: var(--solarized-base2);
