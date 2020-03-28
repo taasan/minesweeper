@@ -12,7 +12,7 @@ import {
 } from '../../Game';
 import { Dispatch } from 'react';
 import { Action } from '../Minesweeper';
-import Cell from './Cell';
+import Row from './Row';
 
 type IProps = {
   board: GameRecord;
@@ -91,40 +91,16 @@ const Board: React.FC<IProps> = (props: IProps) => {
       {[...new Array(rows)].map((_, row) => {
         const from = row + row * (cols - 1);
         const to = from + cols;
-        console.log({ from, to });
         return (
-          <div key={row} className="Row">
-            {[...board.cells.slice(from, to)].map(
-              ([index, { threatCount: threats, state: cellState }]) => (
-                <Cell
-                  coordinate={index}
-                  key={index}
-                  dispatch={dispatch}
-                  content={getContent(cellState, threats, boardState)}
-                  state={cellState}
-                  threats={isNumThreats(threats) ? threats : undefined}
-                  mined={threats === 0xff}
-                />
-              )
-            )}
-          </div>
+          <Row
+            key={row}
+            getContent={getContent}
+            cells={[...board.cells.slice(from, to)]}
+            dispatch={dispatch}
+            gameState={boardState}
+          />
         );
       })}
-      {/*[...board.cells.entries()].map(
-        ([index, { threatCount: threats, state: cellState }]) => {
-          return (
-            <Cell
-              coordinate={index}
-              key={index}
-              dispatch={dispatch}
-              content={getContent(cellState, threats, boardState)}
-              state={cellState}
-              threats={isNumThreats(threats) ? threats : undefined}
-              mined={threats === 0xff}
-            />
-          );
-        }
-      )*/}
     </div>
   );
 };
