@@ -5,6 +5,7 @@ import { Dispatch } from 'react';
 import { Action } from '../Minesweeper';
 import Row from './Row';
 import { getContent } from './getContent';
+import { onContextMenu } from '..';
 
 type IProps = {
   board: GameRecord;
@@ -63,10 +64,7 @@ const Board: React.FC<IProps> = (props: IProps) => {
   const pointerEvents = done ? 'none' : 'initial';
   return (
     <div
-      onContextMenu={e => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
+      onContextMenu={onContextMenu}
       className="Board"
       style={{
         pointerEvents,

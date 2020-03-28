@@ -15,6 +15,7 @@ import {
 import ErrorBoundary from './ErrorBoundary';
 import { useReducer, Dispatch, useCallback, useRef } from 'react';
 import Board from './Board/Board';
+import { onContextMenu } from '.';
 //
 /*
 enum TimingEventType {
@@ -305,10 +306,7 @@ const Minesweeper: React.FC<IProps> = ({ level }) => {
         className="Minesweeper"
         ref={state.containerRef}
         onPointerDown={handlePointerDown}
-        onContextMenu={e => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
+        onContextMenu={onContextMenu}
       >
         <ErrorBoundary>
           <Board dispatch={dispatch} board={board} rotated={rotated} />
