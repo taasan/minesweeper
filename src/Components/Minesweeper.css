@@ -10,7 +10,7 @@
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  cursor: var(--board-cursor), crosshair;
+  cursor: var(--board-cursor, crosshair);
   font-weight: bold;
   --cell-size: 32px;
   font-size: calc(var(--cell-size, 32px) * 0.6);
