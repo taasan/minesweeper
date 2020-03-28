@@ -1,0 +1,200 @@
+// Game states
+$GAME_OVER: 'GAME_OVER';
+$COMPLETED: 'COMPLETED';
+$PAUSED: 'PAUSED';
+$INITIALIZED: 'INITIALIZED';
+$NOT_INITIALIZED: 'NOT_INITIALIZED';
+$PLAYING: 'PLAYING';
+$ERROR: 'ERROR';
+$DEMO: 'DEMO';
+
+$GAME_STATES: $GAME_OVER, $COMPLETED, $PAUSED, $INITIALIZED, $NOT_INITIALIZED,
+  $PLAYING, $ERROR, $DEMO;
+
+// Cell states
+$OPEN: 'OPEN';
+$FLAGGED: 'FLAGGED';
+$UNCERTAIN: 'UNCERTAIN';
+$NEW: 'NEW';
+$EXPLODED: 'EXPLODED';
+
+$CELL_STATES: $OPEN, $FLAGGED, $UNCERTAIN, $NEW, $EXPLODED;
+
+$flagTypes: 'FLAGGED', 'UNCERTAIN';
+
+@function contains($list, $item) {
+  @return index($list, $item);
+}
+
+@function removeCover($gameState, $cellState) {
+  @if ($gameState == $PAUSED) {
+    @return false;
+  }
+  @if ($gameState == $GAME_OVER or $gameState == $COMPLETED) {
+    @return true;
+  }
+
+  @return $cellState != $NEW;
+}
+
+@function coverVisibility($gameState, $cellState) {
+  @if (removeCover($gameState, $cellState)) {
+    @return hidden;
+  } @else {
+    @return visible;
+  }
+}
+
+.SvgBoard.SvgBoard__rotated .SvgCell {
+  rotate: -90deg;
+  transform-origin: center;
+}
+
+.SvgCell {
+  font-family: 'Noto Color Emoji';
+  user-select: none;
+  font-weight: bold;
+
+  /*
+  rotate: 0deg;
+  padding: 3px;
+  margin: 0;
+  border-color: var(--cell-border, black);
+
+  border-width: 2px;
+  border-radius: 5px;
+
+  border-style: outset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  */
+
+  * {
+    cursor: var(--board-cursor, crosshair);
+  }
+
+  .SvgCell__Background {
+    stroke: var(--cell-border, revert);
+    stroke-width: 3px;
+    fill: var(--cell-background, revert);
+  }
+
+  .SvgCell__Cover {
+    /*
+  stroke: var(--cell-border, black);
+  stroke-width: 3px;
+  */
+    fill: var(--cell-background, revert) !important;
+  }
+
+  &[data-state='#{$EXPLODED}'] .SvgCell__Background {
+    fill: var(--mine-detonated-background, revert);
+  }
+
+  &[data-state='#{$OPEN}'][data-threats='0'] {
+    pointer-events: none;
+  }
+
+  &[data-threats][data-state='#{$OPEN}'] {
+    font-family: monospace;
+  }
+
+  @for $i from 1 through 8 {
+    &[data-threats='#{$i}'] .SvgCell__Text {
+      fill: var(--cell-threats-#{$i}-color);
+    }
+  }
+
+  &[data-state='#{$OPEN}'] *,
+  &:disabled {
+    fill: var(--cell-background-open, revert);
+  }
+
+  &:active .SvgCell__Background {
+    fill: var(--cell-pressed-color, revert) !important;
+  }
+}
+/*
+
+.SvgCell[data-state=#{$FLAGGED}],
+.SvgCell[data-state=#{$UNCERTAIN}] {
+  color: var(--cell-flagged-color);
+}
+
+.SvgBoard[data-state=#{$PAUSED}] .SvgCell {
+  fill: var(--cell-background) !important;
+  color: transparent !important;
+}
+
+.SvgBoard[data-state=#{$PAUSED}] .SvgCell * {
+  visibility: hidden;
+}
+
+.SvgBoard[data-state=#{$GAME_OVER}]
+  .SvgCell[data-state=#{$FLAGGED}]:not([data-mined]) {
+  fill: var(--cell-background-flagged-wrong);
+  color: var(--cell-color-flagged-wrong, revert);
+}
+
+.SvgCell[data-threats='0']:not([data-state=#{$FLAGGED}]):not([data-state=#{$UNCERTAIN}])
+  > * {
+  visibility: hidden;
+}
+*/
+
+.SvgBoard[data-state='#{$GAME_OVER}']
+  .SvgCell:not([data-state='#{$OPEN}']):not([data-state='#{$EXPLODED}'])
+  .SvgCell__Background {
+  fill: var(--cell-background-game-over, var(--cell-background, revert));
+}
+
+/*
+.SvgBoard[data-state=#{$PLAYING}] .SvgCell[data-state=#{$FLAGGED}] .SvgCell__Cover,
+.SvgBoard[data-state=#{$PLAYING}] .SvgCell[data-state=#{$FLAGGED}] .SvgCell__Cover,
+.SvgBoard[data-state=#{$PLAYING}]
+  .SvgCell[data-state=#{$UNCERTAIN}]
+  .SvgCell__Cover,
+.SvgBoard[data-state=#{$PLAYING}] .SvgCell[data-state=#{$OPEN}] .SvgCell__Cover {
+  visibility: hidden;
+}
+
+.SvgBoard[data-state=#{$PAUSED}] .SvgCell__Cover {
+  visibility: visible !important;
+}
+*/
+
+.SvgBoard {
+  @each $gameState in $GAME_STATES {
+    @each $cellState in $CELL_STATES {
+      &[data-state='#{$gameState}']
+        .SvgCell[data-state='#{$cellState}']
+        .SvgCell__Cover {
+        visibility: coverVisibility($gameState, $cellState);
+      }
+    }
+  }
+}
+
+.SvgBoard[data-state='#{$GAME_OVER}']
+  .SvgCell[data-state='#{$FLAGGED}']:not([data-mined])
+  .SvgCell__Background {
+  fill: var(--cell-background-flagged-wrong, revert);
+}
+
+.SvgBoard[data-state='#{$GAME_OVER}'] .SvgCell[data-mined] .SvgCell__Cover {
+  visibility: hidden;
+}
+/*
+.SvgBoard[data-state=#{$GAME_OVER}]
+  .SvgCell[data-mined]:not([data-state=#{$EXPLODED}]),
+.SvgBoard[data-state=#{$COMPLETED}]
+  .SvgCell[data-mined]:not([data-state=#{$EXPLODED}]) {
+  background-image: var(--mine-disarmed);
+}
+
+.SvgBoard[data-state=#{$GAME_OVER}] .SvgCell[data-mined],
+.SvgBoard[data-state=#{$COMPLETED}] .SvgCell[data-mined] {
+  font-size: calc(var(--cell-size) * 0.75);
+}
+*/

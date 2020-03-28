@@ -1,0 +1,4 @@
+.SvgBoard {
+  fill: var(--cell-background);
+  transform: scale(var(--board-scaling-factor, 1));
+}

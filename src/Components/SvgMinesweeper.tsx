@@ -1,7 +1,6 @@
 import * as React from 'react';
-import './Minesweeper.css';
+import './SvgMinesweeper.scss';
 import {
-  CellState,
   GameState,
   Level,
   GameRecord,
@@ -10,11 +9,11 @@ import {
   NextStateFunction,
   CmdName,
   isCmdName,
-  legend,
+  // legend,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
-import { useReducer, Dispatch, useCallback, useRef } from 'react';
-import Board from './Board/Board';
+import { useReducer, Dispatch } from 'react';
+import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
 //
 /*
@@ -38,18 +37,13 @@ export const LEVELS: ILevels = {
   EXPERT: { mines: 99, rows: 16, cols: 30 },
 };
 
-const getLevel = (key: string) => {
-  const lvl = LEVELS[key];
-  const v = lvl != null ? lvl : undefined;
-  return v != null ? v : LEVELS.BEGINNER;
-};
-
 type IState = {
   board: GameRecord;
   nextState: NextStateFunction;
   loading: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
   scalingFactor: number;
+  rotated: boolean;
 };
 
 type CmdAction = {
@@ -71,6 +65,10 @@ export type Action =
   | {
       type: 'setScalingFactor';
     }
+  | {
+      type: 'toggleRotated';
+      dispatch: Dispatch<Action>;
+    }
   | CmdAction;
 
 function setBoardAction(
@@ -90,7 +88,7 @@ function setBoardAction(
 function getMaxScalingFactor({ containerRef }: IState): number {
   if (containerRef != null && containerRef.current != null) {
     const { current } = containerRef;
-    const boardElement = current.querySelector('.Board');
+    const boardElement = current.querySelector('.SvgBoard');
 
     if (boardElement == null) {
       return 1;
@@ -99,9 +97,12 @@ function getMaxScalingFactor({ containerRef }: IState): number {
     const { clientWidth, clientHeight } = document.documentElement;
     const width = boardElement.clientWidth;
     const height = boardElement.clientHeight;
-
+    if (height === 0 || width === 0) {
+      return 1;
+    }
     const a = Math.min(clientHeight, current.clientHeight) / height;
     const b = Math.min(clientWidth, current.clientWidth) / width;
+    // console.log({ clientHeight, clientWidth, height, width, a, b });
     return Math.min(a, b);
   }
 
@@ -133,14 +134,16 @@ function reducer(state: IState, action: Action): IState {
         loading: false,
       };
     case 'setScalingFactor':
-      console.log(getMaxScalingFactor);
-      return state;
-    /*
       return {
         ...state,
         scalingFactor: getMaxScalingFactor(state),
       };
-      */
+    case 'toggleRotated':
+      // setBoardAction(() => ({}), state, action.dispatch);
+      return {
+        ...state,
+        rotated: !state.rotated,
+      };
   }
   // assertNever(action);
 }
@@ -148,62 +151,18 @@ function reducer(state: IState, action: Action): IState {
 // @ts-ignore
 function init({ level, containerRef }: any): IState {
   return {
-    ...legend(), // ...createGame(level),
+    //...legend(), // ...createGame(level),
+    ...createGame(level),
     loading: false,
     containerRef,
     scalingFactor: 1,
+    rotated: false,
   };
 }
 
 type IProps = { level: Level };
-type LevelChooserProps = {
-  onChange: (level: Level) => void;
-};
-const LevelChooser: React.FC<LevelChooserProps> = React.memo(({ onChange }) => {
-  console.log('Render LevelChooser');
-  const rowsRef = useRef<HTMLInputElement>(null);
-  const colsRef = useRef<HTMLInputElement>(null);
-  const minesRef = useRef<HTMLInputElement>(null);
-  return (
-    <div style={{ display: 'inline-block' }}>
-      <select
-        className="LevelChooser"
-        onChange={e => onChange(getLevel(e.target.value))}
-      >
-        {Object.keys(LEVELS).map(k => (
-          <option
-            value={k}
-            key={k}
-          >{`${LEVELS[k].cols} x ${LEVELS[k].rows} (${LEVELS[k].mines})`}</option>
-        ))}
-      </select>
-      <input ref={rowsRef} type="number" defaultValue="7" name="rows" />
-      <input ref={colsRef} type="number" defaultValue="11" name="cols" />
-      <input ref={minesRef} type="number" defaultValue="13" name="mines" />
-      <button
-        onClick={() => {
-          const rows = parseInt(rowsRef.current?.value!);
-          const cols = parseInt(colsRef.current?.value!);
-          const mines = parseInt(minesRef.current?.value!);
-          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-          if (rows && cols && mines) {
-            onChange({
-              rows,
-              cols,
-              mines,
-            });
-          }
-        }}
-      >
-        OK
-      </button>
-    </div>
-  );
-});
 
-const Minesweeper: React.FC<IProps> = ({ level }) => {
-  const [rotated, setRotated] = React.useState(false);
-  const rotateRef = useRef<HTMLInputElement>(null);
+const SvgMinesweeper: React.FC<IProps> = ({ level }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(
     reducer,
@@ -211,17 +170,9 @@ const Minesweeper: React.FC<IProps> = ({ level }) => {
     init
   );
 
-  const onLevelChange = useCallback(l => {
-    dispatch({
-      type: 'setLevel',
-      level: l,
-      dispatch,
-    });
-  }, []);
-
   React.useEffect(() => {
     dispatch({ type: 'setScalingFactor' });
-  }, [containerRef, rotated]);
+  }, []);
 
   React.useEffect(() => {
     const callback = () => dispatch({ type: 'setScalingFactor' });
@@ -230,8 +181,7 @@ const Minesweeper: React.FC<IProps> = ({ level }) => {
     return () => window.removeEventListener(event, callback);
   }, []);
 
-  const { board, loading, scalingFactor } = state;
-  const { rows, cols, mines } = board.level;
+  const { board, scalingFactor, rotated } = state;
 
   const togglePause = () => {
     switch (board.state) {
@@ -265,55 +215,28 @@ const Minesweeper: React.FC<IProps> = ({ level }) => {
       });
     }
   };
+  const classes = ['SvgMinesweeper'];
+  if (rotated) {
+    classes.push('SvgMinesweeper__rotated');
+  }
 
   return (
     <div
       style={{
-        display: 'flex',
+        display: 'block',
       }}
     >
-      <div>
-        <aside className="Control">
-          <input
-            checked={rotated}
-            ref={rotateRef}
-            type="checkbox"
-            onClick={() => setRotated(!rotated)}
-          />
-          {/*<button>{seconds}</button>*/}
-          <button>
-            {cols * rows - mines - board.cellStates[CellState.OPEN]}
-          </button>
-          <button>{board.cellStates[CellState.OPEN]}</button>
-          <button>
-            {board.level.mines -
-              board.cellStates[CellState.FLAGGED] -
-              board.cellStates[CellState.UNCERTAIN]}
-          </button>
-          <button onClick={togglePause}>
-            {loading ? 'LOADING' : GameState[board.state]}
-          </button>
-          <LevelChooser onChange={onLevelChange} />
-          <button
-            onClick={() =>
-              dispatch({ type: 'setLevel', level: board.level, dispatch })
-            }
-          >
-            New
-          </button>
-        </aside>
-      </div>
       <div
         style={{
           ['--board-scaling-factor' as any]: `${scalingFactor}`,
         }}
-        className="Minesweeper"
+        className={classes.join(' ')}
         ref={state.containerRef}
         onPointerDown={handlePointerDown}
         onContextMenu={onContextMenu}
       >
         <ErrorBoundary>
-          <Board dispatch={dispatch} board={board} rotated={rotated} />
+          <SvgBoard dispatch={dispatch} board={board} rotated={rotated} />
         </ErrorBoundary>
         {done ? (
           <div className="GameOver">
@@ -327,4 +250,4 @@ const Minesweeper: React.FC<IProps> = ({ level }) => {
   );
 };
 
-export default Minesweeper;
+export default SvgMinesweeper;
