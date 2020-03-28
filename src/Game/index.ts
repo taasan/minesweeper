@@ -227,6 +227,13 @@ export function randomInt(max: number): number {
 
 export type GameCellCallback<T> = ([coordinate, cell]: [Coordinate, T]) => void;
 
+export const calculateCoordinate = (cols: number, index: number) => {
+  const n = cols;
+  const col = index % cols;
+  const row = (index - col) / n;
+  return { col, row };
+};
+
 function visitNeighbours<T>(
   dimension: { rows: number; cols: number },
   cells: IMap<Coordinate, T>,
@@ -235,14 +242,7 @@ function visitNeighbours<T>(
 ) {
   const { rows, cols } = dimension;
 
-  const calculateCoordinate = (index: number) => {
-    const n = cols;
-    const col = index % cols;
-    const row = (index - col) / n;
-    return { col, row };
-  };
-
-  const p = calculateCoordinate(ccc);
+  const p = calculateCoordinate(cols, ccc);
   for (let c = -1; c <= 1; c++) {
     const col = p.col + c;
 
