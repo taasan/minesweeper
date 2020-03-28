@@ -305,6 +305,10 @@ const Minesweeper: React.FC<IProps> = ({ level }) => {
         className="Minesweeper"
         ref={state.containerRef}
         onPointerDown={handlePointerDown}
+        onContextMenu={e => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
       >
         <ErrorBoundary>
           <Board dispatch={dispatch} board={board} rotated={rotated} />
