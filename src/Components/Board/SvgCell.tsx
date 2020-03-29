@@ -1,12 +1,19 @@
 import React, { FC, Dispatch, memo, MouseEvent } from 'react';
 import './SvgCell.scss';
-import { NumThreats, CellState, CmdName, Coordinate } from '../../Game';
+import {
+  NumThreats,
+  CellState,
+  CmdName,
+  Coordinate,
+  GridType,
+} from '../../Game';
 
 import { Action } from '../SvgMinesweeper';
 
 type ICellProps = {
   cellSize: number;
   coordinate: Coordinate;
+  gridType: GridType;
   dispatch: Dispatch<Action>;
   content: string | NumThreats;
   state: CellState;
@@ -23,9 +30,9 @@ const SvgCell: FC<ICellProps> = props => {
     content,
     mined,
     cellSize,
+    gridType,
   } = props;
-  const x = 0,
-    y = 0;
+
   const getCommand = (e: MouseEvent): CmdName => {
     if (state === CellState.OPEN) {
       return 'POKE';
@@ -62,18 +69,16 @@ const SvgCell: FC<ICellProps> = props => {
       data-threats={threats}
       data-mined={mined ? true : undefined}
     >
-      <rect
+      <use
+        xlinkHref={`#${GridType[gridType]}`}
+        scale={cellSize}
         className="SvgCell__Background"
-        x={x + 2}
-        y={y + 2}
-        width={cellSize - 4}
-        height={cellSize - 4}
         fillOpacity={1}
       />
       <text
         className="SvgCell__Text"
-        x={x + cellSize / 2}
-        y={y + cellSize / 2}
+        x={cellSize / 2}
+        y={cellSize / 2}
         dominantBaseline="central"
         textAnchor="middle"
         fill="white"
@@ -82,18 +87,34 @@ const SvgCell: FC<ICellProps> = props => {
         {// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         (state === CellState.OPEN && threats === 0) || content}
       </text>
-      <rect
+      <use
+        xlinkHref={`#${GridType[gridType]}`}
+        scale={cellSize}
         className="SvgCell__Cover"
-        x={x + 3}
-        y={y + 3}
-        width={cellSize - 6}
-        height={cellSize - 6}
         fillOpacity={1}
-        strokeOpacity={0}
+        strokeWidth={0}
       />
+      {/*}
+      <text
+        className="SvgCell__Cover"
+        x={cellSize / 2}
+        y={cellSize / 2}
+        dominantBaseline="central"
+        textAnchor="middle"
+        fill="white"
+        fontSize={fontSize}
+        stroke={'black'}
+        strokeWidth={0.3}
+        fontFamily="monospace"
+        fillOpacity={1}
+      >
+        {coordinate}
+      </text>
+        {*/}
     </svg>
   );
 };
+
 /*
 
     <div

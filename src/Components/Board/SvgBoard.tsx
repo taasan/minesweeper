@@ -8,12 +8,30 @@ import {
   isNumThreats,
   ICell,
   Coordinate,
+  GridType,
 } from '../../Game';
 import { Dispatch } from 'react';
 import { Action } from '../SvgMinesweeper';
 import { getContent } from './getContent';
 import SvgCell from './SvgCell';
-import { onContextMenu } from '..';
+import { onContextMenu, hexOffset, hexagonPoints } from '..';
+
+const hexPoints = (cellSize: number) =>
+  hexagonPoints()
+    .map(({ x, y }) => `${(x * cellSize) / 2},${(y * cellSize) / 2}`)
+    .join(' ');
+
+const squarePoints = (cellSize: number) => {
+  const gap = 2;
+  return [
+    [gap, gap],
+    [gap, cellSize - gap],
+    [cellSize - gap, cellSize - gap],
+    [cellSize - gap, gap],
+  ]
+    .map(([x, y]) => `${x},${y}`)
+    .join(' ');
+};
 
 type IProps = {
   board: GameRecord;
@@ -78,19 +96,41 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
   const pointerEvents = done ? 'none' : 'revert';
 
   const cellSize = 33;
-  const width = cellSize * cols;
-  const height = cellSize * rows;
+
+  const getOffsets = () => {
+    const { type } = board.level;
+    switch (type) {
+      case GridType.SQUARE:
+        return {
+          xOffset: 0,
+          yFactor: 1,
+          width: cellSize * cols,
+          height: cellSize * rows,
+        };
+      case GridType.HEX:
+        const xOffset = cellSize / 2;
+        const width = cellSize * cols + xOffset;
+        const yFactor = hexOffset;
+        // last y + cellSize
+        const height = ((rows - 1) * yFactor + 1) * cellSize;
+        return { xOffset, yFactor, width, height };
+    }
+    assertNever(type);
+  };
+  const { xOffset, yFactor, width, height } = getOffsets();
 
   const mapCell = ([index, cell]: [Coordinate, ICell]) => {
     const { row, col } = calculateCoordinate(cols, index);
-    const x = col * cellSize;
-    const y = row * cellSize;
+
+    const x = col * cellSize + ((row & 1) === 1 ? xOffset : 0);
+    const y = row * cellSize * yFactor;
 
     return (
       <svg key={index} x={x} y={y} width={cellSize} height={cellSize}>
         <SvgCell
           cellSize={cellSize}
           coordinate={index}
+          gridType={board.level.type}
           dispatch={dispatch}
           content={getContent(cell.state, cell.threatCount, boardState)}
           state={cell.state}
@@ -113,6 +153,7 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
       className={classes.join(' ')}
       pointerEvents={pointerEvents}
       viewBox={`0 0 ${width} ${height}`}
+      data-grid={GridType[board.level.type]}
       data-state={GameState[boardState]}
       data-state2={
         boardState === GameState.DEMO
@@ -123,6 +164,13 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
     >
       <rect x="0" y="0" width="100%" height="100%" />
       {[...board.cells].map(mapCell)}
+      <defs>
+        <polygon id={GridType[GridType.HEX]} points={hexPoints(cellSize)} />
+        <polygon
+          id={GridType[GridType.SQUARE]}
+          points={squarePoints(cellSize)}
+        />
+      </defs>
     </svg>
   );
 };

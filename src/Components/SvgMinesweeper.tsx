@@ -9,6 +9,8 @@ import {
   NextStateFunction,
   CmdName,
   isCmdName,
+  GridType,
+  assertNever,
   // legend,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
@@ -27,14 +29,16 @@ type TimingEvent = {
   timestamp: number;
 };
 */
+
 type ILevels = {
   [keyof: string]: Level;
 };
+const type = GridType.HEX;
 
 export const LEVELS: ILevels = {
-  BEGINNER: { rows: 6, cols: 10, mines: 10 },
-  INTERMEDIATE: { rows: 16, cols: 16, mines: 40 },
-  EXPERT: { mines: 99, rows: 16, cols: 30 },
+  BEGINNER: { rows: 6, cols: 10, mines: 10, type },
+  INTERMEDIATE: { rows: 16, cols: 16, mines: 40, type },
+  EXPERT: { mines: 99, rows: 16, cols: 30, type },
 };
 
 type IState = {
@@ -145,7 +149,7 @@ function reducer(state: IState, action: Action): IState {
         rotated: !state.rotated,
       };
   }
-  // assertNever(action);
+  assertNever(action);
 }
 
 // @ts-ignore

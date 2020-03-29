@@ -45,7 +45,7 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   }
 }
 
-.SvgBoard.SvgBoard__rotated .SvgCell {
+.SvgBoard.SvgBoard__rotated .SvgCell .SvgCell__Text {
   rotate: -90deg;
   transform-origin: center;
 }
@@ -73,10 +73,13 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   * {
     cursor: var(--board-cursor, crosshair);
   }
+  .SvgCell__Text {
+    font-size: 100%;
+  }
 
   .SvgCell__Background {
-    stroke: var(--cell-border, revert);
-    stroke-width: 3px;
+    /*stroke: var(--cell-border, revert);*/
+    stroke-width: 0px;
     fill: var(--cell-background, revert);
   }
 
@@ -85,7 +88,7 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   stroke: var(--cell-border, black);
   stroke-width: 3px;
   */
-    fill: var(--cell-background, revert) !important;
+    fill: var(--cell-background, revert);
   }
 
   &[data-state='#{$EXPLODED}'] .SvgCell__Background {
@@ -101,8 +104,9 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   }
 
   @for $i from 1 through 8 {
-    &[data-threats='#{$i}'] .SvgCell__Text {
+    &[data-threats='#{$i}'][data-state='OPEN'] .SvgCell__Text {
       fill: var(--cell-threats-#{$i}-color);
+      font-size: 1.5em;
     }
   }
 

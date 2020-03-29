@@ -11,6 +11,8 @@ import {
   CmdName,
   isCmdName,
   legend,
+  GridType,
+  assertNever,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
 import { useReducer, Dispatch, useCallback, useRef } from 'react';
@@ -32,10 +34,12 @@ type ILevels = {
   [keyof: string]: Level;
 };
 
+const type = GridType.HEX;
+
 export const LEVELS: ILevels = {
-  BEGINNER: { rows: 6, cols: 10, mines: 10 },
-  INTERMEDIATE: { rows: 16, cols: 16, mines: 40 },
-  EXPERT: { mines: 99, rows: 16, cols: 30 },
+  BEGINNER: { rows: 6, cols: 10, mines: 10, type },
+  INTERMEDIATE: { rows: 16, cols: 16, mines: 40, type },
+  EXPERT: { mines: 99, rows: 16, cols: 30, type },
 };
 
 const getLevel = (key: string) => {
@@ -142,7 +146,7 @@ function reducer(state: IState, action: Action): IState {
       };
       */
   }
-  // assertNever(action);
+  assertNever(action);
 }
 
 // @ts-ignore
@@ -155,7 +159,7 @@ function init({ level, containerRef }: any): IState {
   };
 }
 
-type IProps = { level: Level };
+type IProps = { level: Level & { type: GridType.SQUARE } };
 type LevelChooserProps = {
   onChange: (level: Level) => void;
 };
@@ -191,6 +195,7 @@ const LevelChooser: React.FC<LevelChooserProps> = React.memo(({ onChange }) => {
               rows,
               cols,
               mines,
+              type,
             });
           }
         }}

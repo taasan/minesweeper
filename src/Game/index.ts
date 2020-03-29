@@ -19,10 +19,6 @@ export enum CellState {
 }
 export type CellStateName = keyof typeof CellState;
 
-type IMap<K, V> = {
-  get: (i: K) => V | undefined;
-};
-
 export type ICell = {
   state: CellState;
   threatCount: NumThreats | Mine;
@@ -58,6 +54,65 @@ class GameError extends Error {
   }
 }
 
+export enum GridType {
+  SQUARE,
+  HEX,
+}
+
+const hexNeighbours = (origin: { row: number; col: number }) => {
+  const [even, odd] = [
+    [
+      [1, 0],
+      [1, -1],
+      [0, -1],
+      [-1, -1],
+      [-1, 0],
+      [0, 1],
+    ],
+    [
+      [1, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, 1],
+    ],
+  ];
+
+  const neighbours = (origin.row & 1) === 0 ? even : odd;
+  return neighbours
+    .map(([row, col]) => ({
+      row: row + origin.row,
+      col: col + origin.col,
+    }))
+    .flat(1);
+};
+
+const squareNeighbours = (origin: { row: number; col: number }) =>
+  [-1, 0, 1]
+    .map(col =>
+      [-1, 0, 1].map(row => ({
+        row: row + origin.row,
+        col: col + origin.col,
+      }))
+    )
+    .flat(1);
+
+const getNeighbourMatrix = (
+  type: GridType
+): ((origin: {
+  row: number;
+  col: number;
+}) => Array<{ row: number; col: number }>) => {
+  switch (type) {
+    case GridType.SQUARE:
+      return squareNeighbours;
+    case GridType.HEX:
+      return hexNeighbours;
+  }
+  assertNever(type);
+};
+
 type IGame = Readonly<{
   cells: OrderedMap<Coordinate, CellRecord>;
   state: GameState;
@@ -70,12 +125,14 @@ export type Level = {
   cols: number;
   rows: number;
   mines: number;
+  type: GridType;
 };
 
 const createLevel: Record.Factory<Level> = Record<Level>({
   cols: 0,
   rows: 0,
   mines: 0,
+  type: GridType.SQUARE,
 });
 
 const createCellStateStats: Record.Factory<CellStateStats> = Record<
@@ -135,7 +192,7 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
     .add(origin);
   let iterations = 0;
   const dim = cols * rows;
-  do {
+  while (mineSet.size <= mines) {
     if (iterations++ > mines * 10) {
       throw new Error('Infinite loop?');
     }
@@ -144,26 +201,31 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
       mineSet.add(coordinate);
       cells[coordinate][1].threatCount = 0xff;
     }
-  } while (mineSet.size <= mines);
+  }
 
   const cellRecords: OrderedMap<Coordinate, CellRecord> = OrderedMap(
     cells.map(([coord, cell]) => {
-      const mappedCell = {
-        ...cell,
-        threatCount: countThreats({ rows, cols }, coord, {
-          get: c1 => cells[c1][1],
-        }),
-      };
-      return [coord, createGameCell(mappedCell)];
+      return [coord, createGameCell(cell)];
     })
   );
 
-  return createBoard({
-    level: createLevel({ cols, rows, mines }),
+  const board = createBoard({
+    level: createLevel(level),
     cells: cellRecords,
     cellStates: getCellStates(cellRecords),
     state: GameState.INITIALIZED,
-  });
+  }).asMutable();
+  const res = board
+    .set(
+      'cells',
+      board.cells.mapEntries(([coordinate, cell]) => [
+        coordinate,
+        cell.set('threatCount', countThreats(board, coordinate)),
+      ])
+    )
+    .asImmutable();
+
+  return res;
 }
 
 function updateCell(
@@ -193,23 +255,19 @@ function collectSafeCells(
     }
     visited.set(coordinate, cell);
     if (cell.threatCount === 0) {
-      visitNeighbours(board.level, board.cells, coordinate, visitor);
+      visitNeighbours(board, coordinate, visitor);
     }
   };
-  visitNeighbours(board.level, board.cells, origin, visitor);
+  visitNeighbours(board, origin, visitor);
   return [...visited.entries()];
 }
 
-function countThreats(
-  dimension: { cols: number; rows: number },
-  p: Coordinate,
-  cells: IMap<Coordinate, ICell>
-): NumThreats | Mine {
-  if (cells.get(p)?.threatCount === 0xff) {
+function countThreats(board: GameRecord, p: Coordinate): NumThreats | Mine {
+  if (board.cells.get(p)?.threatCount === 0xff) {
     return 0xff;
   }
   let threats: NumThreats = 0;
-  visitNeighbours<ICell>(dimension, cells, p, ([, cell]) => {
+  visitNeighbours(board, p, ([, cell]) => {
     if (cell.threatCount === 0xff) {
       threats++;
     }
@@ -234,38 +292,27 @@ export const calculateCoordinate = (cols: number, index: number) => {
   return { col, row };
 };
 
-function visitNeighbours<T>(
-  dimension: { rows: number; cols: number },
-  cells: IMap<Coordinate, T>,
-  ccc: Coordinate,
-  ...callbacks: Array<GameCellCallback<T>>
+function visitNeighbours(
+  board: GameRecord,
+  origin: Coordinate,
+  ...callbacks: Array<GameCellCallback<CellRecord>>
 ) {
-  const { rows, cols } = dimension;
-
-  const p = calculateCoordinate(cols, ccc);
-  for (let c = -1; c <= 1; c++) {
-    const col = p.col + c;
-
-    if (col >= cols || col < 0) {
-      continue;
-    }
-
-    for (let r = -1; r <= 1; r++) {
-      if (c === 0 && r === 0) {
-        continue;
-      }
-
-      const row = p.row + r;
-
-      if (row >= rows || row < 0) {
-        continue;
-      }
-      const coordinate = col + cols * row;
-      const cell = cells.get(coordinate)!;
-
-      callbacks.forEach(cb => cb([coordinate, cell]));
-    }
+  if (callbacks.length === 0) {
+    return;
   }
+
+  const { rows, cols, type } = board.level;
+
+  getNeighbourMatrix(type)(calculateCoordinate(cols, origin))
+    .filter(
+      ({ row, col }) => !(col >= cols || col < 0 || row >= rows || row < 0)
+    )
+    .map(({ row, col }) => col + cols * row)
+    .filter(c => c !== origin)
+
+    .forEach(coordinate =>
+      callbacks.forEach(cb => cb([coordinate, board.cells.get(coordinate)!]))
+    );
 }
 
 export enum Cmd {
@@ -290,16 +337,11 @@ function openNeighbours(
   if (cell.flaggedNeighboursCount < cell.threatCount) {
     return board;
   }
-  visitNeighbours<CellRecord>(
-    board.level,
-    board.cells,
-    coordinate,
-    ([coord, c]) => {
-      if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
-        newBoard = toggleOpen([[coord, c], newBoard]);
-      }
+  visitNeighbours(board, coordinate, ([coord, c]) => {
+    if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
+      newBoard = toggleOpen([[coord, c], newBoard]);
     }
-  );
+  });
 
   return newBoard;
 }
@@ -480,7 +522,7 @@ function toggleFlagged([[coordinate, cell], board]: [
     newBoard.set(
       'cells',
       newBoard.cells.withMutations(newCells => {
-        visitNeighbours(newBoard.level, newCells, coordinate, ([coord, c]) => {
+        visitNeighbours(newBoard, coordinate, ([coord, c]) => {
           const newCount = c.flaggedNeighboursCount + delta;
           if (!isNumThreats(newCount)) {
             throw new Error();

@@ -1,4 +1,8 @@
 .SvgBoard {
-  fill: var(--cell-background);
+  fill: transparent;
   transform: scale(var(--board-scaling-factor, 1));
+}
+
+.SvgBoard.SvgBoard__rotated {
+  rotate: 90deg;
 }
