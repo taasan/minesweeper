@@ -439,7 +439,7 @@ function toggleOpen([[coordinate, cell], board]: [
       case CellState.EXPLODED:
       case CellState.OPEN:
       case CellState.FLAGGED:
-        break;
+        return;
 
       default:
         assertNever(oldCellState);
