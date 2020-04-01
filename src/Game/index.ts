@@ -423,9 +423,14 @@ function toggleOpen([[coordinate, cell], board]: [
       assertNever(board.state);
   }
 
+  if (cell.state === CellState.FLAGGED) {
+    return board;
+  }
+
   return board.withMutations(mutable => {
     if (cell.state === CellState.OPEN) {
       openNeighbours([coordinate, cell], mutable);
+      return;
     }
 
     const oldCellState = cell.state;
