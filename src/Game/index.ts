@@ -433,21 +433,19 @@ function toggleOpen([[coordinate, cell], board]: [
       return;
     }
 
-    const oldCellState = cell.state;
-    let newState: CellState = oldCellState;
-    switch (oldCellState) {
+    let newState: CellState = cell.state;
+    switch (cell.state) {
       case CellState.NEW:
       case CellState.UNCERTAIN:
         newState =
           cell.threatCount === 0xff ? CellState.EXPLODED : CellState.OPEN;
         break;
       case CellState.EXPLODED:
-      case CellState.OPEN:
       case CellState.FLAGGED:
         return;
 
       default:
-        assertNever(oldCellState);
+        assertNever(cell.state);
     }
 
     if (board.state === GameState.INITIALIZED) {
