@@ -209,23 +209,20 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
     })
   );
 
-  const board = createBoard({
+  return createBoard({
     level: createLevel(level),
     cells: cellRecords,
     cellStates: getCellStates(cellRecords),
     state: GameState.INITIALIZED,
-  }).asMutable();
-  const res = board
-    .set(
+  }).withMutations(board => {
+    board.set(
       'cells',
       board.cells.mapEntries(([coordinate, cell]) => [
         coordinate,
         cell.set('threatCount', countThreats(board, coordinate)),
       ])
-    )
-    .asImmutable();
-
-  return res;
+    );
+  });
 }
 
 function updateCell(
