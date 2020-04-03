@@ -57,7 +57,10 @@ export enum GridType {
   HEX,
 }
 
-const hexNeighbours = (origin: { row: number; col: number }) => {
+const hexNeighbours = (origin: {
+  row: number;
+  col: number;
+}): Array<{ row: number; col: number }> => {
   const [even, odd] = [
     [
       [1, 0],
