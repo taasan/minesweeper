@@ -320,9 +320,7 @@ export enum Cmd {
 
 export type CmdName = keyof typeof Cmd;
 
-export function isCmdName(s: string): s is CmdName {
-  return Cmd[s as CmdName] != null;
-}
+export const isCmdName = (s: string): s is CmdName => Cmd[s as CmdName] != null;
 
 function openNeighbours(
   [coordinate, cell]: [Coordinate, CellRecord],
