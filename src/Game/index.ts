@@ -22,13 +22,11 @@ export type CellStateName = keyof typeof CellState;
 export type ICell = {
   state: CellState;
   threatCount: NumThreats | Mine;
-  flaggedNeighboursCount: NumThreats;
 };
 
 const createGameCell: Record.Factory<ICell> = Record<ICell>({
   state: CellState.NEW,
   threatCount: 0,
-  flaggedNeighboursCount: 0,
 });
 
 export type CellRecord = RecordOf<ICell>;
@@ -176,7 +174,6 @@ function createEmptyCells({ cols, rows }: Level): Array<[Coordinate, ICell]> {
       {
         state: CellState.NEW,
         threatCount: 0,
-        flaggedNeighboursCount: 0,
       },
     ]);
   }
@@ -332,18 +329,23 @@ function openNeighbours(
   [coordinate, cell]: [Coordinate, CellRecord],
   board: GameRecord
 ): GameRecord {
-  let newBoard = board;
-
-  if (cell.flaggedNeighboursCount < cell.threatCount) {
-    return board;
-  }
-  visitNeighbours(board, coordinate, ([coord, c]) => {
-    if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
-      newBoard = toggleOpen([[coord, c], newBoard]);
+  let flaggedNeighboursCount = 0;
+  visitNeighbours(board, coordinate, ([, c]) => {
+    if (c.state === CellState.FLAGGED) {
+      flaggedNeighboursCount++;
     }
   });
 
-  return newBoard;
+  if (flaggedNeighboursCount < cell.threatCount) {
+    return board;
+  }
+  return board.withMutations(mutable =>
+    visitNeighbours(board, coordinate, ([coord, c]) => {
+      if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
+        toggleOpen([[coord, c], mutable]);
+      }
+    })
+  );
 }
 
 function expectUnPause(command: Cmd, board: GameRecord): GameRecord {
@@ -502,38 +504,15 @@ function toggleFlagged([[coordinate, cell], board]: [
       break;
     case CellState.EXPLODED:
     case CellState.OPEN:
-      break;
+      return board;
     default:
       assertNever(cell.state);
   }
-  return board.withMutations(newBoard => {
+  return board.withMutations(mutable => {
     if (board.state === GameState.INITIALIZED) {
-      newBoard.set('state', GameState.PLAYING);
+      mutable.set('state', GameState.PLAYING);
     }
-    updateCell(newBoard, [coordinate, cell.set('state', newCellState)]);
-
-    // Update flaggedNeighboursCount?
-    let delta = 0;
-    if (newCellState === CellState.FLAGGED) {
-      delta = 1;
-    } else if (newCellState === CellState.UNCERTAIN) {
-      delta = -1;
-    }
-    if (delta === 0) {
-      return;
-    }
-    newBoard.set(
-      'cells',
-      newBoard.cells.withMutations(newCells => {
-        visitNeighbours(newBoard, coordinate, ([coord, c]) => {
-          const newCount = c.flaggedNeighboursCount + delta;
-          if (!isNumThreats(newCount)) {
-            throw new Error();
-          }
-          newCells.set(coord, c.set('flaggedNeighboursCount', newCount));
-        });
-      })
-    );
+    updateCell(mutable, [coordinate, cell.set('state', newCellState)]);
   });
 }
 
