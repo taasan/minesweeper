@@ -283,9 +283,8 @@ export function randomInt(max: number): number {
 export type GameCellCallback<T> = ([coordinate, cell]: [Coordinate, T]) => void;
 
 export const calculateCoordinate = (cols: number, index: number) => {
-  const n = cols;
   const col = index % cols;
-  const row = (index - col) / n;
+  const row = (index - col) / cols;
   return { col, row };
 };
 
