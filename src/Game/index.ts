@@ -241,24 +241,6 @@ function updateCell(
   return board.set('cells', board.cells.set(coordinate, newCell));
 }
 
-function collectSafeCells(
-  board: GameRecord,
-  origin: Coordinate
-): Array<[Coordinate, CellRecord]> {
-  const visited = new Map<Coordinate, CellRecord>();
-  const visitor = ([coordinate, cell]: [Coordinate, CellRecord]) => {
-    if (visited.has(coordinate)) {
-      return;
-    }
-    visited.set(coordinate, cell);
-    if (cell.threatCount === 0) {
-      visitNeighbours(board, coordinate, visitor);
-    }
-  };
-  visitNeighbours(board, origin, visitor);
-  return [...visited.entries()];
-}
-
 function countThreats(board: GameRecord, p: Coordinate): NumThreats | Mine {
   if (board.cells.get(p)?.threatCount === 0xff) {
     return 0xff;
@@ -456,17 +438,29 @@ function toggleOpen([[coordinate, cell], board]: [
     updateCell(mutable, [coordinate, newCell]);
 
     if (newCell.threatCount === 0) {
-      collectSafeCells(mutable, coordinate).forEach(([coord, c]) => {
+      const predicate = (cellRecord: CellRecord) =>
+        cellRecord.state === CellState.NEW ||
+        cellRecord.state === CellState.UNCERTAIN;
+      const visitor = ([coord, c]: [Coordinate, CellRecord]) => {
         if (c.threatCount === 0xff) {
           throw new Error(`Expected 0-8 threatCount, got ${c.threatCount}`);
         }
-        if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
+        if (predicate(c)) {
           mutable = updateCell(mutable, [
             coord,
             c.set('state', CellState.OPEN),
           ]);
+          if (c.threatCount === 0) {
+            getNeighbours(mutable, coord).forEach(cc => {
+              const cr = mutable.cells.get(cc)!;
+              if (predicate(cr)) {
+                visitor([cc, cr]);
+              }
+            });
+          }
         }
-      });
+      };
+      visitor([coordinate, cell]);
     }
   });
 }
