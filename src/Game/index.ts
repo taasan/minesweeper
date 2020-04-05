@@ -288,6 +288,17 @@ export const calculateCoordinate = (cols: number, index: number) => {
   return { col, row };
 };
 
+export const getNeighbours = (board: GameRecord, origin: Coordinate) => {
+  const { rows, cols, type } = board.level;
+
+  return getNeighbourMatrix(type)(calculateCoordinate(cols, origin))
+    .filter(
+      ({ row, col }) => !(col >= cols || col < 0 || row >= rows || row < 0)
+    )
+    .map(({ row, col }) => col + cols * row)
+    .filter(c => c !== origin);
+};
+
 function visitNeighbours(
   board: GameRecord,
   origin: Coordinate,
@@ -297,18 +308,9 @@ function visitNeighbours(
     return;
   }
 
-  const { rows, cols, type } = board.level;
-
-  getNeighbourMatrix(type)(calculateCoordinate(cols, origin))
-    .filter(
-      ({ row, col }) => !(col >= cols || col < 0 || row >= rows || row < 0)
-    )
-    .map(({ row, col }) => col + cols * row)
-    .filter(c => c !== origin)
-
-    .forEach(coordinate =>
-      callbacks.forEach(cb => cb([coordinate, board.cells.get(coordinate)!]))
-    );
+  getNeighbours(board, origin).forEach(coordinate =>
+    callbacks.forEach(cb => cb([coordinate, board.cells.get(coordinate)!]))
+  );
 }
 
 export enum Cmd {
