@@ -101,7 +101,7 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   @for $i from 1 through 8 {
     &[data-threats='#{$i}'][data-state='OPEN'] .SvgCell__Text {
       fill: var(--cell-threats-#{$i}-color);
-      font-size: 1.5em;
+      font-size: 1em;
     }
   }
   /*

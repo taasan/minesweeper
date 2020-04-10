@@ -15,6 +15,7 @@ export enum NumeralSystem {
   guru = 0xa66,
   nkoo = 0x7c0,
   lepc = 0x1c40,
+  roman = 0x215f,
 }
 
 export function getContent(
