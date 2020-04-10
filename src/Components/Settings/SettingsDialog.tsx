@@ -4,6 +4,8 @@ import SvgBoard from '../Board/SvgBoard';
 import { legend, NumThreats } from '../../Game';
 import { NumeralSystem, renderThreats } from '../Board/getContent';
 import { Action } from '../reducer';
+import './SettingsDialog.scss';
+import './NumeralSystemChooser.scss';
 
 export type ISettings = {
   numeralSystem: NumeralSystem;
@@ -24,42 +26,36 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   );
   const [fitWindow, setFitWindow] = React.useState(initialState.fitWindow);
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <section>
-          <header>
-            <h1>Numeral system</h1>
-          </header>
-          <main>
-            <NumeralSystemChooser
-              selected={numeralSystem}
-              onChange={setNumeralSystem}
+    <form className="SettingsDialog">
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+        }}
+      >
+        <fieldset>
+          <legend>Numeral system</legend>
+          <NumeralSystemChooser
+            selected={numeralSystem}
+            onChange={setNumeralSystem}
+          />
+        </fieldset>
+        <fieldset>
+          <legend>Style</legend>
+          <StyleSelector />
+        </fieldset>
+        <fieldset>
+          <legend>Scaling</legend>
+          <label>
+            <input
+              type="checkbox"
+              defaultChecked={fitWindow}
+              onChange={e => setFitWindow(e.currentTarget.checked)}
             />
-          </main>
-        </section>
-        <section>
-          <header>
-            <h2>Style</h2>
-          </header>
-          <main>
-            <StyleSelector />
-          </main>
-        </section>
-        <section>
-          <header>
-            <h2>Scaling</h2>
-          </header>
-          <main>
-            <label>
-              <input
-                type="checkbox"
-                defaultChecked={fitWindow}
-                onChange={e => setFitWindow(e.currentTarget.checked)}
-              />
-              Fit to window
-            </label>
-          </main>
-        </section>
+            Fit to window
+          </label>
+        </fieldset>
         <section>
           <header>
             <h1>Preview</h1>
@@ -103,7 +99,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </main>
         </section>
       </div>
-    </div>
+    </form>
   );
 };
 
@@ -117,10 +113,7 @@ const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = ({
   onChange,
 }) => {
   return (
-    <ul
-      className="NumeralSystemChooser"
-      style={{ listStyleType: 'none', padding: 0 }}
-    >
+    <ul className="NumeralSystemChooser">
       {Object.keys(NumeralSystem)
         .filter(name => isNaN(Number(name)))
         .map(name => {
@@ -139,9 +132,7 @@ const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = ({
                       onChange(value);
                     }
                   }}
-                />
-                {name}
-                {': '}
+                />{' '}
                 {[...new Array(8)].map((_, n) => (
                   <span
                     key={n}
