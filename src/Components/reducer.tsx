@@ -38,7 +38,6 @@ export function isCmdAction(s: Action): s is CmdAction {
 
 export enum ModalType {
   SELECT_LEVEL,
-  GAME_OVER,
   SETTINGS,
 }
 
@@ -110,11 +109,6 @@ const reducer = (state: IState, action: Action): IState => {
     return {
       ...state,
       board,
-      modalStack:
-        board.state === GameState.GAME_OVER ||
-        board.state === GameState.COMPLETED
-          ? [ModalType.GAME_OVER]
-          : state.modalStack,
     };
   }
   const modalStackSize = state.modalStack.length;

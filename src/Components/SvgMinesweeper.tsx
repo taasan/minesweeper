@@ -102,7 +102,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   }, [containerRef]);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
-  const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
+  // const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
 
   const done =
     board.state === GameState.GAME_OVER ||
@@ -170,29 +170,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       </Modal>
       <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
         <SettingsDialog initialState={state} dispatch={dispatch} />
-      </Modal>
-
-      <Modal
-        isOpen={modal === ModalType.GAME_OVER}
-        onRequestClose={closeModal}
-        shouldCloseOnOverlayClick={true}
-        shouldCloseOnEsc={true}
-      >
-        <h1>{GameState[state.board.state]}</h1>
-        <button onClick={() => showModal(ModalType.SELECT_LEVEL)}>
-          Select level
-        </button>
-        <button
-          onClick={() =>
-            dispatch({
-              type: 'setLevel',
-              level: board.level,
-              dispatch,
-            })
-          }
-        >
-          Nytt spill
-        </button>
       </Modal>
     </div>
   );
