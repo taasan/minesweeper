@@ -6,22 +6,21 @@ import {
   GameRecord,
   Cmd,
   createGame,
-  NextStateFunction,
   CmdName,
-  isCmdName,
   GridType,
   assertNever,
   CellState,
   // legend,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
-import { useReducer, Dispatch } from 'react';
+import { useReducer } from 'react';
 import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
 import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
 import { NumeralSystem } from './Board/getContent';
-import SettingsDialog, { ISettings } from './Settings/SettingsDialog';
+import SettingsDialog from './Settings/SettingsDialog';
+import { reducer, IState, ModalType, Action } from './reducer';
 //
 /*
 enum TimingEventType {
@@ -46,73 +45,7 @@ export const LEVELS: ILevels = {
   EXPERT: { mines: 99, rows: 16, cols: 30, type },
 };
 
-type IState = {
-  board: GameRecord;
-  nextState: NextStateFunction;
-  loading: boolean;
-  containerRef: React.MutableRefObject<HTMLDivElement>;
-  scalingFactor: number;
-  modalStack: ModalType[];
-  numeralSystem: NumeralSystem;
-};
-
-type CmdAction = {
-  type: CmdName;
-  coordinate: number;
-  dispatch: Dispatch<Action>;
-};
-
-function isCmdAction(s: Action): s is CmdAction {
-  return isCmdName(s.type);
-}
-
-enum ModalType {
-  SELECT_LEVEL,
-  GAME_OVER,
-  SETTINGS,
-}
-
-export type Action =
-  | { type: 'setLevel'; level: Level; dispatch: Dispatch<Action> }
-  | {
-      type: 'setBoard';
-      game: { board: GameRecord; nextState: NextStateFunction };
-    }
-  | {
-      type: 'setScalingFactor';
-    }
-  | {
-      type: 'setNumeralSystem';
-      numeralSystem: NumeralSystem;
-    }
-  | {
-      type: 'applySettings';
-      settings: ISettings;
-    }
-  | {
-      type: 'showModal';
-      modal: ModalType;
-    }
-  | {
-      type: 'closeModal';
-    }
-  | CmdAction;
-/*
-function setBoardAction(
-  f: () => object,
-  state: IState,
-  dispatch: Dispatch<Action>
-) {
-  new Promise<IState>(resolve => resolve({ ...state, ...f() }))
-    .then(game => dispatch({ type: 'setBoard', game }))
-    .then(() => dispatch({ type: 'setScalingFactor' }))
-    .catch(err => ({
-      ...state,
-      board: state.board.set('error', err).set('state', GameState.ERROR),
-    }));
-}
-*/
-function getMaxScalingFactor(
+export function getMaxScalingFactor(
   _containerRef: React.RefObject<HTMLElement>
 ): number {
   return 1;
@@ -143,84 +76,6 @@ function getMaxScalingFactor(
 
   return 1;
   */
-}
-
-function reducer(state: IState, action: Action): IState {
-  console.log(action);
-  if (isCmdAction(action)) {
-    if (
-      action.type === 'TOGGLE_PAUSE' &&
-      ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state)
-    ) {
-      return state;
-    }
-
-    const board = state.nextState(Cmd[action.type], [
-      action.coordinate,
-      state.board,
-    ]);
-    return {
-      ...state,
-      board,
-      modalStack:
-        board.state === GameState.GAME_OVER ||
-        board.state === GameState.COMPLETED
-          ? [ModalType.GAME_OVER]
-          : state.modalStack,
-    };
-  }
-  const modalStackSize = state.modalStack.length;
-
-  switch (action.type) {
-    case 'setLevel':
-      const { board, nextState } = createGame(action.level);
-      return {
-        ...state,
-        board,
-        nextState,
-        modalStack: [],
-        scalingFactor: getMaxScalingFactor(state.containerRef),
-      };
-    case 'setBoard':
-      return {
-        ...state,
-        ...action.game,
-        loading: false,
-      };
-    case 'setScalingFactor':
-      return {
-        ...state,
-        scalingFactor: getMaxScalingFactor(state.containerRef),
-      };
-    case 'setNumeralSystem':
-      return {
-        ...state,
-        numeralSystem: action.numeralSystem,
-      };
-    case 'applySettings':
-      return {
-        ...state,
-        ...action.settings,
-        modalStack: [],
-      };
-    case 'showModal':
-      return {
-        ...state,
-        modalStack: [...state.modalStack].concat([action.modal]),
-      };
-    case 'closeModal':
-      if (modalStackSize === 0) {
-        console.warn('Modal stack is empty');
-        return state;
-      }
-      const modalStack = [...state.modalStack];
-      modalStack.pop();
-      return {
-        ...state,
-        modalStack,
-      };
-  }
-  assertNever(action);
 }
 
 // @ts-ignore

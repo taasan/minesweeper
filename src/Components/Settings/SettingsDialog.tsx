@@ -3,7 +3,7 @@ import StyleSelector from '../StyleSelector';
 import SvgBoard from '../Board/SvgBoard';
 import { legend, NumThreats } from '../../Game';
 import { NumeralSystem, renderThreats } from '../Board/getContent';
-import { Action } from '../SvgMinesweeper';
+import { Action } from '../reducer';
 
 export type ISettings = {
   numeralSystem: NumeralSystem;

@@ -8,7 +8,7 @@ import {
   GridType,
 } from '../../Game';
 
-import { Action } from '../SvgMinesweeper';
+import { Action } from '../reducer';
 
 type ICellProps = {
   cellSize: number;

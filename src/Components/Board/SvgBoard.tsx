@@ -11,7 +11,7 @@ import {
   GridType,
 } from '../../Game';
 import { Dispatch } from 'react';
-import { Action } from '../SvgMinesweeper';
+import { Action } from '../reducer';
 import { getContent, NumeralSystem } from './getContent';
 import SvgCell from './SvgCell';
 import { onContextMenu, hexOffset, hexagonPoints } from '..';
