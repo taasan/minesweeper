@@ -24,7 +24,7 @@ export type IState = {
   numeralSystem: NumeralSystem;
 };
 
-type CmdAction = {
+export type CmdAction = {
   type: CmdName;
   coordinate: number;
   dispatch: Dispatch<Action>;
@@ -81,7 +81,7 @@ export type Action =
   }
   */
 
-export function reducer(state: IState, action: Action): IState {
+const reducer = (state: IState, action: Action): IState => {
   console.log(action);
   if (isCmdAction(action)) {
     if (
@@ -155,4 +155,6 @@ export function reducer(state: IState, action: Action): IState {
       };
   }
   assertNever(action);
-}
+};
+
+export default reducer;

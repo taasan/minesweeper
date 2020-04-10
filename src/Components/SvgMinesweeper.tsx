@@ -84,7 +84,6 @@ type IStateInit = Pick<IState, 'containerRef'> & {
 
 function init({ level, containerRef }: IStateInit): IState {
   return {
-    //...legend(), // ...createGame(level),
     ...createGame(level),
     loading: false,
     containerRef,
