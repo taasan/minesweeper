@@ -18,7 +18,7 @@ export type IState = {
   board: GameRecord;
   nextState: NextStateFunction;
   loading: boolean;
-  containerRef: React.MutableRefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement>;
   scalingFactor: number;
   modalStack: ModalType[];
   numeralSystem: NumeralSystem;

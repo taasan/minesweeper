@@ -78,8 +78,11 @@ export function getMaxScalingFactor(
   */
 }
 
-// @ts-ignore
-function init({ level, containerRef }: any): IState {
+type IStateInit = Pick<IState, 'containerRef'> & {
+  level: Level;
+};
+
+function init({ level, containerRef }: IStateInit): IState {
   return {
     //...legend(), // ...createGame(level),
     ...createGame(level),
@@ -97,10 +100,10 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   console.log('Render', 'SvgMinesweeper');
   const [state, dispatch] = useReducer(
     reducer,
-    ({
+    {
       level: initialLevel,
       containerRef: React.useRef<HTMLDivElement>(null),
-    } as unknown) as IState,
+    },
     init
   );
 
