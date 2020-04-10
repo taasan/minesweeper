@@ -14,7 +14,7 @@ type ICellProps = {
   cellSize: number;
   coordinate: Coordinate;
   gridType: GridType;
-  dispatch: Dispatch<Action>;
+  dispatch?: Dispatch<Action>;
   content: string | NumThreats;
   state: CellState;
   threats?: NumThreats;
@@ -94,6 +94,20 @@ const SvgCell: FC<ICellProps> = props => {
         fillOpacity={1}
         strokeWidth={0}
       />
+      {(state === CellState.FLAGGED || state === CellState.UNCERTAIN) && (
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        <text
+          className="SvgCell__Text"
+          x={cellSize / 2}
+          y={cellSize / 2}
+          dominantBaseline="central"
+          textAnchor="middle"
+          fill="white"
+          fontSize={fontSize}
+        >
+          {content}
+        </text>
+      )}
       {/*}
       <text
         className="SvgCell__Cover"

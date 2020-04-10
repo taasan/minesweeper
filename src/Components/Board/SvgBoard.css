@@ -1,8 +1,17 @@
 .SvgBoard {
   fill: transparent;
   transform: scale(var(--board-scaling-factor, 1));
+  transform-origin: top;
+  /*
+  box-shadow: 0 0 40px wheat, 0 0 10px purple;
+  padding: 10px;
+  margin: 40px;
+  border-radius: 10px;
+  */
 }
-
+/*
 .SvgBoard.SvgBoard__rotated {
-  rotate: 90deg;
+  transform: translate(50%, 0) rotate(90deg);
+  transform-origin: top left;
 }
+*/

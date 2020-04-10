@@ -354,6 +354,9 @@ function nextState(
     return board;
   }
   if (command === Cmd.TOGGLE_PAUSE) {
+    if (![GameState.PAUSED, GameState.PLAYING].includes(board.state)) {
+      return board;
+    }
     return board.set(
       'state',
       board.state === GameState.PAUSED ? GameState.PLAYING : GameState.PAUSED
@@ -591,14 +594,18 @@ export const legend: () => {
       threatCount: 0xff,
     }),
     createGameCell({
-      state: CellState.NEW,
+      state: CellState.OPEN,
       threatCount: 0xff,
     }),
   ];
   const cols = 4;
   const board = createBoard({
     cells: OrderedMap(cells.map((c, i) => [i, c])),
-    level: createLevel({ cols, rows: Math.ceil(cells.length / cols) }),
+    level: createLevel({
+      cols,
+      rows: Math.ceil(cells.length / cols),
+      type: GridType.HEX,
+    }),
     state: GameState.DEMO,
   });
   return {

@@ -1,0 +1,15 @@
+.Modal {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  right: 40px;
+  bottom: 40px;
+  border: 1px solid;
+  overflow: auto;
+  border-radius: 10px;
+  outline: none;
+  padding: 20px;
+  background-color: var(--background-base3, revert);
+  color: var(--foreground-base3, revert);
+  opacity: 0.9;
+}

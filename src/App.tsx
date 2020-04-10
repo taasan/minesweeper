@@ -1,27 +1,16 @@
 import React from 'react';
 import './App.css';
 // import Minesweeper, { LEVELS } from './Components/Minesweeper';
-import StyleSelector from './Components/StyleSelector';
-import SvgMinesweeper, { LEVELS } from './Components/SvgMinesweeper';
-import Minesweeper from './Components/Minesweeper';
+import SvgMinesweeper from './Components/SvgMinesweeper';
 import { GridType } from './Game';
-
-const level = LEVELS.EXPERT;
+import { getLevel } from './Components/LevelChooser';
 
 function App() {
   return (
     <div className="App">
-      <div style={{ position: 'fixed', top: 0, right: 0 }}>
-        <StyleSelector />
+      <div>
+        <SvgMinesweeper level={{ ...getLevel(), type: GridType.HEX }} />
       </div>
-      {Math.random() > -1 ? (
-        <div>
-          <SvgMinesweeper level={{ ...level, type: 0 }} />
-          <SvgMinesweeper level={{ ...level, type: 1 }} />
-        </div>
-      ) : (
-        <Minesweeper level={{ ...level, type: GridType.SQUARE }} />
-      )}
     </div>
   );
 }

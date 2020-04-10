@@ -30,7 +30,7 @@
 }
 
 .Cell {
-  font-family: 'Noto Color Emoji';
+  font-family: 'color-emoji';
   color: var(--cell-color, inherit);
   background-repeat: no-repeat;
   background-position: center;

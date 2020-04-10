@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Chrome fikser ikke å sette disabled direkte på stylesheet-objektet
 type StyleElement = (HTMLLinkElement | HTMLStyleElement) & {
@@ -9,7 +9,7 @@ type StyleElement = (HTMLLinkElement | HTMLStyleElement) & {
 const DEFAULT_STYLESHEET = '__DEFAULT_STYLESHEET__';
 const NO_STYLESHEET = '__NO_STYLESHEET__';
 
-function StyleSelector() {
+const StyleSelector: React.FC<any> = () => {
   const [styleSheetMap, setStylesheetMap] = useState<
     | Readonly<{
         map: ReadonlyMap<string, StyleElement[]>;
@@ -21,14 +21,13 @@ function StyleSelector() {
 
   const [css, setCss] = useState<string | undefined>();
 
-  const handleOnLoad = useCallback(() => {
+  useEffect(() => {
     /*
     // Experimental status
     const stylesheets: StyleSheetWithTitle[] = [...document.styleSheets].filter(
       e => e.title != null
     ) as StyleSheetWithTitle[];
     */
-
     const links = document.head.querySelectorAll<StyleElement>(
       'link[rel*=style][title],style[title]'
     );
@@ -43,6 +42,8 @@ function StyleSelector() {
         stylesheets.push(link);
       }
     });
+
+    console.log({ stylesheets });
 
     const map: Map<string, StyleElement[]> = new Map();
     const defaultTitles: string[] = [];
@@ -72,11 +73,6 @@ function StyleSelector() {
     const titles = Object.freeze([...map.keys()]);
     setStylesheetMap({ map, isDefault, titles });
   }, []);
-
-  useEffect(() => {
-    window.addEventListener('load', handleOnLoad);
-    return () => window.removeEventListener('load', handleOnLoad);
-  }, [handleOnLoad]);
 
   useEffect(() => {
     function disable(title: string, disabled: boolean) {
@@ -119,6 +115,6 @@ function StyleSelector() {
         })}
     </select>
   );
-}
+};
 
 export default StyleSelector;

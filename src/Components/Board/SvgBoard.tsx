@@ -12,7 +12,7 @@ import {
 } from '../../Game';
 import { Dispatch } from 'react';
 import { Action } from '../SvgMinesweeper';
-import { getContent } from './getContent';
+import { getContent, NumeralSystem } from './getContent';
 import SvgCell from './SvgCell';
 import { onContextMenu, hexOffset, hexagonPoints } from '..';
 
@@ -35,18 +35,19 @@ const squarePoints = (cellSize: number) => {
 
 type IProps = {
   board: GameRecord;
-  rotated: boolean;
-  dispatch: Dispatch<Action>;
+  dispatch?: Dispatch<Action>;
+  numeralSystem: NumeralSystem;
 };
 
 const SvgBoard: React.FC<IProps> = (props: IProps) => {
   console.log('Render board');
-  const { board, dispatch, rotated } = props;
+  const { dispatch, numeralSystem, board } = props;
 
   const boardState = board.state;
   switch (board.state) {
     case GameState.ERROR:
       const error = board.error != null ? board.error.message : 'Unknown error';
+      console.error(board.error?.cause);
       const cause =
         board.error != null &&
         board.error.cause != null &&
@@ -132,7 +133,12 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
           coordinate={index}
           gridType={board.level.type}
           dispatch={dispatch}
-          content={getContent(cell.state, cell.threatCount, boardState)}
+          content={getContent(
+            cell.state,
+            cell.threatCount,
+            boardState,
+            numeralSystem
+          )}
           state={cell.state}
           threats={
             isNumThreats(cell.threatCount) ? cell.threatCount : undefined
@@ -144,9 +150,6 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
   };
 
   const classes = ['SvgBoard'];
-  if (rotated) {
-    classes.push('SvgBoard__rotated');
-  }
   return (
     <svg
       preserveAspectRatio="xMidYMid meet"

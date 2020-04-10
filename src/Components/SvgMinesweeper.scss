@@ -1,5 +1,27 @@
 .SvgMinesweeper {
   user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+
+  .SvgMinesweeper__Controls {
+    cursor: default;
+    min-height: 10px;
+    min-width: 10px;
+    padding: 0px;
+    position: relative;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    place-content: space-between;
+    padding: 5px 5px 2px 5px;
+    margin: 5px 5px 2px 5px;
+  }
 }
 
 .GameOver {

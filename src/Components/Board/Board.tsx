@@ -4,7 +4,7 @@ import { GameState, GameRecord, assertNever } from '../../Game';
 import { Dispatch } from 'react';
 import { Action } from '../Minesweeper';
 import Row from './Row';
-import { getContent } from './getContent';
+import { NumeralSystem } from './getContent';
 import { onContextMenu } from '..';
 
 type IProps = {
@@ -84,10 +84,10 @@ const Board: React.FC<IProps> = (props: IProps) => {
         return (
           <Row
             key={row}
-            getContent={getContent}
             cells={[...board.cells.slice(from, to)]}
             dispatch={dispatch}
             gameState={boardState}
+            numeralSystem={NumeralSystem.ascii}
           />
         );
       })}

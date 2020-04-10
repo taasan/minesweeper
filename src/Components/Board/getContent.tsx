@@ -7,10 +7,21 @@ import {
   randomInt,
 } from '../../Game';
 
+export enum NumeralSystem {
+  ascii = 0x30,
+  arab = 0x660,
+  beng = 0x9e6,
+  deva = 0x966,
+  guru = 0xa66,
+  nkoo = 0x7c0,
+  lepc = 0x1c40,
+}
+
 export function getContent(
   state: CellState,
   threats: NumThreats | Mine,
-  gameState: GameState
+  gameState: GameState,
+  numeralSystem: NumeralSystem
 ): string | NumThreats {
   const mines = [
     '🤒',
@@ -26,6 +37,7 @@ export function getContent(
     '🥵',
     '🥶',
     '👺',
+    '🦠',
   ];
   const disarmedMine = '🥰';
   const isMined = threats === 0xff;
@@ -41,11 +53,19 @@ export function getContent(
   if (isDisarmed) {
     return disarmedMine;
   }
-  if ((gameOver || demo) && state !== CellState.EXPLODED && threats === 0xff) {
+  if (
+    ((gameOver && state !== CellState.EXPLODED) || state === CellState.OPEN) &&
+    threats === 0xff
+  ) {
     return mines[randomInt(mines.length)];
   }
   if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
-    return getContent(CellState.OPEN, threats, GameState.PLAYING);
+    return getContent(
+      CellState.OPEN,
+      threats,
+      GameState.PLAYING,
+      numeralSystem
+    );
   }
   switch (state) {
     case CellState.FLAGGED:
@@ -53,10 +73,16 @@ export function getContent(
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:
-      return isNumThreats(threats) ? threats : '\u00A0';
+      return isNumThreats(threats)
+        ? renderThreats(numeralSystem, threats)
+        : '\u00A0';
     case CellState.EXPLODED:
       return '💀';
     default:
       return '\u00A0';
   }
+}
+
+export function renderThreats(numeralSystem: NumeralSystem, n: NumThreats) {
+  return String.fromCodePoint(numeralSystem + n);
 }

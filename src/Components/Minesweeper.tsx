@@ -35,7 +35,6 @@ type ILevels = {
 };
 
 const type = GridType.HEX;
-
 export const LEVELS: ILevels = {
   BEGINNER: { rows: 6, cols: 10, mines: 10, type },
   INTERMEDIATE: { rows: 16, cols: 16, mines: 40, type },
@@ -137,14 +136,13 @@ function reducer(state: IState, action: Action): IState {
         loading: false,
       };
     case 'setScalingFactor':
-      console.log(getMaxScalingFactor);
-      return state;
-    /*
+      // console.log(getMaxScalingFactor);
+      // return state;
+
       return {
         ...state,
         scalingFactor: getMaxScalingFactor(state),
       };
-      */
   }
   assertNever(action);
 }
@@ -207,6 +205,7 @@ const LevelChooser: React.FC<LevelChooserProps> = React.memo(({ onChange }) => {
 });
 
 const Minesweeper: React.FC<IProps> = ({ level }) => {
+  // eslint-disable-next-line no-shadow
   const [rotated, setRotated] = React.useState(false);
   const rotateRef = useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);

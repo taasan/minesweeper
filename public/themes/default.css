@@ -22,4 +22,18 @@
 
   --board-border-width: 6px;
   --board-padding: 3px;
+
+  --background-base3: white;
+  --background-base2: white;
+  --background-base1: white;
+  --background-base0: white;
+  --foreground-base3: black;
+  --foreground-base2: black;
+  --foreground-base1: black;
+  --foreground-base0: black;
+}
+
+:root {
+  background-color: var(--solarized-base3);
+  color: var(--solarized-base03);
 }
