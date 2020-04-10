@@ -7,6 +7,7 @@ import { Action } from '../reducer';
 
 export type ISettings = {
   numeralSystem: NumeralSystem;
+  fitWindow: boolean;
 };
 
 export type SettingsDialogProps = {
@@ -21,39 +22,48 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [numeralSystem, setNumeralSystem] = React.useState(
     initialState.numeralSystem
   );
+  const [fitWindow, setFitWindow] = React.useState(initialState.fitWindow);
   return (
-    <section>
-      <section>
-        <header>
-          <h1>Numeral system</h1>
-        </header>
-        <main>
-          <NumeralSystemChooser
-            selected={numeralSystem}
-            onChange={setNumeralSystem}
-          />
-        </main>
-      </section>
-      <section>
-        <button
-          onClick={() => {
-            dispatch({
-              type: 'applySettings',
-              settings: {
-                numeralSystem,
-              },
-            });
-          }}
-        >
-          OK
-        </button>
-      </section>
-      <section>
-        <header>
-          <h1>Display</h1>
-        </header>
-        <main>
-          <StyleSelector />
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <section>
+          <header>
+            <h1>Numeral system</h1>
+          </header>
+          <main>
+            <NumeralSystemChooser
+              selected={numeralSystem}
+              onChange={setNumeralSystem}
+            />
+          </main>
+        </section>
+        <section>
+          <header>
+            <h2>Style</h2>
+          </header>
+          <main>
+            <StyleSelector />
+          </main>
+        </section>
+        <section>
+          <header>
+            <h2>Scaling</h2>
+          </header>
+          <main>
+            <label>
+              <input
+                type="checkbox"
+                defaultChecked={fitWindow}
+                onChange={e => setFitWindow(e.currentTarget.checked)}
+              />
+              Fit to window
+            </label>
+          </main>
+        </section>
+        <section>
+          <header>
+            <h1>Preview</h1>
+          </header>
           <div
             style={{
               width: '200px',
@@ -62,9 +72,38 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           >
             <SvgBoard board={legend().board} numeralSystem={numeralSystem} />
           </div>
-        </main>
-      </section>
-    </section>
+        </section>
+      </div>
+      <div>
+        <section>
+          <main>
+            <button
+              onClick={() => {
+                dispatch({
+                  type: 'applySettings',
+                  settings: {
+                    numeralSystem,
+                    fitWindow,
+                  },
+                });
+              }}
+            >
+              Apply changes
+            </button>
+            <button
+              onClick={() => {
+                dispatch({
+                  type: 'applySettings',
+                  settings: initialState,
+                });
+              }}
+            >
+              Revert changes
+            </button>
+          </main>
+        </section>
+      </div>
+    </div>
   );
 };
 

@@ -9,7 +9,7 @@ import {
   isCmdName,
   Level,
 } from '../Game';
-import { getMaxScalingFactor } from './SvgMinesweeper';
+
 import { NumeralSystem } from './Board/getContent';
 import { Dispatch } from 'react';
 import { ISettings } from './Settings/SettingsDialog';
@@ -19,7 +19,9 @@ export type IState = {
   nextState: NextStateFunction;
   loading: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
-  scalingFactor: number;
+  controlsRef: React.RefObject<HTMLDivElement>;
+  fitWindow: boolean;
+  maxBoardDimensions: { maxWidth: string; maxHeight: string };
   modalStack: ModalType[];
   numeralSystem: NumeralSystem;
 };
@@ -47,7 +49,7 @@ export type Action =
       game: { board: GameRecord; nextState: NextStateFunction };
     }
   | {
-      type: 'setScalingFactor';
+      type: 'fitWindow';
     }
   | {
       type: 'setNumeralSystem';
@@ -65,21 +67,32 @@ export type Action =
       type: 'closeModal';
     }
   | CmdAction;
-/*
-  function setBoardAction(
-    f: () => object,
-    state: IState,
-    dispatch: Dispatch<Action>
-  ) {
-    new Promise<IState>(resolve => resolve({ ...state, ...f() }))
-      .then(game => dispatch({ type: 'setBoard', game }))
-      .then(() => dispatch({ type: 'setScalingFactor' }))
-      .catch(err => ({
-        ...state,
-        board: state.board.set('error', err).set('state', GameState.ERROR),
-      }));
+
+const calculateCssMaxDimensions = (
+  board: React.RefObject<HTMLDivElement>,
+  controls: React.RefObject<HTMLDivElement>
+) => {
+  if (board.current == null || controls.current == null) {
+    return {
+      maxHeight: 'revert',
+      maxWidth: 'revert',
+    };
   }
-  */
+  const {
+    paddingTop,
+    paddingBottom,
+    marginTop,
+    marginBottom,
+  } = window.getComputedStyle(controls.current);
+  const padding = [paddingBottom, paddingTop, marginTop, marginBottom].join(
+    ' - '
+  );
+  const { clientHeight } = controls.current;
+  return {
+    maxWidth: '100vw',
+    maxHeight: `calc(100vh - ${clientHeight}px - ${padding})`,
+  };
+};
 
 const reducer = (state: IState, action: Action): IState => {
   console.log(action);
@@ -113,18 +126,12 @@ const reducer = (state: IState, action: Action): IState => {
         board,
         nextState,
         modalStack: [],
-        scalingFactor: getMaxScalingFactor(state.containerRef),
       };
     case 'setBoard':
       return {
         ...state,
         ...action.game,
         loading: false,
-      };
-    case 'setScalingFactor':
-      return {
-        ...state,
-        scalingFactor: getMaxScalingFactor(state.containerRef),
       };
     case 'setNumeralSystem':
       return {
@@ -152,6 +159,14 @@ const reducer = (state: IState, action: Action): IState => {
       return {
         ...state,
         modalStack,
+      };
+    case 'fitWindow':
+      return {
+        ...state,
+        maxBoardDimensions: calculateCssMaxDimensions(
+          state.containerRef,
+          state.controlsRef
+        ),
       };
   }
   assertNever(action);

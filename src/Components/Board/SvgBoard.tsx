@@ -37,11 +37,12 @@ type IProps = {
   board: GameRecord;
   dispatch?: Dispatch<Action>;
   numeralSystem: NumeralSystem;
+  style?: React.CSSProperties;
 };
 
 const SvgBoard: React.FC<IProps> = (props: IProps) => {
   console.log('Render board');
-  const { dispatch, numeralSystem, board } = props;
+  const { dispatch, numeralSystem, board, style } = props;
 
   const boardState = board.state;
   switch (board.state) {
@@ -152,6 +153,7 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
   const classes = ['SvgBoard'];
   return (
     <svg
+      style={style}
       preserveAspectRatio="xMidYMid meet"
       className={classes.join(' ')}
       pointerEvents={pointerEvents}

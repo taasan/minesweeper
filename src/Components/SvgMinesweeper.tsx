@@ -20,7 +20,7 @@ import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
 import { NumeralSystem } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
-import { reducer, IState, ModalType, Action } from './reducer';
+import reducer, { IState, ModalType, Action } from './reducer';
 //
 /*
 enum TimingEventType {
@@ -45,49 +45,21 @@ export const LEVELS: ILevels = {
   EXPERT: { mines: 99, rows: 16, cols: 30, type },
 };
 
-export function getMaxScalingFactor(
-  _containerRef: React.RefObject<HTMLElement>
-): number {
-  return 1;
-  /*
-  if (containerRef != null && containerRef.current != null) {
-    const { current } = containerRef;
-    const boardElement = current.querySelector('.SvgBoard');
-
-    if (boardElement == null) {
-      return 1;
-    }
-    // const { clientWidth, clientHeight } = current;
-    const { clientWidth, clientHeight } = document.documentElement;
-    const width = !rotated
-      ? boardElement.clientWidth
-      : boardElement.clientHeight;
-    const height = !rotated
-      ? boardElement.clientHeight
-      : boardElement.clientWidth;
-    if (height === 0 || width === 0) {
-      return 1;
-    }
-    const a = Math.min(clientHeight, current.clientHeight) / height;
-    const b = Math.min(clientWidth, current.clientWidth) / width;
-    console.log({ clientHeight, clientWidth, height, width, a, b, current });
-    return Math.min(a, b);
-  }
-
-  return 1;
-  */
-}
-
-type IStateInit = Pick<IState, 'containerRef'> & {
+type IStateInit = Pick<IState, 'containerRef' | 'controlsRef'> & {
   level: Level;
 };
 
-function init({ level, containerRef }: IStateInit): IState {
+function init({ level, containerRef, controlsRef }: IStateInit): IState {
   return {
     ...createGame(level),
     loading: false,
     containerRef,
-    scalingFactor: 1,
+    controlsRef,
+    fitWindow: true,
+    maxBoardDimensions: {
+      maxHeight: 'revert',
+      maxWidth: 'revert',
+    },
     numeralSystem: NumeralSystem.beng,
     modalStack: [],
   };
@@ -102,6 +74,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     {
       level: initialLevel,
       containerRef: React.useRef<HTMLDivElement>(null),
+      controlsRef: React.useRef<HTMLDivElement>(null),
     },
     init
   );
@@ -111,20 +84,13 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     return () => window.removeEventListener(event, callback);
   };
 
+  const { board, modalStack, numeralSystem, containerRef, controlsRef } = state;
+
   React.useEffect(() => {
-    return registerEvent('resize', () =>
-      dispatch({ type: 'setScalingFactor' })
-    );
+    dispatch({ type: 'fitWindow' });
+    // return registerEvent('resize', () => dispatch({ type: 'fitWindow' }));
   }, []);
 
-  const {
-    board,
-    scalingFactor,
-    modalStack,
-    numeralSystem,
-    containerRef,
-  } = state;
-  const { level } = board;
   const modal = modalStack[modalStack.length - 1];
   React.useEffect(() => {
     console.log('useEffect register keyup');
@@ -134,10 +100,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       }
     });
   }, [containerRef]);
-
-  React.useEffect(() => {
-    dispatch({ type: 'setScalingFactor' });
-  }, [level]);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
   const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
@@ -173,20 +135,20 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       }}
     >
       <div
-        style={{
-          ['--board-scaling-factor' as any]: `${scalingFactor}`,
-        }}
         className={classes.join(' ')}
         ref={state.containerRef}
         onPointerDown={handlePointerDown}
         onContextMenu={onContextMenu}
       >
-        <Controls board={board} dispatch={dispatch} />
+        <Controls board={board} dispatch={dispatch} ref={controlsRef} />
         <ErrorBoundary>
           <SvgBoard
             dispatch={dispatch}
             board={board}
             numeralSystem={numeralSystem}
+            style={
+              state.fitWindow ? { ...state.maxBoardDimensions } : undefined
+            }
           />
         </ErrorBoundary>
       </div>
@@ -241,60 +203,64 @@ interface ControlsProps {
   dispatch: React.Dispatch<Action>;
 }
 
-const Controls: React.FC<ControlsProps> = React.memo(({ board, dispatch }) => {
-  console.log('Render', 'Controls');
-  const { level } = board;
-  const remaining = level.mines - board.cellStates[CellState.FLAGGED];
+const Controls = React.memo(
+  React.forwardRef<HTMLDivElement, ControlsProps>(
+    ({ board, dispatch }, ref) => {
+      console.log('Render', 'Controls');
+      const { level } = board;
+      const remaining = level.mines - board.cellStates[CellState.FLAGGED];
 
-  const togglePause = () => {
-    switch (board.state) {
-      case GameState.PAUSED:
-      case GameState.PLAYING:
-        dispatch({
-          type: Cmd[Cmd.TOGGLE_PAUSE] as CmdName,
-          coordinate: -1,
-          dispatch,
-        });
-        break;
+      const togglePause = () => {
+        switch (board.state) {
+          case GameState.PAUSED:
+          case GameState.PLAYING:
+            dispatch({
+              type: Cmd[Cmd.TOGGLE_PAUSE] as CmdName,
+              coordinate: -1,
+              dispatch,
+            });
+            break;
+        }
+      };
+
+      return (
+        <div className="SvgMinesweeper__Controls" ref={ref}>
+          <div
+            role="button"
+            onClick={() =>
+              dispatch({ type: 'showModal', modal: ModalType.SELECT_LEVEL })
+            }
+          >
+            {level.cols} x {level.rows} / {level.mines}
+          </div>
+          <div
+            role="button"
+            onClick={togglePause}
+            aria-label={`Game state: ${GameState[board.state]}`}
+          >
+            {renderGameState(board.state)}
+          </div>
+          <div>
+            <span role="img" aria-label="Remaining mines">
+              {remaining >= 0 ? '🚩' : '💩'}
+            </span>{' '}
+            <span>{remaining}</span>
+          </div>
+          <div
+            role="button"
+            onClick={() =>
+              dispatch({ type: 'showModal', modal: ModalType.SETTINGS })
+            }
+          >
+            <span role="img" aria-label="Settings">
+              ⚙️
+            </span>
+          </div>
+        </div>
+      );
     }
-  };
-
-  return (
-    <div className="SvgMinesweeper__Controls">
-      <div
-        role="button"
-        onClick={() =>
-          dispatch({ type: 'showModal', modal: ModalType.SELECT_LEVEL })
-        }
-      >
-        {level.cols} x {level.rows} / {level.mines}
-      </div>
-      <div
-        role="button"
-        onClick={togglePause}
-        aria-label={`Game state: ${GameState[board.state]}`}
-      >
-        {renderGameState(board.state)}
-      </div>
-      <div>
-        <span role="img" aria-label="Remaining mines">
-          {remaining >= 0 ? '🚩' : '💩'}
-        </span>{' '}
-        <span>{remaining}</span>
-      </div>
-      <div
-        role="button"
-        onClick={() =>
-          dispatch({ type: 'showModal', modal: ModalType.SETTINGS })
-        }
-      >
-        <span role="img" aria-label="Settings">
-          ⚙️
-        </span>
-      </div>
-    </div>
-  );
-});
+  )
+);
 
 function renderGameState(state: GameState) {
   switch (state) {
