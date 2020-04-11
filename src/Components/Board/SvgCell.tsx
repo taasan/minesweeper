@@ -57,6 +57,12 @@ const SvgCell: FC<ICellProps> = props => {
       });
     }
   };
+  const ariaProps =
+    typeof content === 'string'
+      ? {
+          role: 'img',
+        }
+      : {};
 
   const fontSize = cellSize * 0.6;
   return (
@@ -76,6 +82,7 @@ const SvgCell: FC<ICellProps> = props => {
         fillOpacity={1}
       />
       <text
+        {...ariaProps}
         className="SvgCell__Text"
         x={cellSize / 2}
         y={cellSize / 2}
@@ -97,6 +104,7 @@ const SvgCell: FC<ICellProps> = props => {
       {(state === CellState.FLAGGED || state === CellState.UNCERTAIN) && (
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         <text
+          {...ariaProps}
           className="SvgCell__Text"
           x={cellSize / 2}
           y={cellSize / 2}

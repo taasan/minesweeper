@@ -19,6 +19,10 @@ body {
   */
 }
 
+[role='img'] {
+  font-family: 'color-emoji';
+}
+
 :root,
 body {
   height: 100%;
