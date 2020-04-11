@@ -34,6 +34,6 @@
 }
 
 :root {
-  background-color: var(--solarized-base3);
-  color: var(--solarized-base03);
+  background-color: var(--background-base3);
+  color: var(--foreground-base3);
 }
