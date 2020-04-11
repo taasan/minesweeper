@@ -248,7 +248,7 @@ function renderGameState(state: GameState) {
     case GameState.ERROR:
       return '🤔';
     case GameState.GAME_OVER:
-      return '💀';
+      return '🤬';
     case GameState.DEMO:
     case GameState.INITIALIZED:
     case GameState.NOT_INITIALIZED:
