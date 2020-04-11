@@ -59,14 +59,15 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
             Fit to window
           </label>
         </fieldset>
-        <section>
+        <section
+          className={`SvgMinesweeper ${theme.styles
+            .map(t => t.Theme)
+            .join(' ')}`}
+        >
           <header>
             <h1>Preview</h1>
           </header>
           <div
-            className={`SvgMinesweeper ${theme.styles
-              .map(t => t.Theme)
-              .join(' ')}`}
             style={{
               width: '200px',
               height: 'auto',
