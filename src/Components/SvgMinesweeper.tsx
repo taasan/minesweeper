@@ -217,7 +217,7 @@ const Controls = React.memo(
           </div>
           <div>
             <span role="img" aria-label="Remaining mines">
-              {remaining >= 0 ? '🚩' : '💩'}
+              {remaining >= 0 ? '☣️' : '💩'}
             </span>{' '}
             <span>{remaining}</span>
           </div>

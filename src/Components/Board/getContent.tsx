@@ -72,7 +72,7 @@ export function getContent(
   }
   switch (state) {
     case CellState.FLAGGED:
-      return (demo || gameOver) && !isMined ? '💩' : '🚩';
+      return (demo || gameOver) && !isMined ? '💩' : '☣️';
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:
