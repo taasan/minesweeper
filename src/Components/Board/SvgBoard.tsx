@@ -40,7 +40,7 @@ type IProps = {
   style?: React.CSSProperties;
 };
 
-const SvgBoard: React.FC<IProps> = (props: IProps) => {
+const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
   console.log('Render board');
   const { dispatch, numeralSystem, board, style } = props;
 
@@ -153,6 +153,7 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
   const classes = ['SvgBoard'];
   return (
     <svg
+      ref={ref}
       style={style}
       preserveAspectRatio="xMidYMid meet"
       className={classes.join(' ')}
@@ -178,6 +179,6 @@ const SvgBoard: React.FC<IProps> = (props: IProps) => {
       </defs>
     </svg>
   );
-};
+});
 
 export default React.memo(SvgBoard);

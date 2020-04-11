@@ -45,16 +45,15 @@ export const LEVELS: ILevels = {
   EXPERT: { mines: 99, rows: 16, cols: 30, type },
 };
 
-type IStateInit = Pick<IState, 'containerRef' | 'controlsRef'> & {
+type IStateInit = Pick<IState, 'containerRef'> & {
   level: Level;
 };
 
-function init({ level, containerRef, controlsRef }: IStateInit): IState {
+function init({ level, containerRef }: IStateInit): IState {
   return {
     ...createGame(level),
     loading: false,
     containerRef,
-    controlsRef,
     fitWindow: true,
     maxBoardDimensions: {
       maxHeight: 'revert',
@@ -73,8 +72,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     reducer,
     {
       level: initialLevel,
-      containerRef: React.useRef<HTMLDivElement>(null),
-      controlsRef: React.useRef<HTMLDivElement>(null),
+      containerRef: React.useRef<SVGSVGElement>(null),
     },
     init
   );
@@ -84,7 +82,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     return () => window.removeEventListener(event, callback);
   };
 
-  const { board, modalStack, numeralSystem, containerRef, controlsRef } = state;
+  const { board, modalStack, numeralSystem, containerRef } = state;
 
   React.useEffect(() => {
     dispatch({ type: 'fitWindow' });
@@ -136,13 +134,13 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     >
       <div
         className={classes.join(' ')}
-        ref={state.containerRef}
         onPointerDown={handlePointerDown}
         onContextMenu={onContextMenu}
       >
-        <Controls board={board} dispatch={dispatch} ref={controlsRef} />
+        <Controls board={board} dispatch={dispatch} />
         <ErrorBoundary>
           <SvgBoard
+            ref={state.containerRef}
             dispatch={dispatch}
             board={board}
             numeralSystem={numeralSystem}

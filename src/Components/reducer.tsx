@@ -18,8 +18,7 @@ export type IState = {
   board: GameRecord;
   nextState: NextStateFunction;
   loading: boolean;
-  containerRef: React.RefObject<HTMLDivElement>;
-  controlsRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<SVGSVGElement>;
   fitWindow: boolean;
   maxBoardDimensions: { maxWidth: string; maxHeight: string };
   modalStack: ModalType[];
@@ -67,29 +66,19 @@ export type Action =
     }
   | CmdAction;
 
-const calculateCssMaxDimensions = (
-  board: React.RefObject<HTMLDivElement>,
-  controls: React.RefObject<HTMLDivElement>
-) => {
-  if (board.current == null || controls.current == null) {
+const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
+  if (board.current == null) {
     return {
       maxHeight: 'revert',
       maxWidth: 'revert',
     };
   }
-  const {
-    paddingTop,
-    paddingBottom,
-    marginTop,
-    marginBottom,
-  } = window.getComputedStyle(controls.current);
-  const padding = [paddingBottom, paddingTop, marginTop, marginBottom].join(
-    ' - '
-  );
-  const { clientHeight } = controls.current;
+
+  const { top } = board.current.getBoundingClientRect();
   return {
     maxWidth: '100vw',
-    maxHeight: `calc(100vh - ${clientHeight}px - ${padding})`,
+    // Must add 3-5 px to prevent scrollbars
+    maxHeight: `calc(100vh - ${top + 5}px)`,
   };
 };
 
@@ -157,10 +146,7 @@ const reducer = (state: IState, action: Action): IState => {
     case 'fitWindow':
       return {
         ...state,
-        maxBoardDimensions: calculateCssMaxDimensions(
-          state.containerRef,
-          state.controlsRef
-        ),
+        maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
       };
   }
   assertNever(action);
