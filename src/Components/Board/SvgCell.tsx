@@ -70,7 +70,7 @@ const SvgCell: FC<ICellProps> = props => {
       data-mined={mined ? true : undefined}
     >
       <use
-        xlinkHref={`#${GridType[gridType]}`}
+        href={`#${GridType[gridType]}`}
         scale={cellSize}
         className="SvgCell__Background"
         fillOpacity={1}
@@ -88,7 +88,7 @@ const SvgCell: FC<ICellProps> = props => {
         (state === CellState.OPEN && threats === 0) || content}
       </text>
       <use
-        xlinkHref={`#${GridType[gridType]}`}
+        href={`#${GridType[gridType]}`}
         scale={cellSize}
         className="SvgCell__Cover"
         fillOpacity={1}
