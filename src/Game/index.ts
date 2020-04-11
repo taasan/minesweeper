@@ -6,8 +6,8 @@ export function assertNever(x: never): never {
 
 export type NumThreats = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-export function isNumThreats(n: number): n is NumThreats {
-  return n >= 0 && n <= 8;
+export function isNumThreats(n: any): n is NumThreats {
+  return Number.isInteger(Number(n)) && n >= 0 && n <= 8;
 }
 
 export enum CellState {
