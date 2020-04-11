@@ -69,7 +69,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               .join(' ')}`}
             style={{
               width: '200px',
-              height: '200px',
+              height: 'auto',
             }}
           >
             <SvgBoard board={legend().board} numeralSystem={numeralSystem} />
