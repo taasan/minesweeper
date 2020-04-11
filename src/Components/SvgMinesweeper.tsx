@@ -21,6 +21,8 @@ import Modal from './Modal';
 import { NumeralSystem } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
 import reducer, { IState, ModalType, Action } from './reducer';
+import { defaultTheme } from '../Theme';
+import useTheme from '../Hooks/useTheme';
 //
 /*
 enum TimingEventType {
@@ -61,6 +63,7 @@ function init({ level, containerRef }: IStateInit): IState {
     },
     numeralSystem: NumeralSystem.beng,
     modalStack: [],
+    theme: defaultTheme,
   };
 }
 
@@ -82,7 +85,8 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     return () => window.removeEventListener(event, callback);
   };
 
-  const { board, modalStack, numeralSystem, containerRef } = state;
+  const { board, modalStack, numeralSystem, containerRef, theme } = state;
+  useTheme(theme);
 
   React.useEffect(() => {
     dispatch({ type: 'fitWindow' });

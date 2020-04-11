@@ -1,15 +1,17 @@
 import * as React from 'react';
-import StyleSelector from '../StyleSelector';
 import SvgBoard from '../Board/SvgBoard';
 import { legend, NumThreats } from '../../Game';
 import { NumeralSystem, renderThreats } from '../Board/getContent';
 import { Action } from '../reducer';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
+import ThemeChooser from './ThemeChooser';
+import { ITheme } from '../../Theme';
 
 export type ISettings = {
   numeralSystem: NumeralSystem;
   fitWindow: boolean;
+  theme: ITheme;
 };
 
 export type SettingsDialogProps = {
@@ -25,6 +27,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     initialState.numeralSystem
   );
   const [fitWindow, setFitWindow] = React.useState(initialState.fitWindow);
+  const [theme, setTheme] = React.useState<ITheme>(initialState.theme);
   return (
     <form className="SettingsDialog">
       <div
@@ -42,8 +45,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           />
         </fieldset>
         <fieldset>
-          <legend>Style</legend>
-          <StyleSelector />
+          <legend>Theme</legend>
+          <ThemeChooser theme={theme} onChange={setTheme} />
         </fieldset>
         <fieldset>
           <legend>Scaling</legend>
@@ -61,6 +64,9 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
             <h1>Preview</h1>
           </header>
           <div
+            className={`SvgMinesweeper ${theme.styles
+              .map(t => t.Theme)
+              .join(' ')}`}
             style={{
               width: '200px',
               height: '200px',
@@ -80,6 +86,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   settings: {
                     numeralSystem,
                     fitWindow,
+                    theme,
                   },
                 });
               }}

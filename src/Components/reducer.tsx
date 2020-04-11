@@ -13,6 +13,7 @@ import {
 import { NumeralSystem } from './Board/getContent';
 import { Dispatch } from 'react';
 import { ISettings } from './Settings/SettingsDialog';
+import { ITheme } from '../Theme';
 
 export type IState = {
   board: GameRecord;
@@ -23,6 +24,7 @@ export type IState = {
   maxBoardDimensions: { maxWidth: string; maxHeight: string };
   modalStack: ModalType[];
   numeralSystem: NumeralSystem;
+  theme: ITheme;
 };
 
 export type CmdAction = {

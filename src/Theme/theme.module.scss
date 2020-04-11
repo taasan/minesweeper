@@ -1,17 +1,17 @@
-:root {
+.Theme {
   --mine-detonated-background: red;
   --mine-detonated-animation: none;
 
   --cell-border: var(--cell-background-open);
-  --cell-background: grey;
-  --cell-background-open: white;
+  --cell-background: lightSlateGray;
+  --cell-background-open: #eee;
   --cell-background-flagged-wrong: var(--cell-background);
-  --cell-threats-1-color: blue;
-  --cell-threats-2-color: green;
-  --cell-threats-3-color: red;
+  --cell-threats-1-color: DodgerBlue;
+  --cell-threats-2-color: ForestGreen;
+  --cell-threats-3-color: crimson;
   --cell-threats-4-color: violet;
   --cell-threats-5-color: magenta;
-  --cell-threats-6-color: cyan;
+  --cell-threats-6-color: DarkTurquoise;
   --cell-threats-7-color: indigo;
   --cell-threats-8-color: orange;
   --cell-pressed-color: var(--cell-background-open);
@@ -31,9 +31,6 @@
   --foreground-base2: black;
   --foreground-base1: black;
   --foreground-base0: black;
-}
-
-:root {
   background-color: var(--background-base3);
   color: var(--foreground-base3);
 }
