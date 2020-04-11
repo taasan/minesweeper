@@ -115,6 +115,10 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   }
 }
 
+.SvgBoard[data-state='#{$PAUSED}'] .SvgCell__Text {
+  visibility: hidden;
+}
+
 /*
 
 .SvgCell[data-state=#{$FLAGGED}],
