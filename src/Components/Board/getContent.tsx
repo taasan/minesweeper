@@ -16,6 +16,7 @@ export enum NumeralSystem {
   nkoo = 0x7c0,
   lepc = 0x1c40,
   roman = 0x215f,
+  taml = 0x0be6,
 }
 
 export function getContent(
