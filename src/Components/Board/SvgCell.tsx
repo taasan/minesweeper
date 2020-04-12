@@ -9,6 +9,7 @@ import {
 } from '../../Game';
 
 import { CmdAction } from '../reducer';
+import { onContextMenu } from '..';
 
 type ICellProps = {
   coordinate: Coordinate;
@@ -40,8 +41,6 @@ const SvgCell: FC<ICellProps> = props => {
       switch (e.button) {
         case 0:
           return 'POKE';
-        case 2:
-          return 'FLAG';
         default:
           return 'NONE';
       }
@@ -56,6 +55,23 @@ const SvgCell: FC<ICellProps> = props => {
       });
     }
   };
+
+  const handleContextMenu = (e: MouseEvent) => {
+    onContextMenu(e);
+    if (dispatch != null) {
+      switch (state) {
+        case CellState.NEW:
+        case CellState.FLAGGED:
+        case CellState.UNCERTAIN:
+          window.navigator.vibrate(100);
+          return dispatch({
+            type: 'FLAG',
+            coordinate,
+          });
+      }
+    }
+  };
+
   const role = /^\p{Number}$/u.test(content.toString()) ? undefined : 'img';
 
   const fontSize = cellSize * 0.6;
@@ -64,6 +80,7 @@ const SvgCell: FC<ICellProps> = props => {
       viewBox={`0 0 ${cellSize} ${cellSize}`}
       className="SvgCell"
       onMouseDown={handleClick}
+      onContextMenu={handleContextMenu}
       data-state={CellState[state]}
       data-threats={threats}
       data-mined={mined ? true : undefined}
