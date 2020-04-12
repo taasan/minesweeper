@@ -1,18 +1,20 @@
-.Theme {
-  background-color: var(--solarized-base03);
-  color: var(--solarized-base3);
+@import 'colors';
 
-  --cell-background: var(--solarized-base0);
-  --cell-background-open: var(--solarized-base02);
-  --cell-border: var(--solarized-base02);
-  --cell-pressed-color: var(--solarized-base02);
-  --board-border-color: var(--solarized-base02);
-  --background-base3: var(--solarized-base03);
-  --background-base2: var(--solarized-base02);
-  --background-base1: var(--solarized-base01);
-  --background-base0: var(--solarized-base00);
-  --foreground-base3: var(--solarized-base3);
-  --foreground-base2: var(--solarized-base2);
-  --foreground-base1: var(--solarized-base1);
-  --foreground-base0: var(--solarized-base0);
+.Theme {
+  background-color: $base03;
+  color: $base3;
+
+  --cell-background: #{$base0};
+  --cell-background-open: #{$base02};
+  --cell-border: #{$base02};
+  --cell-pressed-color: #{lighten($base02, 4%)};
+  --board-border-color: #{$base02};
+  --background-base3: #{$base03};
+  --background-base2: #{$base02};
+  --background-base1: #{$base01};
+  --background-base0: #{$base00};
+  --foreground-base3: #{$base3};
+  --foreground-base2: #{$base2};
+  --foreground-base1: #{$base1};
+  --foreground-base0: #{$base0};
 }
