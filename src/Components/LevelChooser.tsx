@@ -40,12 +40,10 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
   const handleTypeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setLevel({
-        cols,
-        rows,
-        mines,
+        ...level,
         type: (GridType[e.currentTarget.value as any] as unknown) as GridType,
       }),
-    [cols, rows, mines]
+    [level]
   );
 
   return (
@@ -83,9 +81,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
             <input
               onChange={e =>
                 setLevel({
-                  cols,
-                  mines,
-                  type,
+                  ...level,
                   rows: e.currentTarget.valueAsNumber,
                 })
               }
@@ -101,9 +97,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
             <input
               onChange={e =>
                 setLevel({
-                  rows,
-                  mines,
-                  type,
+                  ...level,
                   cols: e.currentTarget.valueAsNumber,
                 })
               }
@@ -124,9 +118,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
               name="mines"
               onChange={e =>
                 setLevel({
-                  cols,
-                  rows,
-                  type,
+                  ...level,
                   mines: e.currentTarget.valueAsNumber,
                 })
               }

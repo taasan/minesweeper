@@ -117,7 +117,7 @@ const getNeighbourMatrix = (
 type IGame = Readonly<{
   cells: OrderedMap<Coordinate, CellRecord>;
   state: GameState;
-  level: RecordOf<Level>;
+  level: Readonly<Level>;
   cellStates: RecordOf<CellStateStats>;
   error: Readonly<GameError> | null;
 }>;
@@ -129,12 +129,14 @@ export type Level = {
   type: GridType;
 };
 
-const createLevel: Record.Factory<Level> = Record<Level>({
-  cols: 0,
-  rows: 0,
-  mines: 0,
-  type: GridType.SQUARE,
-});
+const createLevel = (level?: Partial<Level>) =>
+  Object.freeze({
+    cols: 0,
+    rows: 0,
+    mines: 0,
+    type: GridType.SQUARE,
+    ...level,
+  });
 
 const createCellStateStats: Record.Factory<CellStateStats> = Record<
   CellStateStats
