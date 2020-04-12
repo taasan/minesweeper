@@ -13,15 +13,15 @@ import {
 import { Dispatch } from 'react';
 import { Action } from '../reducer';
 import { NumeralSystem, getContent } from './getContent';
-import SvgCell from './SvgCell';
+import SvgCell, { cellSize } from './SvgCell';
 import { hexOffset, hexagonPoints, onContextMenu } from '..';
 
-const hexPoints = (cellSize: number) =>
+const hexPoints = () =>
   hexagonPoints()
     .map(({ x, y }) => `${(x * cellSize) / 2},${(y * cellSize) / 2}`)
     .join(' ');
 
-const squarePoints = (cellSize: number) => {
+const squarePoints = () => {
   const gap = 2;
   return [
     [gap, gap],
@@ -98,8 +98,6 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
     boardState === GameState.ERROR;
   const pointerEvents = done ? 'none' : 'revert';
 
-  const cellSize = 33;
-
   const getOffsets = () => {
     const { type } = board.level;
     switch (type) {
@@ -131,7 +129,6 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
     return (
       <svg key={index} x={x} y={y} width={cellSize} height={cellSize}>
         <SvgCell
-          cellSize={cellSize}
           coordinate={index}
           gridType={board.level.type}
           dispatch={dispatch}
@@ -172,11 +169,8 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
       <rect x="0" y="0" width="100%" height="100%" />
       {[...board.cells].map(mapCell)}
       <defs>
-        <polygon id={GridType[GridType.HEX]} points={hexPoints(cellSize)} />
-        <polygon
-          id={GridType[GridType.SQUARE]}
-          points={squarePoints(cellSize)}
-        />
+        <polygon id={GridType[GridType.HEX]} points={hexPoints()} />
+        <polygon id={GridType[GridType.SQUARE]} points={squarePoints()} />
       </defs>
     </svg>
   );

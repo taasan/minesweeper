@@ -11,7 +11,6 @@ import {
 import { CmdAction } from '../reducer';
 
 type ICellProps = {
-  cellSize: number;
   coordinate: Coordinate;
   gridType: GridType;
   dispatch?: Dispatch<CmdAction>;
@@ -21,6 +20,8 @@ type ICellProps = {
   mined: boolean;
 };
 
+export const cellSize = 33;
+
 const SvgCell: FC<ICellProps> = props => {
   const {
     dispatch,
@@ -29,7 +30,6 @@ const SvgCell: FC<ICellProps> = props => {
     threats,
     content,
     mined,
-    cellSize,
     gridType,
   } = props;
 
