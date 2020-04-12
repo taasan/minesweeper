@@ -134,6 +134,7 @@ const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = ({
                 <input
                   checked={selected === value}
                   type="radio"
+                  name="numeralsystem"
                   value={value}
                   onChange={e => {
                     if (e.currentTarget.checked) {
