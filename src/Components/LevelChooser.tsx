@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
-import { GridType, Level } from '../Game';
+import React, { useCallback, useState } from 'react';
+import { CellState, GameState, GridType, Level } from '../Game';
 
 import './LevelChooser.scss';
+import SvgCell from './Board/SvgCell';
 
 interface LevelLite extends Omit<Level, 'type'> {}
 
@@ -25,65 +26,157 @@ export const getLevel = (
 };
 
 type LevelChooserProps = {
+  level: Level;
   onChange: (level: Level) => void;
-  open: boolean;
 };
 
-export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
-  const rowsRef = useRef<HTMLInputElement>(null);
-  const colsRef = useRef<HTMLInputElement>(null);
-  const minesRef = useRef<HTMLInputElement>(null);
-  const typeRef = useRef<HTMLSelectElement>(null);
+export const LevelChooser: React.FC<LevelChooserProps> = ({
+  onChange,
+  level: initialLevel,
+}) => {
+  const [level, setLevel] = useState(initialLevel);
+  const { rows, cols, mines, type } = level;
+
+  const handleTypeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setLevel({
+        cols,
+        rows,
+        mines,
+        type: (GridType[e.currentTarget.value as any] as unknown) as GridType,
+      }),
+    [cols, rows, mines]
+  );
+
   return (
     <div className="LevelChooser">
-      <div style={{ display: 'inline-block' }}>
-        <select
-          onChange={e =>
-            onChange(
-              getLevel(e.target.value, parseInt(typeRef.current?.value!))
-            )
-          }
-        >
-          {Object.keys(LEVELS).map(k => (
-            <option
-              value={k}
-              key={k}
-            >{`${LEVELS[k].cols} x ${LEVELS[k].rows} (${LEVELS[k].mines})`}</option>
-          ))}
-        </select>
-        <input ref={rowsRef} type="number" defaultValue="7" name="rows" />
-        <input ref={colsRef} type="number" defaultValue="11" name="cols" />
-        <input ref={minesRef} type="number" defaultValue="13" name="mines" />
-        <select ref={typeRef}>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          onChange(level);
+        }}
+        onReset={e => {
+          e.preventDefault();
+          setLevel(initialLevel);
+        }}
+      >
+        <fieldset>
+          <legend>Select level</legend>
+          <select
+            onChange={e => {
+              setLevel(getLevel(e.target.value, level.type));
+            }}
+          >
+            <option hidden disabled selected />
+            {Object.keys(LEVELS).map(k => (
+              <option
+                value={k}
+                key={k}
+              >{`${LEVELS[k].cols} x ${LEVELS[k].rows} (${LEVELS[k].mines})`}</option>
+            ))}
+          </select>
+        </fieldset>
+        <fieldset>
+          <legend>Custom level</legend>
+          <label>
+            Rows: {rows}
+            <input
+              onChange={e =>
+                setLevel({
+                  cols,
+                  mines,
+                  type,
+                  rows: e.currentTarget.valueAsNumber,
+                })
+              }
+              min={3}
+              max={30}
+              type="range"
+              value={rows}
+              name="rows"
+            />
+          </label>
+          <label>
+            Columns: {cols}
+            <input
+              onChange={e =>
+                setLevel({
+                  rows,
+                  mines,
+                  type,
+                  cols: e.currentTarget.valueAsNumber,
+                })
+              }
+              min={3}
+              max={30}
+              type="range"
+              value={cols}
+              name="cols"
+            />
+          </label>
+          <label>
+            Mines: {mines} ({((100 * mines) / (rows * cols)).toFixed(1)}%)
+            <input
+              min={1}
+              max={rows * cols}
+              type="range"
+              value={mines}
+              name="mines"
+              onChange={e =>
+                setLevel({
+                  cols,
+                  rows,
+                  type,
+                  mines: e.currentTarget.valueAsNumber,
+                })
+              }
+            />
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Grid type</legend>
           {Object.keys(GridType)
             .filter(name => isNaN(Number(name)))
-            .map((name, i) => (
-              <option key={i} value={i}>
-                {name}
-              </option>
-            ))}
-        </select>
-
-        <button
-          onClick={() => {
-            const rows = parseInt(rowsRef.current?.value!);
-            const cols = parseInt(colsRef.current?.value!);
-            const mines = parseInt(minesRef.current?.value!);
-            const type = parseInt(typeRef.current?.value!);
-            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-            if (rows && cols && mines) {
-              onChange({
-                rows,
-                cols,
-                mines,
-                type,
-              });
-            }
-          }}
-        >
-          OK
-        </button>
-      </div>
+            .map(name => {
+              const checked = name === GridType[type];
+              const state = checked ? CellState.OPEN : CellState.NEW;
+              const content = checked ? '✓' : '';
+              return (
+                <label className="RadioGroup__Option" key={name}>
+                  <input
+                    onChange={handleTypeChange}
+                    checked={checked}
+                    type="radio"
+                    name="type"
+                    value={name}
+                  />
+                  <div
+                    className="SvgBoard"
+                    data-state={GameState[GameState.GAME_OVER]}
+                    style={{
+                      width: '64px',
+                      height: 'auto',
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    {' '}
+                    <SvgCell
+                      threats={2}
+                      content={content}
+                      coordinate={0}
+                      mined={false}
+                      state={state}
+                      gridType={(GridType[name as any] as unknown) as GridType}
+                    />
+                  </div>
+                </label>
+              );
+            })}
+        </fieldset>
+        <button type="submit">OK</button>
+        <button type="reset">Reset</button>
+      </form>
     </div>
   );
 };

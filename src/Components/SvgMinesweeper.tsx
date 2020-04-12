@@ -163,7 +163,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
               level: l,
             });
           }}
-          open={true}
+          level={board.level}
         />
       </Modal>
       <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
