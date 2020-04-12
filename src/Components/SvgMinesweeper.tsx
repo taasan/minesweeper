@@ -22,7 +22,7 @@ import { NumeralSystem } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
 import reducer, { IState, ModalType, Action } from './reducer';
 import { defaultTheme } from '../Theme';
-import useTheme from '../Hooks/useTheme';
+import { useTheme } from '../Hooks';
 //
 /*
 enum TimingEventType {
