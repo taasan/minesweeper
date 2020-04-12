@@ -65,7 +65,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
               setLevel(getLevel(e.target.value, level.type));
             }}
           >
-            <option hidden disabled selected />
+            <option hidden disabled />
             {Object.keys(LEVELS).map(k => (
               <option
                 value={k}
