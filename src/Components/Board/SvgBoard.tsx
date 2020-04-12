@@ -48,7 +48,6 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
   switch (board.state) {
     case GameState.ERROR:
       const error = board.error != null ? board.error.message : 'Unknown error';
-      console.error(board.error?.cause);
       const cause =
         board.error != null &&
         board.error.cause != null &&
@@ -58,6 +57,9 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
         ) : (
           undefined
         );
+      if (board.error != null) {
+        console.error(board.error);
+      }
       return (
         <main className="Error">
           <header>
