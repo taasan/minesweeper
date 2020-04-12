@@ -23,11 +23,24 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   initialState,
   dispatch,
 }) => {
-  const [numeralSystem, setNumeralSystem] = React.useState(
-    initialState.numeralSystem
+  const [state, setState] = React.useState<ISettings>(initialState);
+  const { theme, fitWindow, numeralSystem } = state;
+
+  const handleOnThemeChange = React.useCallback(
+    t => setState({ ...state, theme: t }),
+    [state]
   );
-  const [fitWindow, setFitWindow] = React.useState(initialState.fitWindow);
-  const [theme, setTheme] = React.useState<ITheme>(initialState.theme);
+  const handleOnFitWindowChange = React.useCallback(
+    e => setState({ ...state, fitWindow: e.currentTarget.checked }),
+    [state]
+  );
+
+  const handleNumeralSystemChange = React.useCallback(
+    // eslint-disable-next-line no-shadow
+    numeralSystem => setState({ ...state, numeralSystem }),
+    [state]
+  );
+
   return (
     <form className="SettingsDialog">
       <div
@@ -41,20 +54,20 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           <legend>Numeral system</legend>
           <NumeralSystemChooser
             selected={numeralSystem}
-            onChange={setNumeralSystem}
+            onChange={handleNumeralSystemChange}
           />
         </fieldset>
         <fieldset>
           <legend>Theme</legend>
-          <ThemeChooser theme={theme} onChange={setTheme} />
+          <ThemeChooser theme={theme} onChange={handleOnThemeChange} />
         </fieldset>
         <fieldset>
           <legend>Scaling</legend>
           <label>
             <input
               type="checkbox"
-              defaultChecked={fitWindow}
-              onChange={e => setFitWindow(e.currentTarget.checked)}
+              checked={fitWindow}
+              onChange={handleOnFitWindowChange}
             />
             Fit to window
           </label>
@@ -81,7 +94,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
         <section>
           <main>
             <button
-              onClick={() => {
+              onClick={e => {
+                e.preventDefault();
                 dispatch({
                   type: 'applySettings',
                   settings: {
@@ -95,14 +109,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               Apply changes
             </button>
             <button
-              onClick={() => {
-                dispatch({
-                  type: 'applySettings',
-                  settings: initialState,
-                });
+              onClick={e => {
+                e.preventDefault();
+                setState(initialState);
               }}
             >
-              Revert changes
+              Reset
             </button>
           </main>
         </section>
