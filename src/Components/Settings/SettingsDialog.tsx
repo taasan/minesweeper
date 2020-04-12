@@ -128,49 +128,48 @@ interface NumeralSystemChooserProps {
   onChange: (value: NumeralSystem) => void;
 }
 
-const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = ({
-  selected,
-  onChange,
-}) => {
-  return (
-    <ul className="NumeralSystemChooser">
-      {Object.keys(NumeralSystem)
-        .filter(name => isNaN(Number(name)))
-        .map(name => {
-          const value = (NumeralSystem[
-            name as any
-          ] as unknown) as NumeralSystem;
-          return (
-            <li key={value}>
-              <label>
-                <input
-                  checked={selected === value}
-                  type="radio"
-                  name="numeralsystem"
-                  value={value}
-                  onChange={e => {
-                    if (e.currentTarget.checked) {
-                      onChange(value);
-                    }
-                  }}
-                />{' '}
-                {[...new Array(8)].map((_, n) => (
-                  <span
-                    key={n}
-                    style={{
-                      display: 'inline list-item',
-                      color: `var(--cell-threats-${n + 1}-color)`,
+const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = React.memo(
+  ({ selected, onChange }) => {
+    return (
+      <ul className="NumeralSystemChooser">
+        {Object.keys(NumeralSystem)
+          .filter(name => isNaN(Number(name)))
+          .map(name => {
+            const value = (NumeralSystem[
+              name as any
+            ] as unknown) as NumeralSystem;
+            return (
+              <li key={value}>
+                <label>
+                  <input
+                    checked={selected === value}
+                    type="radio"
+                    name="numeralsystem"
+                    value={value}
+                    onChange={e => {
+                      if (e.currentTarget.checked) {
+                        onChange(value);
+                      }
                     }}
-                  >
-                    {renderThreats(value, (n + 1) as NumThreats)}
-                  </span>
-                ))}
-              </label>
-            </li>
-          );
-        })}
-    </ul>
-  );
-};
+                  />{' '}
+                  {[...new Array(8)].map((_, n) => (
+                    <span
+                      key={n}
+                      style={{
+                        display: 'inline list-item',
+                        color: `var(--cell-threats-${n + 1}-color)`,
+                      }}
+                    >
+                      {renderThreats(value, (n + 1) as NumThreats)}
+                    </span>
+                  ))}
+                </label>
+              </li>
+            );
+          })}
+      </ul>
+    );
+  }
+);
 
 export default SettingsDialog;
