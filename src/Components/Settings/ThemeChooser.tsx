@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Themes, { ITheme } from '../../Theme';
 
 const themes = Themes();
@@ -8,15 +8,11 @@ interface IProps {
   onChange: (value: ITheme) => void;
 }
 
-const ThemeChooser: React.FC<IProps> = ({ theme: initialTheme, onChange }) => {
-  const [theme, setTheme] = useState<ITheme>(
-    initialTheme != null ? initialTheme : themes[0]
-  );
-  console.log({ theme, setTheme });
+const ThemeChooser: React.FC<IProps> = ({ theme, onChange }) => {
   return (
     <div className="ThemeChooser">
       <select
-        defaultValue={themes.indexOf(initialTheme)}
+        value={themes.indexOf(theme)}
         onChange={e => onChange(themes[parseInt(e.currentTarget.value)])}
       >
         {themes.map((t, i) => (
