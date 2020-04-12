@@ -1,13 +1,13 @@
 import {
-  GameState,
   Cmd,
-  createGame,
-  assertNever,
-  GameRecord,
-  NextStateFunction,
   CmdName,
-  isCmdName,
+  GameRecord,
+  GameState,
   Level,
+  NextStateFunction,
+  assertNever,
+  createGame,
+  isCmdName,
 } from '../Game';
 
 import { NumeralSystem } from './Board/getContent';

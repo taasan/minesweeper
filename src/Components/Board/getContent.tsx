@@ -1,8 +1,8 @@
 import {
   CellState,
   GameState,
-  NumThreats,
   Mine,
+  NumThreats,
   isNumThreats,
   randomInt,
 } from '../../Game';

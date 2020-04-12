@@ -37,7 +37,13 @@
     ],
     "rules": {
       "no-shadow": "error",
-      "@typescript-eslint/strict-boolean-expressions": "error"
+      "@typescript-eslint/strict-boolean-expressions": "error",
+      "sort-imports": [
+        "error",
+        {
+          "ignoreDeclarationSort": true
+        }
+      ]
     },
     "parserOptions": {
       "project": "./tsconfig.json"

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Level, GridType } from '../Game';
+import { GridType, Level } from '../Game';
 
 import './LevelChooser.scss';
 

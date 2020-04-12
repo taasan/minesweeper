@@ -1,20 +1,20 @@
 import * as React from 'react';
 import './SvgBoard.css';
 import {
-  GameState,
+  Coordinate,
   GameRecord,
+  GameState,
+  GridType,
+  ICell,
   assertNever,
   calculateCoordinate,
   isNumThreats,
-  ICell,
-  Coordinate,
-  GridType,
 } from '../../Game';
 import { Dispatch } from 'react';
 import { Action } from '../reducer';
-import { getContent, NumeralSystem } from './getContent';
+import { NumeralSystem, getContent } from './getContent';
 import SvgCell from './SvgCell';
-import { onContextMenu, hexOffset, hexagonPoints } from '..';
+import { hexOffset, hexagonPoints, onContextMenu } from '..';
 
 const hexPoints = (cellSize: number) =>
   hexagonPoints()

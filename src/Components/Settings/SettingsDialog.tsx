@@ -1,6 +1,6 @@
 import * as React from 'react';
 import SvgBoard from '../Board/SvgBoard';
-import { legend, NumThreats } from '../../Game';
+import { NumThreats, legend } from '../../Game';
 import { NumeralSystem, renderThreats } from '../Board/getContent';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';

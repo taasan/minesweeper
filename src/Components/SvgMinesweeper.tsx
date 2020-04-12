@@ -1,15 +1,15 @@
 import * as React from 'react';
 import './SvgMinesweeper.scss';
 import {
-  GameState,
-  Level,
-  GameRecord,
-  Cmd,
-  createGame,
-  CmdName,
-  GridType,
-  assertNever,
   CellState,
+  Cmd,
+  CmdName,
+  GameRecord,
+  GameState,
+  GridType,
+  Level,
+  assertNever,
+  createGame,
   // legend,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
@@ -20,7 +20,7 @@ import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
 import { NumeralSystem } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
-import reducer, { IState, ModalType, Action } from './reducer';
+import reducer, { Action, IState, ModalType } from './reducer';
 import { defaultTheme } from '../Theme';
 import { useTheme } from '../Hooks';
 //

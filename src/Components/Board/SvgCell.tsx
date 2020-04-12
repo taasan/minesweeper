@@ -1,11 +1,11 @@
-import React, { FC, Dispatch, memo, MouseEvent } from 'react';
+import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
 import {
-  NumThreats,
   CellState,
   CmdName,
   Coordinate,
   GridType,
+  NumThreats,
 } from '../../Game';
 
 import { CmdAction } from '../reducer';

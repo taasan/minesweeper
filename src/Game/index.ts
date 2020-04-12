@@ -1,4 +1,4 @@
-import { OrderedMap, Record, RecordOf, Collection } from 'immutable';
+import { Collection, OrderedMap, Record, RecordOf } from 'immutable';
 
 export function assertNever(x: never): never {
   throw new Error('Unexpected value: ' + x);
