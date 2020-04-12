@@ -9,7 +9,6 @@ import {
 } from '../../Game';
 
 import { CmdAction } from '../reducer';
-import { useLongPress } from '../../Hooks';
 
 type ICellProps = {
   coordinate: Coordinate;
@@ -33,23 +32,6 @@ const SvgCell: FC<ICellProps> = props => {
     mined,
     gridType,
   } = props;
-
-  // Long press on touch devices. Flag
-  const { start, stop } = useLongPress(() => {
-    stop();
-    if (dispatch != null) {
-      switch (state) {
-        case CellState.NEW:
-        case CellState.FLAGGED:
-        case CellState.UNCERTAIN:
-          window.navigator.vibrate(100);
-          return dispatch({
-            type: 'FLAG',
-            coordinate,
-          });
-      }
-    }
-  }, 200);
 
   const getCommand = (e: MouseEvent): CmdName => {
     if (state === CellState.OPEN) {
@@ -82,8 +64,6 @@ const SvgCell: FC<ICellProps> = props => {
       viewBox={`0 0 ${cellSize} ${cellSize}`}
       className="SvgCell"
       onMouseDown={handleClick}
-      onTouchEnd={stop}
-      onTouchStart={start}
       data-state={CellState[state]}
       data-threats={threats}
       data-mined={mined ? true : undefined}
