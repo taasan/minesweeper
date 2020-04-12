@@ -30,7 +30,6 @@ type LevelChooserProps = {
 };
 
 export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
-  console.log('Render LevelChooser');
   const rowsRef = useRef<HTMLInputElement>(null);
   const colsRef = useRef<HTMLInputElement>(null);
   const minesRef = useRef<HTMLInputElement>(null);

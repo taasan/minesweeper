@@ -162,7 +162,6 @@ type LevelChooserProps = {
   onChange: (level: Level) => void;
 };
 const LevelChooser: React.FC<LevelChooserProps> = React.memo(({ onChange }) => {
-  console.log('Render LevelChooser');
   const rowsRef = useRef<HTMLInputElement>(null);
   const colsRef = useRef<HTMLInputElement>(null);
   const minesRef = useRef<HTMLInputElement>(null);

@@ -14,7 +14,6 @@ type IProps = {
 };
 
 const Board: React.FC<IProps> = (props: IProps) => {
-  console.log('Render board');
   const { board, dispatch, rotated } = props;
 
   const boardState = board.state;

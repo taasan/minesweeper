@@ -23,8 +23,6 @@ export type ICellProps = {
 };
 
 const Cell: FC<ICellProps> = props => {
-  console.log('Render cell');
-
   const random = useMemo(() => randomInt(12), []);
 
   const { dispatch, state, coordinate, threats, content, mined } = props;

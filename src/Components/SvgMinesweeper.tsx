@@ -70,7 +70,6 @@ function init({ level, containerRef }: IStateInit): IState {
 type IProps = { level: Level };
 
 const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
-  console.log('Render', 'SvgMinesweeper');
   const [state, dispatch] = useReducer(
     reducer,
     {
@@ -95,7 +94,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
 
   const modal = modalStack[modalStack.length - 1];
   React.useEffect(() => {
-    console.log('useEffect register keyup');
     return registerEvent('keyup', (e: KeyboardEvent) => {
       if (e.keyCode === 80) {
         dispatch({ type: 'TOGGLE_PAUSE', coordinate: 0 });
@@ -183,7 +181,6 @@ interface ControlsProps {
 const Controls = React.memo(
   React.forwardRef<HTMLDivElement, ControlsProps>(
     ({ board, dispatch }, ref) => {
-      console.log('Render', 'Controls');
       const { level } = board;
       const remaining = level.mines - board.cellStates[CellState.FLAGGED];
 

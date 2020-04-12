@@ -41,7 +41,6 @@ type IProps = {
 };
 
 const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
-  console.log('Render board');
   const { dispatch, numeralSystem, board, style } = props;
 
   const boardState = board.state;

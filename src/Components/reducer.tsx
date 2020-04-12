@@ -96,7 +96,6 @@ const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
 };
 
 const reducer = (state: IState, action: Action): IState => {
-  console.log(action);
   if (isCmdAction(action)) {
     if (
       action.type === 'TOGGLE_PAUSE' &&
