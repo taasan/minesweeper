@@ -96,7 +96,8 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
     boardState === GameState.COMPLETED ||
     boardState === GameState.DEMO ||
     boardState === GameState.ERROR;
-  const pointerEvents = done ? 'none' : 'revert';
+  const pointerEvents =
+    done || boardState === GameState.PAUSED ? 'none' : 'revert';
 
   const getOffsets = () => {
     const { type } = board.level;

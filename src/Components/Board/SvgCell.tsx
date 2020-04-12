@@ -81,7 +81,6 @@ const SvgCell: FC<ICellProps> = props => {
     <svg
       viewBox={`0 0 ${cellSize} ${cellSize}`}
       className="SvgCell"
-      pointerEvents="all"
       onMouseDown={handleClick}
       onTouchEnd={stop}
       onTouchStart={start}
