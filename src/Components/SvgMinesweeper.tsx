@@ -98,7 +98,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     console.log('useEffect register keyup');
     return registerEvent('keyup', (e: KeyboardEvent) => {
       if (e.keyCode === 80) {
-        dispatch({ type: 'TOGGLE_PAUSE', dispatch, coordinate: 0 });
+        dispatch({ type: 'TOGGLE_PAUSE', coordinate: 0 });
       }
     });
   }, [containerRef]);
@@ -120,7 +120,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       dispatch({
         type: 'setLevel',
         level: board.level,
-        dispatch,
       });
     }
   };
@@ -164,7 +163,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
             dispatch({
               type: 'setLevel',
               level: l,
-              dispatch,
             });
           }}
           open={true}
@@ -196,7 +194,6 @@ const Controls = React.memo(
             dispatch({
               type: Cmd[Cmd.TOGGLE_PAUSE] as CmdName,
               coordinate: -1,
-              dispatch,
             });
             break;
         }

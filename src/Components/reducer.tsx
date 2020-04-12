@@ -11,7 +11,6 @@ import {
 } from '../Game';
 
 import { NumeralSystem } from './Board/getContent';
-import { Dispatch } from 'react';
 import { ISettings } from './Settings/SettingsDialog';
 import { ITheme } from '../Theme';
 
@@ -30,7 +29,6 @@ export type IState = {
 export type CmdAction = {
   type: CmdName;
   coordinate: number;
-  dispatch: Dispatch<Action>;
 };
 
 export function isCmdAction(s: Action): s is CmdAction {
@@ -42,30 +40,43 @@ export enum ModalType {
   SETTINGS,
 }
 
-export type Action =
-  | { type: 'setLevel'; level: Level; dispatch: Dispatch<Action> }
-  | {
-      type: 'setBoard';
-      game: { board: GameRecord; nextState: NextStateFunction };
-    }
-  | {
-      type: 'fitWindow';
-    }
-  | {
-      type: 'setNumeralSystem';
-      numeralSystem: NumeralSystem;
-    }
-  | {
-      type: 'applySettings';
-      settings: ISettings;
-    }
+export type SettingsAction = {
+  type: 'applySettings';
+  settings: ISettings;
+};
+
+export type LevelAction = {
+  type: 'setLevel';
+  level: Level;
+};
+
+export type BoardAction = {
+  type: 'setBoard';
+  game: {
+    board: GameRecord;
+    nextState: NextStateFunction;
+  };
+};
+
+export type FitWindowAction = {
+  type: 'fitWindow';
+};
+
+export type ModalAction =
   | {
       type: 'showModal';
       modal: ModalType;
     }
   | {
       type: 'closeModal';
-    }
+    };
+
+export type Action =
+  | LevelAction
+  | BoardAction
+  | SettingsAction
+  | FitWindowAction
+  | ModalAction
   | CmdAction;
 
 const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
@@ -117,11 +128,6 @@ const reducer = (state: IState, action: Action): IState => {
         ...state,
         ...action.game,
         loading: false,
-      };
-    case 'setNumeralSystem':
-      return {
-        ...state,
-        numeralSystem: action.numeralSystem,
       };
     case 'applySettings':
       return {

@@ -8,13 +8,13 @@ import {
   GridType,
 } from '../../Game';
 
-import { Action } from '../reducer';
+import { CmdAction } from '../reducer';
 
 type ICellProps = {
   cellSize: number;
   coordinate: Coordinate;
   gridType: GridType;
-  dispatch?: Dispatch<Action>;
+  dispatch?: Dispatch<CmdAction>;
   content: string | NumThreats;
   state: CellState;
   threats?: NumThreats;
@@ -53,7 +53,6 @@ const SvgCell: FC<ICellProps> = props => {
       dispatch({
         type: getCommand(e),
         coordinate,
-        dispatch,
       });
     }
   };

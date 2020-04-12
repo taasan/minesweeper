@@ -2,11 +2,11 @@ import * as React from 'react';
 import SvgBoard from '../Board/SvgBoard';
 import { legend, NumThreats } from '../../Game';
 import { NumeralSystem, renderThreats } from '../Board/getContent';
-import { Action } from '../reducer';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
 import { ITheme } from '../../Theme';
+import { SettingsAction } from '../reducer';
 
 export type ISettings = {
   numeralSystem: NumeralSystem;
@@ -15,7 +15,7 @@ export type ISettings = {
 };
 
 export type SettingsDialogProps = {
-  dispatch: React.Dispatch<Action>;
+  dispatch: React.Dispatch<SettingsAction>;
   initialState: ISettings;
 };
 
