@@ -114,12 +114,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       e.preventDefault();
       e.stopPropagation();
     }
-    if (done) {
-      dispatch({
-        type: 'setLevel',
-        level: board.level,
-      });
-    }
   };
   const classes = ['SvgMinesweeper'];
   /*
@@ -184,7 +178,7 @@ const Controls = React.memo(
       const { level } = board;
       const remaining = level.mines - board.cellStates[CellState.FLAGGED];
 
-      const togglePause = () => {
+      const handleGameStateClick = () => {
         switch (board.state) {
           case GameState.PAUSED:
           case GameState.PLAYING:
@@ -193,6 +187,13 @@ const Controls = React.memo(
               coordinate: -1,
             });
             break;
+          case GameState.COMPLETED:
+          case GameState.GAME_OVER:
+          case GameState.ERROR:
+            dispatch({
+              type: 'setLevel',
+              level: board.level,
+            });
         }
       };
 
@@ -208,7 +209,7 @@ const Controls = React.memo(
           </div>
           <div
             role="button"
-            onClick={togglePause}
+            onClick={handleGameStateClick}
             aria-label={`Game state: ${GameState[board.state]}`}
           >
             {renderGameState(board.state)}
