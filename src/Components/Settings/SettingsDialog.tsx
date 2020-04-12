@@ -42,7 +42,24 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   );
 
   return (
-    <form className="SettingsDialog">
+    <form
+      className="SettingsDialog"
+      onSubmit={e => {
+        e.preventDefault();
+        dispatch({
+          type: 'applySettings',
+          settings: {
+            numeralSystem,
+            fitWindow,
+            theme,
+          },
+        });
+      }}
+      onReset={e => {
+        e.preventDefault();
+        setState(initialState);
+      }}
+    >
       <div
         style={{
           display: 'flex',
@@ -93,29 +110,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
       <div>
         <section>
           <main>
-            <button
-              onClick={e => {
-                e.preventDefault();
-                dispatch({
-                  type: 'applySettings',
-                  settings: {
-                    numeralSystem,
-                    fitWindow,
-                    theme,
-                  },
-                });
-              }}
-            >
-              Apply changes
-            </button>
-            <button
-              onClick={e => {
-                e.preventDefault();
-                setState(initialState);
-              }}
-            >
-              Reset
-            </button>
+            <button type="submit">Apply changes</button>
+            <button type="reset">Reset</button>
           </main>
         </section>
       </div>
