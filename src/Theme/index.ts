@@ -7,12 +7,14 @@ export type ITheme = Readonly<{
   darkMode?: boolean;
 }>;
 
-export const defaultTheme: ITheme = Object.freeze({
-  name: 'Default',
+const simple: ITheme = Object.freeze({
+  name: 'Simple',
   styles: [theme],
   darkMode: false,
 });
 
+export const defaultTheme = solarized;
+
 export default () => {
-  return [defaultTheme, solarized, Solarized.dark, Solarized.light];
+  return [simple, solarized, Solarized.dark, Solarized.light];
 };
