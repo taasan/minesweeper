@@ -27,7 +27,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const { theme, fitWindow, numeralSystem } = state;
 
   const handleOnThemeChange = React.useCallback(
-    t => setState({ ...state, theme: t }),
+    // eslint-disable-next-line no-shadow
+    theme => setState({ ...state, theme }),
     [state]
   );
   const handleOnFitWindowChange = React.useCallback(
