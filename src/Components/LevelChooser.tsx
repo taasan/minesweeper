@@ -146,7 +146,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
                     className="SvgBoard"
                     data-state={GameState[GameState.GAME_OVER]}
                     style={{
-                      width: '64px',
+                      width: '32px',
                       height: 'auto',
                       display: 'inline-block',
                       verticalAlign: 'middle',
