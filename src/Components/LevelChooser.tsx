@@ -160,6 +160,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
             />
           </label>
           <button
+            disabled={rows === cols}
             type="button"
             onClick={() =>
               setLevel({
