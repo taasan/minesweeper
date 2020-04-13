@@ -16,24 +16,24 @@ import { CloseButton } from './CloseButton';
 
 interface LevelLite extends Omit<Level, 'type'> {}
 
-type ILevels = {
-  [keyof: string]: LevelLite;
-};
-
-const LEVELS: ILevels = {
-  BEGINNER: { rows: 6, cols: 10, mines: 10 },
-  INTERMEDIATE: { rows: 16, cols: 16, mines: 40 },
-  EXPERT: { mines: 99, rows: 16, cols: 30 },
-};
+// const predefinedLevels: ReadonlyMap<string, Readonly<LevelLite>> = new Map();
+const predefinedLevels = Object.freeze([
+  Object.freeze({ rows: 6, cols: 10, mines: 10, name: 'Beginner' }),
+  Object.freeze({ rows: 16, cols: 16, mines: 40, name: 'Intermediate' }),
+  Object.freeze({ mines: 99, rows: 16, cols: 30, name: 'Expert' }),
+]);
 
 export const getLevel = (
-  key: string = 'BEGINNER',
+  key: string = 'Beginner',
   type: GridType = GridType.SQUARE
 ): Level => {
-  const lvl = LEVELS[key];
-  const v = lvl != null ? lvl : LEVELS.BEGINNER;
+  const lvl = predefinedLevels.find(l => l.name === key);
+  const v = lvl != null ? lvl : predefinedLevels[0];
   return Object.freeze({ ...v, type });
 };
+
+const compareLevels = (a: LevelLite | Level, b: LevelLite | Level) =>
+  a.cols === b.cols && a.rows === b.rows && a.mines === b.mines;
 
 type LevelChooserProps = {
   level: Level;
@@ -62,6 +62,9 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
     });
   }
 
+  const selectedLevel = predefinedLevels.find(v => compareLevels(level, v))
+    ?.name;
+
   const handleTypeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setLevel({
@@ -70,6 +73,11 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
       }),
     [level]
   );
+
+  const custom = 'Custom';
+
+  const formatLevel = (v: LevelLite & { name: string }) =>
+    `${v.name}: ${v.cols} x ${v.rows} (${v.mines})`;
 
   return (
     <div className="LevelChooser">
@@ -86,16 +94,18 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
         <fieldset>
           <legend>Select level</legend>
           <select
+            value={selectedLevel ?? custom}
             onChange={e => {
               setLevel(getLevel(e.target.value, level.type));
             }}
           >
-            <option hidden disabled />
-            {Object.keys(LEVELS).map(k => (
-              <option
-                value={k}
-                key={k}
-              >{`${LEVELS[k].cols} x ${LEVELS[k].rows} (${LEVELS[k].mines})`}</option>
+            <option hidden={selectedLevel != null} value={custom}>
+              {formatLevel({ name: custom, cols, rows, mines })}
+            </option>
+            {[...predefinedLevels.entries()].map(([k, v]) => (
+              <option value={v.name} key={k}>
+                {formatLevel(v)}
+              </option>
             ))}
           </select>
         </fieldset>
