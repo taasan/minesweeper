@@ -115,7 +115,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       e.stopPropagation();
     }
   };
-  const classes = ['SvgMinesweeper'];
+  const classes = ['SvgMinesweeper', 'SvgMinesweeper__Container'];
   /*
   if (rotated) {
     classes.push('SvgMinesweeper__rotated');
@@ -133,11 +133,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   );
 
   return (
-    <div
-      style={{
-        display: 'block',
-      }}
-    >
+    <div>
       <div
         className={classes.join(' ')}
         onPointerDown={handlePointerDown}
