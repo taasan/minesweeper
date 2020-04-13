@@ -158,6 +158,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         onRequestClose={closeModal}
       >
         <LevelChooser
+          onCancel={closeModal}
           onChange={l => {
             closeModal();
             dispatch({

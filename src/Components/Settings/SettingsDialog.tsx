@@ -6,7 +6,8 @@ import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
 import { ITheme } from '../../Theme';
-import { SettingsAction } from '../reducer';
+import { ModalAction, SettingsAction } from '../reducer';
+import { CloseButton } from '../CloseButton';
 
 export type ISettings = {
   numeralSystem: NumeralSystem;
@@ -15,7 +16,7 @@ export type ISettings = {
 };
 
 export type SettingsDialogProps = {
-  dispatch: React.Dispatch<SettingsAction>;
+  dispatch: React.Dispatch<SettingsAction | ModalAction>;
   initialState: ISettings;
 };
 
@@ -113,6 +114,10 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           <main>
             <button type="submit">Apply changes</button>
             <button type="reset">Reset</button>
+            <CloseButton
+              close={() => dispatch({ type: 'closeModal' })}
+              text="Cancel"
+            />
           </main>
         </section>
       </div>

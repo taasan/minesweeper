@@ -3,6 +3,7 @@ import { CellState, GameState, GridType, Level } from '../Game';
 
 import './LevelChooser.scss';
 import SvgCell from './Board/SvgCell';
+import { CloseButton } from './CloseButton';
 
 interface LevelLite extends Omit<Level, 'type'> {}
 
@@ -28,11 +29,13 @@ export const getLevel = (
 type LevelChooserProps = {
   level: Level;
   onChange: (level: Level) => void;
+  onCancel(): void;
 };
 
 export const LevelChooser: React.FC<LevelChooserProps> = ({
   onChange,
   level: initialLevel,
+  onCancel,
 }) => {
   const [level, setLevel] = useState(initialLevel);
   const { rows, cols, mines, type } = level;
@@ -180,6 +183,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
         </fieldset>
         <button type="submit">OK</button>
         <button type="reset">Reset</button>
+        <CloseButton close={onCancel} text="Cancel" />
       </form>
     </div>
   );
