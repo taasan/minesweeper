@@ -3,6 +3,7 @@ ul.NumeralSystemChooser {
   li {
     list-style-type: none;
     margin: revert;
+    unicode-bidi: bidi-override;
   }
   .NumeralSystemChooser__digit {
     width: 1.1em;
