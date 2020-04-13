@@ -4,4 +4,9 @@ ul.NumeralSystemChooser {
     list-style-type: none;
     margin: revert;
   }
+  .NumeralSystemChooser__digit {
+    width: 1.1em;
+    display: inline-block;
+    text-align: center;
+  }
 }

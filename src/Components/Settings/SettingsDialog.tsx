@@ -151,9 +151,9 @@ const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = React.memo(
                   />{' '}
                   {[...new Array(8)].map((_, n) => (
                     <span
+                      className="NumeralSystemChooser__digit"
                       key={n}
                       style={{
-                        display: 'inline list-item',
                         color: `var(--cell-threats-${n + 1}-color)`,
                       }}
                     >
