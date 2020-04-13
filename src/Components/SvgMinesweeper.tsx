@@ -20,7 +20,7 @@ import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
 import { NumeralSystem } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
-import reducer, { Action, IState, ModalType } from './reducer';
+import reducer, { Action, IState, ModalType, onGameOver } from './reducer';
 import { defaultTheme } from '../Theme';
 import { useTheme } from '../Hooks';
 //
@@ -53,7 +53,7 @@ type IStateInit = Pick<IState, 'containerRef'> & {
 
 function init({ level, containerRef }: IStateInit): IState {
   return {
-    ...createGame(level),
+    ...createGame(level, onGameOver),
     loading: false,
     containerRef,
     fitWindow: true,

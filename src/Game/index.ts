@@ -120,6 +120,7 @@ type IGame = Readonly<{
   level: Readonly<Level>;
   cellStates: RecordOf<CellStateStats>;
   error: Readonly<GameError> | null;
+  onGameOver(): void;
 }>;
 
 export type Level = {
@@ -150,6 +151,7 @@ const createBoard: Record.Factory<IGame> = Record<IGame>({
   level: createLevel(),
   cellStates: createCellStateStats(),
   error: null,
+  onGameOver: () => undefined,
 });
 
 export type Mine = 0xff;
@@ -185,7 +187,11 @@ function createEmptyCells({ cols, rows }: Level): Array<[Coordinate, ICell]> {
   return cells;
 }
 
-function initialize(level: Level, origin: Coordinate): GameRecord {
+function initialize(
+  level: Level,
+  origin: Coordinate,
+  onGameOver: () => void
+): GameRecord {
   const cells = createEmptyCells(level);
   const { cols, rows, mines } = level;
 
@@ -216,6 +222,7 @@ function initialize(level: Level, origin: Coordinate): GameRecord {
     cells: cellRecords,
     cellStates: getCellStates(cellRecords),
     state: GameState.INITIALIZED,
+    onGameOver,
   }).withMutations(board => {
     board.set(
       'cells',
@@ -348,7 +355,10 @@ function nextState(
   if (board.state === GameState.NOT_INITIALIZED) {
     return nextState(command, [
       coordinate,
-      initialize(board.level, coordinate).set('state', GameState.PLAYING),
+      initialize(board.level, coordinate, board.onGameOver).set(
+        'state',
+        GameState.PLAYING
+      ),
     ]);
   }
 
@@ -382,6 +392,14 @@ function nextState(
       mutable.set('cellStates', stats);
       if (stats[CellState.EXPLODED] > 0) {
         mutable.set('state', GameState.GAME_OVER);
+        const gameOver = async () => {
+          try {
+            board.onGameOver();
+          } catch (err) {
+            console.warn('Unhandled exception in onGameOver handler', err);
+          }
+        };
+        gameOver();
       } else if (mutable.cells.get(coordinate)!.state === CellState.OPEN) {
         const openPlusMines = mutable.level.mines + stats[CellState.OPEN];
         const numCells = mutable.level.cols * mutable.level.rows;
@@ -520,7 +538,8 @@ export type NextStateFunction = (
 ) => GameRecord;
 
 export function createGame(
-  level: Level
+  level: Level,
+  onGameOver: () => void
 ): { board: GameRecord; nextState: NextStateFunction } {
   const cells = OrderedMap(
     createEmptyCells(level).map(([pos, cell]) => [pos, createGameCell(cell)])
@@ -551,7 +570,7 @@ export function createGame(
     }
   };
   return {
-    board: createBoard({ level: createLevel(level), cells }),
+    board: createBoard({ level: createLevel(level), cells, onGameOver }),
     nextState: func,
   };
 }

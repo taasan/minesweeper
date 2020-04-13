@@ -79,6 +79,12 @@ export type Action =
   | ModalAction
   | CmdAction;
 
+export const onGameOver = () => {
+  window.navigator.vibrate(
+    [...new Array(6)].map((_, i) => ((i & 1) === 0 ? 300 : 100))
+  );
+};
+
 const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
   if (board.current == null) {
     return {
@@ -115,7 +121,7 @@ const reducer = (state: IState, action: Action): IState => {
   const modalStackSize = state.modalStack.length;
   switch (action.type) {
     case 'setLevel':
-      const { board, nextState } = createGame(action.level);
+      const { board, nextState } = createGame(action.level, onGameOver);
       return {
         ...state,
         board,
