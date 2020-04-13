@@ -121,6 +121,17 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     classes.push('SvgMinesweeper__rotated');
   }
 */
+  const handleRestartGame = React.useCallback(
+    e => {
+      onContextMenu(e);
+      dispatch({
+        type: 'setLevel',
+        level: board.level,
+      });
+    },
+    [board.level]
+  );
+
   return (
     <div
       style={{
@@ -130,7 +141,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       <div
         className={classes.join(' ')}
         onPointerDown={handlePointerDown}
-        onContextMenu={onContextMenu}
+        onContextMenu={done ? handleRestartGame : onContextMenu}
       >
         <Controls board={board} dispatch={dispatch} />
         <ErrorBoundary>
