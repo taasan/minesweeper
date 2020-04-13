@@ -1,5 +1,14 @@
 import React, { useCallback, useState } from 'react';
-import { CellState, GameState, GridType, Level } from '../Game';
+import {
+  CellState,
+  GameState,
+  GridType,
+  Level,
+  MAX_LEVEL,
+  MIN_LEVEL,
+  maxMines,
+  minMines,
+} from '../Game';
 
 import './LevelChooser.scss';
 import SvgCell from './Board/SvgCell';
@@ -39,6 +48,19 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
 }) => {
   const [level, setLevel] = useState(initialLevel);
   const { rows, cols, mines, type } = level;
+  const maxM = maxMines({ rows, cols });
+  const minM = minMines({ rows, cols });
+  if (level.mines > maxM) {
+    setLevel({
+      ...level,
+      mines: maxM,
+    });
+  } else if (level.mines < minM) {
+    setLevel({
+      ...level,
+      mines: minM,
+    });
+  }
 
   const handleTypeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -88,8 +110,8 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
                   rows: e.currentTarget.valueAsNumber,
                 })
               }
-              min={3}
-              max={30}
+              min={MIN_LEVEL}
+              max={MAX_LEVEL}
               type="range"
               value={rows}
               name="rows"
@@ -104,8 +126,8 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
                   cols: e.currentTarget.valueAsNumber,
                 })
               }
-              min={3}
-              max={30}
+              min={MIN_LEVEL}
+              max={MAX_LEVEL}
               type="range"
               value={cols}
               name="cols"
@@ -114,8 +136,8 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
           <label>
             Mines: {mines} ({((100 * mines) / (rows * cols)).toFixed(1)}%)
             <input
-              min={1}
-              max={rows * cols}
+              min={minM}
+              max={maxM}
               type="range"
               value={mines}
               name="mines"

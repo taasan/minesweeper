@@ -6,6 +6,7 @@ import {
   GameState,
   GridType,
   ICell,
+  ValidationError,
   assertNever,
   calculateCoordinate,
   isNumThreats,
@@ -47,6 +48,26 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
   switch (board.state) {
     case GameState.ERROR:
       const error = board.error != null ? board.error.message : 'Unknown error';
+      let content;
+      if (board.error instanceof ValidationError) {
+        content = (
+          <pre style={{ textAlign: 'initial' }}>
+            {JSON.stringify(board.error.errors, undefined, 2)}
+          </pre>
+          /*
+          <dl>
+            {board.error.errors.map((err, i) => (
+              <React.Fragment key={i}>
+                <dt>Field: {err.field}</dt>
+                <dd>
+                  {err.msg}: {err.value}
+                </dd>
+              </React.Fragment>
+            ))}
+          </dl>
+          */
+        );
+      }
       const cause =
         board.error != null &&
         board.error.cause != null &&

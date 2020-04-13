@@ -45,8 +45,8 @@ export enum GameState {
 }
 
 class GameError extends Error {
-  readonly cause: Error;
-  constructor(msg: string, err: Error) {
+  readonly cause?: Error;
+  constructor(msg: string, err?: Error) {
     super(msg);
     this.cause = Object.freeze(err);
   }
@@ -537,10 +537,73 @@ export type NextStateFunction = (
   currentState: [Coordinate, GameRecord]
 ) => GameRecord;
 
+export type IValidationError = {
+  field: string;
+  value: any;
+  msg: string;
+};
+
+export const MAX_LEVEL = 30;
+export const MIN_LEVEL = 3;
+
+export const maxMines = ({ rows, cols }: { rows: number; cols: number }) =>
+  Math.floor(rows * cols * 0.5);
+
+export const minMines = ({ rows, cols }: { rows: number; cols: number }) =>
+  Math.ceil(rows * cols * 0.1);
+
+export const validateLevel = ({
+  rows,
+  cols,
+  mines,
+}: Level): IValidationError[] => {
+  const errors = [];
+  if (rows < MIN_LEVEL) {
+    errors.push({ field: 'rows', value: rows, msg: 'Too small' });
+  } else if (rows > MAX_LEVEL) {
+    errors.push({ field: 'rows', value: rows, msg: 'Too large' });
+  }
+  if (cols < MIN_LEVEL) {
+    errors.push({ field: 'cols', value: cols, msg: 'Too small' });
+  } else if (rows > MAX_LEVEL) {
+    errors.push({ field: 'cols', value: cols, msg: 'Too large' });
+  }
+  if (mines < minMines({ rows, cols })) {
+    errors.push({ field: 'mines', value: mines, msg: 'Too small' });
+  } else if (mines > maxMines({ rows, cols })) {
+    errors.push({ field: 'mines', value: mines, msg: 'Too large' });
+  }
+
+  return errors;
+};
+
+export class ValidationError extends GameError {
+  public readonly errors: ReadonlyArray<IValidationError>;
+  constructor(msg: string, errors: IValidationError[]) {
+    super(msg);
+    this.errors = Object.freeze(errors.map(e => Object.freeze(e)));
+  }
+}
+
 export function createGame(
   level: Level,
   onGameOver: () => void
 ): { board: GameRecord; nextState: NextStateFunction } {
+  const errors = validateLevel(level);
+
+  if (errors.length > 0) {
+    return {
+      board: createBoard({
+        level: createLevel(level),
+        cells: OrderedMap(),
+        onGameOver,
+        state: GameState.ERROR,
+        error: Object.freeze(new ValidationError('Invalid level', errors)),
+      }),
+      nextState: (_cmd, [_coordinate, game]) => game,
+    };
+  }
+
   const cells = OrderedMap(
     createEmptyCells(level).map(([pos, cell]) => [pos, createGameCell(cell)])
   );
