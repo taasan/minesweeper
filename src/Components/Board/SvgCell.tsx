@@ -101,8 +101,7 @@ const SvgCell: FC<ICellProps> = props => {
         fill="white"
         fontSize={fontSize}
       >
-        {// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        (state === CellState.OPEN && threats === 0) || content}
+        {state === CellState.OPEN && threats === 0 ? undefined : content}
       </text>
       <use
         href={`#${GridType[gridType]}`}
@@ -111,8 +110,7 @@ const SvgCell: FC<ICellProps> = props => {
         fillOpacity={1}
         strokeWidth={0}
       />
-      {(state === CellState.FLAGGED || state === CellState.UNCERTAIN) && (
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      {state === CellState.FLAGGED || state === CellState.UNCERTAIN ? (
         <text
           role={role}
           className="SvgCell__Text"
@@ -125,6 +123,8 @@ const SvgCell: FC<ICellProps> = props => {
         >
           {content}
         </text>
+      ) : (
+        undefined
       )}
       {/*}
       <text

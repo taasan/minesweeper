@@ -87,10 +87,10 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
             <p>Something went wrong</p>
           </header>
           <p>{error}</p>
+          {content}
           <section>
             <h2>Cause</h2>
-            {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions*/}
-            {cause || 'unknown'}
+            {cause ?? 'unknown'}
           </section>
         </main>
       );
