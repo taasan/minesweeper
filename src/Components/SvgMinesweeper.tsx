@@ -124,6 +124,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   const handleRestartGame = React.useCallback(
     e => {
       onContextMenu(e);
+      window.navigator.vibrate(300);
       dispatch({
         type: 'setLevel',
         level: board.level,
