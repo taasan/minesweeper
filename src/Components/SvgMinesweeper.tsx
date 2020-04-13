@@ -61,7 +61,7 @@ function init({ level, containerRef }: IStateInit): IState {
       maxHeight: 'revert',
       maxWidth: 'revert',
     },
-    numeralSystem: NumeralSystem.beng,
+    numeralSystem: NumeralSystem.BENGALI,
     modalStack: [],
     theme: defaultTheme,
   };
