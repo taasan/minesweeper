@@ -124,6 +124,18 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
               }
             />
           </label>
+          <button
+            type="button"
+            onClick={() =>
+              setLevel({
+                ...level,
+                rows: level.cols,
+                cols: level.rows,
+              })
+            }
+          >
+            Swap rows and columns
+          </button>
         </fieldset>
         <fieldset>
           <legend>Grid type</legend>
