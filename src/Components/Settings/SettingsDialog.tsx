@@ -137,7 +137,7 @@ const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = React.memo(
             ] as unknown) as NumeralSystem;
             return (
               <li key={value}>
-                <label>
+                <label title={name}>
                   <input
                     checked={selected === value}
                     type="radio"
