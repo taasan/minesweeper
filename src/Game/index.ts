@@ -392,14 +392,13 @@ function nextState(
       mutable.set('cellStates', stats);
       if (stats[CellState.EXPLODED] > 0) {
         mutable.set('state', GameState.GAME_OVER);
-        const gameOver = async () => {
+        (async () => {
           try {
             board.onGameOver();
           } catch (err) {
             console.warn('Unhandled exception in onGameOver handler', err);
           }
-        };
-        gameOver();
+        })();
       } else if (mutable.cells.get(coordinate)!.state === CellState.OPEN) {
         const openPlusMines = mutable.level.mines + stats[CellState.OPEN];
         const numCells = mutable.level.cols * mutable.level.rows;
