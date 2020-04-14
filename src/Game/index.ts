@@ -123,6 +123,8 @@ type IGame = Readonly<{
   onGameOver(): void;
 }>;
 
+export type Grid = Omit<Level, 'mines'>;
+
 export type Level = {
   cols: number;
   rows: number;
@@ -251,11 +253,13 @@ function updateCell(
 }
 
 function countThreats(board: GameRecord, p: Coordinate): NumThreats | Mine {
-  if (board.cells.get(p)?.threatCount === 0xff) {
+  const { cells, level } = board;
+  if (cells.get(p)?.threatCount === 0xff) {
     return 0xff;
   }
   let threats: NumThreats = 0;
-  visitNeighbours(board, p, ([, cell]) => {
+  visitNeighbours(level, p, coordinate => {
+    const cell = cells.get(coordinate)!;
     if (cell.threatCount === 0xff) {
       threats++;
     }
@@ -271,7 +275,7 @@ export function randomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-export type GameCellCallback<T> = ([coordinate, cell]: [Coordinate, T]) => void;
+export type GameCellCallback = (coordinate: Coordinate) => void;
 
 export const calculateCoordinate = (cols: number, index: number) => {
   const col = index % cols;
@@ -279,28 +283,25 @@ export const calculateCoordinate = (cols: number, index: number) => {
   return { col, row };
 };
 
-export const getNeighbours = (board: GameRecord, origin: Coordinate) => {
-  const { rows, cols, type } = board.level;
-
-  return getNeighbourMatrix(type)(calculateCoordinate(cols, origin))
+export const getNeighbours = ({ rows, cols, type }: Grid, origin: Coordinate) =>
+  getNeighbourMatrix(type)(calculateCoordinate(cols, origin))
     .filter(
       ({ row, col }) => !(col >= cols || col < 0 || row >= rows || row < 0)
     )
     .map(({ row, col }) => col + cols * row)
     .filter(c => c !== origin);
-};
 
-function visitNeighbours(
-  board: GameRecord,
+export function visitNeighbours(
+  level: Grid,
   origin: Coordinate,
-  ...callbacks: Array<GameCellCallback<CellRecord>>
+  ...callbacks: Array<GameCellCallback>
 ) {
   if (callbacks.length === 0) {
     return;
   }
 
-  getNeighbours(board, origin).forEach(coordinate =>
-    callbacks.forEach(cb => cb([coordinate, board.cells.get(coordinate)!]))
+  getNeighbours(level, origin).forEach(coordinate =>
+    callbacks.forEach(cb => cb(coordinate))
   );
 }
 
@@ -316,11 +317,13 @@ export type CmdName = keyof typeof Cmd;
 export const isCmdName = (s: string): s is CmdName => Cmd[s as CmdName] != null;
 
 function openNeighbours(
-  [coordinate, cell]: [Coordinate, CellRecord],
+  [origin, cell]: [Coordinate, CellRecord],
   board: GameRecord
 ): GameRecord {
+  const { level } = board;
   let flaggedNeighboursCount = 0;
-  visitNeighbours(board, coordinate, ([, c]) => {
+  visitNeighbours(level, origin, coord => {
+    const c = board.cells.get(coord)!;
     if (c.state === CellState.FLAGGED) {
       flaggedNeighboursCount++;
     }
@@ -330,7 +333,8 @@ function openNeighbours(
     return board;
   }
   return board.withMutations(mutable =>
-    visitNeighbours(board, coordinate, ([coord, c]) => {
+    visitNeighbours(level, origin, coord => {
+      const c = board.cells.get(coord)!;
       if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
         toggleOpen([[coord, c], mutable]);
       }
@@ -471,7 +475,7 @@ function toggleOpen([[coordinate, cell], board]: [
             c.set('state', CellState.OPEN),
           ]);
           if (c.threatCount === 0) {
-            getNeighbours(mutable, coord).forEach(cc => {
+            getNeighbours(mutable.level, coord).forEach(cc => {
               const cr = mutable.cells.get(cc)!;
               if (predicate(cr)) {
                 visitor([cc, cr]);
