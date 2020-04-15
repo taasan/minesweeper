@@ -1,6 +1,5 @@
 import {
   Cmd,
-  CmdName,
   GameRecord,
   GameState,
   Level,
@@ -32,10 +31,17 @@ export type IState = {
   elapsedTime: number;
 };
 
-export type CmdAction = {
-  type: CmdName;
-  coordinate: number;
-};
+export type CmdAction =
+  | {
+      type: 'NONE';
+    }
+  | {
+      type: 'TOGGLE_PAUSE';
+    }
+  | {
+      type: 'POKE' | 'FLAG';
+      coordinate: number;
+    };
 
 export function isCmdAction(s: Action): s is CmdAction {
   return isCmdName(s.type);
@@ -122,13 +128,14 @@ const calulateElapsedTime = (timingEvents: TimingEvent[]) => {
 
 const commandActionReducer = (state: IState, action: CmdAction): IState => {
   if (
-    action.type === 'TOGGLE_PAUSE' &&
-    ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state)
+    action.type === 'NONE' ||
+    (action.type === 'TOGGLE_PAUSE' &&
+      ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state))
   ) {
     return state;
   }
   const board = state.nextState(Cmd[action.type], [
-    action.coordinate,
+    action.type === 'TOGGLE_PAUSE' ? -1 : action.coordinate,
     state.board,
   ]);
 
@@ -184,15 +191,18 @@ const reducer = (state: IState, action: Action): IState => {
         ...action.settings,
         modalStack: [],
       };
-    case 'showModal':
+    case 'showModal': {
+      let newState = state;
+      if (state.board.state === GameState.PLAYING) {
+        newState = commandActionReducer(newState, {
+          type: 'TOGGLE_PAUSE',
+        });
+      }
       return {
-        ...state,
+        ...newState,
         modalStack: [...state.modalStack].concat([action.modal]),
-        board:
-          state.board.state === GameState.PLAYING
-            ? state.nextState(Cmd.TOGGLE_PAUSE, [0, state.board])
-            : state.board,
       };
+    }
     case 'closeModal':
       if (modalStackSize === 0) {
         log.warn('Modal stack is empty');
@@ -214,3 +224,10 @@ const reducer = (state: IState, action: Action): IState => {
 };
 
 export default reducer;
+/*
+export default (state: IState, action: Action): IState => {
+  const s = reducer(state, action);
+  log.debug({ newState: s });
+  return s;
+};
+*/

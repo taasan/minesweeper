@@ -2,8 +2,6 @@ import * as React from 'react';
 import './SvgMinesweeper.scss';
 import {
   CellState,
-  Cmd,
-  CmdName,
   GameRecord,
   GameState,
   GridType,
@@ -89,9 +87,6 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   } = state;
 
   const elapsedTimeCb = React.useCallback(() => {
-    if (board.state !== GameState.PLAYING) {
-      return elapsedTime;
-    }
     const len = timingEvents.length;
     if ((len & 1) !== 1) {
       log.error('EEP!');
@@ -99,7 +94,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     const lastStart = timingEvents[len - 1];
     const a = elapsedTime + Date.now() - lastStart;
     return a;
-  }, [board.state, elapsedTime, timingEvents]);
+  }, [elapsedTime, timingEvents]);
 
   useTheme(theme);
 
@@ -115,7 +110,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         'keyup',
         (e: KeyboardEvent) =>
           // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-          e.keyCode === 80 && dispatch({ type: 'TOGGLE_PAUSE', coordinate: 0 })
+          e.keyCode === 80 && dispatch({ type: 'TOGGLE_PAUSE' })
       ),
 
     [containerRef]
@@ -127,7 +122,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         document.visibilityState !== 'visible' &&
         board.state === GameState.PLAYING
       ) {
-        dispatch({ type: 'TOGGLE_PAUSE', coordinate: 0 });
+        dispatch({ type: 'TOGGLE_PAUSE' });
       }
     });
   }, [board.state]);
@@ -229,25 +224,26 @@ const Controls = React.memo(
       // TODO
       const [timer, setTimer] = React.useState(0);
 
-      const timerCb = React.useCallback(() => {
-        log.debug('timerCb');
-        setTimer(Math.floor(elapsedTime() / 1000));
-      }, [elapsedTime]);
-
-      useTicker(1000, state === GameState.PLAYING, timerCb);
+      useTicker(
+        1000,
+        state === GameState.PLAYING,
+        React.useCallback(() => setTimer(Math.floor(elapsedTime() / 1000)), [
+          elapsedTime,
+        ])
+      );
 
       const handleGameStateClick = () => {
         switch (board.state) {
           case GameState.PAUSED:
           case GameState.PLAYING:
             dispatch({
-              type: Cmd[Cmd.TOGGLE_PAUSE] as CmdName,
-              coordinate: -1,
+              type: 'TOGGLE_PAUSE',
             });
             break;
           case GameState.COMPLETED:
           case GameState.GAME_OVER:
           case GameState.ERROR:
+            setTimer(0);
             dispatch({
               type: 'setLevel',
               level: board.level,

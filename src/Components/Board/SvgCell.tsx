@@ -1,12 +1,6 @@
 import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
-import {
-  CellState,
-  CmdName,
-  Coordinate,
-  GridType,
-  NumThreats,
-} from '../../Game';
+import { CellState, Coordinate, GridType, NumThreats } from '../../Game';
 
 import { CmdAction } from '../reducer';
 import { onContextMenu } from '..';
@@ -34,26 +28,12 @@ const SvgCell: FC<ICellProps> = props => {
     gridType,
   } = props;
 
-  const getCommand = (e: MouseEvent): CmdName => {
-    if (state === CellState.OPEN) {
-      return 'POKE';
-    } else {
-      switch (e.button) {
-        case 0:
-          return 'POKE';
-        default:
-          return 'NONE';
-      }
-    }
-  };
-
   const handleClick = (e: MouseEvent) => {
-    if (dispatch != null) {
+    if (dispatch != null && (state === CellState.OPEN || e.button === 0))
       dispatch({
-        type: getCommand(e),
+        type: 'POKE',
         coordinate,
       });
-    }
   };
 
   const handleContextMenu = (e: MouseEvent) => {
