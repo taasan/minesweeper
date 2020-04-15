@@ -1,4 +1,5 @@
 import { Collection, OrderedMap, Record, RecordOf } from 'immutable';
+import log from '../lib/log';
 
 export function assertNever(x: never): never {
   throw new Error('Unexpected value: ' + x);
@@ -24,7 +25,7 @@ export type ICell = {
   threatCount: NumThreats | Mine;
 };
 
-const createGameCell: Record.Factory<ICell> = Record<ICell>({
+export const createGameCell: Record.Factory<ICell> = Record<ICell>({
   state: CellState.NEW,
   threatCount: 0,
 });
@@ -123,6 +124,11 @@ type IGame = Readonly<{
   onGameOver(): void;
 }>;
 
+export enum Topology {
+  LIMITED,
+  TORUS,
+}
+
 export type Grid = Omit<Level, 'mines'>;
 
 export type Level = {
@@ -130,6 +136,7 @@ export type Level = {
   rows: number;
   mines: number;
   type: GridType;
+  topology: Topology;
 };
 
 const createLevel = (level?: Partial<Level>) =>
@@ -138,6 +145,7 @@ const createLevel = (level?: Partial<Level>) =>
     rows: 0,
     mines: 0,
     type: GridType.SQUARE,
+    topology: Topology.LIMITED,
     ...level,
   });
 
@@ -147,7 +155,7 @@ const createCellStateStats: Record.Factory<CellStateStats> = Record<
 
 export type GameRecord = RecordOf<IGame>;
 
-const createBoard: Record.Factory<IGame> = Record<IGame>({
+export const createBoard: Record.Factory<IGame> = Record<IGame>({
   cells: OrderedMap(),
   state: GameState.NOT_INITIALIZED,
   level: createLevel(),
@@ -283,13 +291,42 @@ export const calculateCoordinate = (cols: number, index: number) => {
   return { col, row };
 };
 
-export const getNeighbours = ({ rows, cols, type }: Grid, origin: Coordinate) =>
-  getNeighbourMatrix(type)(calculateCoordinate(cols, origin))
-    .filter(
-      ({ row, col }) => !(col >= cols || col < 0 || row >= rows || row < 0)
-    )
+export const calculateIndex = (
+  { cols }: { cols: number },
+  { row, col }: { row: number; col: number }
+) => col + cols * row;
+
+export const getNeighbours = (
+  { rows, cols, type, topology }: Grid,
+  origin: Coordinate
+) => {
+  let neighbours = getNeighbourMatrix(type)(calculateCoordinate(cols, origin));
+
+  const torusAdjust = (n: number, max: number) =>
+    n === -1 ? max - 1 : n === max ? 0 : n;
+  switch (topology) {
+    case Topology.TORUS:
+      neighbours = neighbours.map(({ row, col }) => ({
+        row: torusAdjust(row, rows),
+        col: torusAdjust(col, cols),
+      }));
+
+      break;
+    case Topology.LIMITED:
+      neighbours = neighbours.filter(
+        ({ row, col }) => !(col >= cols || col < 0 || row >= rows || row < 0)
+      );
+
+      break;
+
+    default:
+      assertNever(topology);
+  }
+
+  return neighbours
     .map(({ row, col }) => col + cols * row)
     .filter(c => c !== origin);
+};
 
 export function visitNeighbours(
   level: Grid,
@@ -399,7 +436,7 @@ function nextState(
         try {
           board.onGameOver();
         } catch (err) {
-          console.warn('Unhandled exception in onGameOver handler', err);
+          log.warn('Unhandled exception in onGameOver handler', err);
         }
       } else if (mutable.cells.get(coordinate)!.state === CellState.OPEN) {
         const openPlusMines = mutable.level.mines + stats[CellState.OPEN];

@@ -13,6 +13,10 @@ import {
 import { NumeralSystem } from './Board/getContent';
 import { ISettings } from './Settings/SettingsDialog';
 import { ITheme } from '../Theme';
+import log from '../lib/log';
+import { chunk } from '../lib';
+
+type TimingEvent = number;
 
 export type IState = {
   board: GameRecord;
@@ -24,6 +28,8 @@ export type IState = {
   modalStack: ModalType[];
   numeralSystem: NumeralSystem;
   theme: ITheme;
+  timingEvents: TimingEvent[];
+  elapsedTime: number;
 };
 
 export type CmdAction = {
@@ -38,6 +44,7 @@ export function isCmdAction(s: Action): s is CmdAction {
 export enum ModalType {
   SELECT_LEVEL,
   SETTINGS,
+  GOL,
 }
 
 export type SettingsAction = {
@@ -101,22 +108,55 @@ const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
   };
 };
 
+const calulateElapsedTime = (timingEvents: TimingEvent[]) => {
+  const t = [...timingEvents];
+  if ((t.length & 1) === 1) t.pop(); // t.push(Date.now());
+
+  return chunk(
+    t.map((v, _, arr) => v - arr[0]),
+    2
+  )
+    .map(([a, b]) => (b != null ? b - a : b))
+    .reduce((result, n) => result + n, 0);
+};
+
+const commandActionReducer = (state: IState, action: CmdAction): IState => {
+  if (
+    action.type === 'TOGGLE_PAUSE' &&
+    ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state)
+  ) {
+    return state;
+  }
+  const board = state.nextState(Cmd[action.type], [
+    action.coordinate,
+    state.board,
+  ]);
+
+  let addTimingEvent = action.type === 'TOGGLE_PAUSE';
+  switch (state.board.state) {
+    case GameState.NOT_INITIALIZED:
+    case GameState.INITIALIZED:
+      addTimingEvent = action.type === 'POKE' || action.type === 'FLAG';
+      break;
+  }
+
+  let newState = { ...state };
+  if (addTimingEvent) {
+    const t = [...state.timingEvents];
+    const elapsedTime = calulateElapsedTime(t);
+
+    newState.timingEvents = t;
+    newState.elapsedTime = elapsedTime;
+    t.push(Date.now());
+  }
+  newState.board = board;
+  return newState;
+};
+
 const reducer = (state: IState, action: Action): IState => {
+  log.debug(action);
   if (isCmdAction(action)) {
-    if (
-      action.type === 'TOGGLE_PAUSE' &&
-      ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state)
-    ) {
-      return state;
-    }
-    const board = state.nextState(Cmd[action.type], [
-      action.coordinate,
-      state.board,
-    ]);
-    return {
-      ...state,
-      board,
-    };
+    return commandActionReducer(state, action);
   }
   const modalStackSize = state.modalStack.length;
   switch (action.type) {
@@ -124,6 +164,8 @@ const reducer = (state: IState, action: Action): IState => {
       const { board, nextState } = createGame(action.level, onGameOver);
       return {
         ...state,
+        timingEvents: [],
+        elapsedTime: 0,
         board,
         nextState,
         modalStack: [],
@@ -132,6 +174,8 @@ const reducer = (state: IState, action: Action): IState => {
       return {
         ...state,
         ...action.game,
+        timingEvents: [],
+        elapsedTime: 0,
         loading: false,
       };
     case 'applySettings':
@@ -144,10 +188,14 @@ const reducer = (state: IState, action: Action): IState => {
       return {
         ...state,
         modalStack: [...state.modalStack].concat([action.modal]),
+        board:
+          state.board.state === GameState.PLAYING
+            ? state.nextState(Cmd.TOGGLE_PAUSE, [0, state.board])
+            : state.board,
       };
     case 'closeModal':
       if (modalStackSize === 0) {
-        console.warn('Modal stack is empty');
+        log.warn('Modal stack is empty');
         return state;
       }
       const modalStack = [...state.modalStack];

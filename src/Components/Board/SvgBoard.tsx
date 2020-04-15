@@ -12,10 +12,11 @@ import {
   isNumThreats,
 } from '../../Game';
 import { Dispatch } from 'react';
-import { Action } from '../reducer';
+import { CmdAction } from '../reducer';
 import { NumeralSystem, getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
 import { hexOffset, hexagonPoints, onContextMenu } from '..';
+import log from '../../lib/log';
 
 const hexPoints = () =>
   hexagonPoints()
@@ -36,7 +37,7 @@ const squarePoints = () => {
 
 type IProps = {
   board: GameRecord;
-  dispatch?: Dispatch<Action>;
+  dispatch?: Dispatch<CmdAction>;
   numeralSystem: NumeralSystem;
   style?: React.CSSProperties;
 };
@@ -78,7 +79,7 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
           undefined
         );
       if (board.error != null) {
-        console.error(board.error);
+        log.error(board.error);
       }
       return (
         <main className="Error">

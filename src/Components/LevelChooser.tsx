@@ -6,6 +6,7 @@ import {
   Level,
   MAX_LEVEL,
   MIN_LEVEL,
+  Topology,
   maxMines,
   minMines,
 } from '../Game';
@@ -14,7 +15,7 @@ import './LevelChooser.scss';
 import SvgCell from './Board/SvgCell';
 import { CloseButton } from './CloseButton';
 
-interface LevelLite extends Omit<Level, 'type'> {}
+interface LevelLite extends Omit<Level, 'type' | 'topology'> {}
 
 // const predefinedLevels: ReadonlyMap<string, Readonly<LevelLite>> = new Map();
 const predefinedLevels = Object.freeze([
@@ -27,9 +28,10 @@ export const getLevel = (
   key: string = 'Beginner',
   type: GridType = GridType.SQUARE
 ): Level => {
+  const topology = Topology.LIMITED;
   const lvl = predefinedLevels.find(l => l.name === key);
   const v = lvl != null ? lvl : predefinedLevels[0];
-  return Object.freeze({ ...v, type });
+  return Object.freeze({ ...v, type, topology });
 };
 
 const compareLevels = (a: LevelLite | Level, b: LevelLite | Level) =>

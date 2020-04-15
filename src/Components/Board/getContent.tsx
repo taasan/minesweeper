@@ -105,29 +105,32 @@ export enum NumeralSystem {
   SEGMENTED = 0x1fbf8 - 8,
 }
 
+export const MINES = Object.freeze([
+  '🤒',
+  '😷',
+  '🤮',
+  '🤢',
+  '🤡',
+  '🧟',
+  '🤥',
+  '🤕',
+  '🤧',
+  '👻',
+  '🥵',
+  '🥶',
+  '👹',
+  '👺',
+  '🦠',
+]);
+
+export const FLAG = '☣️';
+
 export function getContent(
   state: CellState,
   threats: NumThreats | Mine,
   gameState: GameState,
   numeralSystem: NumeralSystem
 ): string | NumThreats {
-  const mines = [
-    '🤒',
-    '😷',
-    '🤮',
-    '🤢',
-    '🤡',
-    '🧟',
-    '🤥',
-    '🤕',
-    '🤧',
-    '👻',
-    '🥵',
-    '🥶',
-    '👹',
-    '👺',
-    '🦠',
-  ];
   const disarmedMine = '🥰';
   const isMined = threats === 0xff;
   const gameWon = gameState === GameState.COMPLETED;
@@ -146,7 +149,7 @@ export function getContent(
     ((gameOver && state !== CellState.EXPLODED) || state === CellState.OPEN) &&
     threats === 0xff
   ) {
-    return mines[randomInt(mines.length)];
+    return MINES[randomInt(MINES.length)];
   }
   if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
     return getContent(
@@ -158,7 +161,7 @@ export function getContent(
   }
   switch (state) {
     case CellState.FLAGGED:
-      return (demo || gameOver) && !isMined ? '💩' : '☣️';
+      return (demo || gameOver) && !isMined ? '💩' : FLAG;
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:

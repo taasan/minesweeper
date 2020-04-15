@@ -8,6 +8,7 @@ import {
   GameState,
   GridType,
   Level,
+  Topology,
   assertNever,
   createGame,
   // legend,
@@ -22,29 +23,20 @@ import { NumeralSystem } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
 import reducer, { Action, IState, ModalType, onGameOver } from './reducer';
 import { defaultTheme } from '../Theme';
-import { useTheme } from '../Hooks';
-//
-/*
-enum TimingEventType {
-  START,
-  STOP,
-}
-
-type TimingEvent = {
-  type: TimingEventType;
-  timestamp: number;
-};
-*/
+import { useTheme, useTicker } from '../Hooks';
+import { GameOfLife } from './GameOfLife';
+import { log } from '../lib';
 
 type ILevels = {
   [keyof: string]: Level;
 };
 const type = GridType.HEX;
+const topology = Topology.LIMITED;
 
 export const LEVELS: ILevels = {
-  BEGINNER: { rows: 6, cols: 10, mines: 10, type },
-  INTERMEDIATE: { rows: 16, cols: 16, mines: 40, type },
-  EXPERT: { mines: 99, rows: 16, cols: 30, type },
+  BEGINNER: { rows: 6, cols: 10, mines: 10, type, topology },
+  INTERMEDIATE: { rows: 16, cols: 16, mines: 40, type, topology },
+  EXPERT: { mines: 99, rows: 16, cols: 30, type, topology },
 };
 
 type IStateInit = Pick<IState, 'containerRef'> & {
@@ -64,6 +56,8 @@ function init({ level, containerRef }: IStateInit): IState {
     numeralSystem: NumeralSystem.BENGALI,
     modalStack: [],
     theme: defaultTheme,
+    timingEvents: [],
+    elapsedTime: 0,
   };
 }
 
@@ -84,7 +78,29 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     return () => window.removeEventListener(event, callback);
   };
 
-  const { board, modalStack, numeralSystem, containerRef, theme } = state;
+  const {
+    board,
+    modalStack,
+    numeralSystem,
+    containerRef,
+    theme,
+    elapsedTime,
+    timingEvents,
+  } = state;
+
+  const elapsedTimeCb = React.useCallback(() => {
+    if (board.state !== GameState.PLAYING) {
+      return elapsedTime;
+    }
+    const len = timingEvents.length;
+    if ((len & 1) !== 1) {
+      log.error('EEP!');
+    }
+    const lastStart = timingEvents[len - 1];
+    const a = elapsedTime + Date.now() - lastStart;
+    return a;
+  }, [board.state, elapsedTime, timingEvents]);
+
   useTheme(theme);
 
   React.useEffect(() => {
@@ -93,13 +109,28 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   }, []);
 
   const modal = modalStack[modalStack.length - 1];
+  React.useEffect(
+    () =>
+      registerEvent(
+        'keyup',
+        (e: KeyboardEvent) =>
+          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+          e.keyCode === 80 && dispatch({ type: 'TOGGLE_PAUSE', coordinate: 0 })
+      ),
+
+    [containerRef]
+  );
+
   React.useEffect(() => {
-    return registerEvent('keyup', (e: KeyboardEvent) => {
-      if (e.keyCode === 80) {
+    return registerEvent('visibilitychange', () => {
+      if (
+        document.visibilityState !== 'visible' &&
+        board.state === GameState.PLAYING
+      ) {
         dispatch({ type: 'TOGGLE_PAUSE', coordinate: 0 });
       }
     });
-  }, [containerRef]);
+  }, [board.state]);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
   // const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
@@ -140,7 +171,11 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         onPointerDown={handlePointerDown}
         onContextMenu={done ? handleRestartGame : onContextMenu}
       >
-        <Controls board={board} dispatch={dispatch} />
+        <Controls
+          board={board}
+          dispatch={dispatch}
+          elapsedTime={elapsedTimeCb}
+        />
         <ErrorBoundary>
           <SvgBoard
             ref={state.containerRef}
@@ -172,6 +207,9 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
         <SettingsDialog initialState={state} dispatch={dispatch} />
       </Modal>
+      <Modal isOpen={modal === ModalType.GOL} onRequestClose={closeModal}>
+        <GameOfLife onClose={closeModal} />
+      </Modal>
     </div>
   );
 };
@@ -179,13 +217,24 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
 interface ControlsProps {
   board: GameRecord;
   dispatch: React.Dispatch<Action>;
+  elapsedTime(): number;
 }
 
 const Controls = React.memo(
   React.forwardRef<HTMLDivElement, ControlsProps>(
-    ({ board, dispatch }, ref) => {
-      const { level } = board;
+    ({ board, dispatch, elapsedTime }, ref) => {
+      const { level, state } = board;
       const remaining = level.mines - board.cellStates[CellState.FLAGGED];
+
+      // TODO
+      const [timer, setTimer] = React.useState(0);
+
+      const timerCb = React.useCallback(() => {
+        log.debug('timerCb');
+        setTimer(Math.floor(elapsedTime() / 1000));
+      }, [elapsedTime]);
+
+      useTicker(1000, state === GameState.PLAYING, timerCb);
 
       const handleGameStateClick = () => {
         switch (board.state) {
@@ -216,6 +265,9 @@ const Controls = React.memo(
           >
             {level.cols} x {level.rows} / {level.mines}
           </div>
+          <div role="button" onClick={handleGameStateClick}>
+            {timer}
+          </div>
           <div
             role="button"
             onClick={handleGameStateClick}
@@ -223,7 +275,12 @@ const Controls = React.memo(
           >
             {renderGameState(board.state)}
           </div>
-          <div>
+          <div
+            role="button"
+            onClick={() =>
+              dispatch({ type: 'showModal', modal: ModalType.GOL })
+            }
+          >
             <span role="img" aria-label="Remaining mines">
               {remaining >= 0 ? '☣️' : '💩'}
             </span>{' '}
