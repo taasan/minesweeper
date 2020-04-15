@@ -17,7 +17,7 @@ import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
 import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
-import { NumeralSystem } from './Board/getContent';
+import { NumeralSystem, formatNumber } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
 import reducer, { Action, IState, ModalType, onGameOver } from './reducer';
 import { defaultTheme } from '../Theme';
@@ -170,6 +170,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
           board={board}
           dispatch={dispatch}
           elapsedTime={elapsedTimeCb}
+          numeralSystem={numeralSystem}
         />
         <ErrorBoundary>
           <SvgBoard
@@ -213,11 +214,12 @@ interface ControlsProps {
   board: GameRecord;
   dispatch: React.Dispatch<Action>;
   elapsedTime(): number;
+  numeralSystem: NumeralSystem;
 }
 
 const Controls = React.memo(
   React.forwardRef<HTMLDivElement, ControlsProps>(
-    ({ board, dispatch, elapsedTime }, ref) => {
+    ({ board, dispatch, elapsedTime, numeralSystem }, ref) => {
       const { level, state } = board;
       const remaining = level.mines - board.cellStates[CellState.FLAGGED];
 
@@ -262,7 +264,7 @@ const Controls = React.memo(
             {level.cols} x {level.rows} / {level.mines}
           </div>
           <div role="button" onClick={handleGameStateClick}>
-            {timer}
+            {formatNumber(numeralSystem, timer)}
           </div>
           <div
             role="button"

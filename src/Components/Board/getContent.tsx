@@ -105,6 +105,8 @@ export enum NumeralSystem {
   SEGMENTED = 0x1fbf8 - 8,
 }
 
+export const formatNumber = (_ns: NumeralSystem, n: number) => n;
+
 export const MINES = Object.freeze([
   '🤒',
   '😷',
