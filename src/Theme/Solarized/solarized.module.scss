@@ -1,8 +1,8 @@
 @import 'colors';
-
+$lightRed: lighten($violet, 20%);
 .Theme {
-  --mine-detonated-background: #{$red};
-  --cell-background-flagged-wrong: #{$red};
+  --mine-detonated-background: #{$lightRed};
+  --cell-background-flagged-wrong: #{$lightRed};
   --cell-threats-1-color: #{$blue};
   --cell-threats-2-color: #{$green};
   --cell-threats-3-color: #{$red};

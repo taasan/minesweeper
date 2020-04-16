@@ -1,4 +1,4 @@
-import { ITheme } from '../Theme';
+import { ITheme } from '../Theme/theme';
 import { useBodyClass } from './';
 
 const useTheme = (theme: ITheme) =>

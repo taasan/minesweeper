@@ -345,7 +345,6 @@ export function visitNeighbours(
 export enum Cmd {
   POKE,
   FLAG,
-  NONE,
   TOGGLE_PAUSE,
 }
 
@@ -403,9 +402,6 @@ function nextState(
     ]);
   }
 
-  if (command === Cmd.NONE) {
-    return board;
-  }
   if (command === Cmd.TOGGLE_PAUSE) {
     if (![GameState.PAUSED, GameState.PLAYING].includes(board.state)) {
       return board;
@@ -652,7 +648,7 @@ export function createGame(
         case GameState.PAUSED:
           return expectUnPause(cmd, game);
       }
-      if (game.state === GameState.ERROR || cmd === Cmd.NONE) {
+      if (game.state === GameState.ERROR) {
         return game;
       }
       return nextState(cmd, [coordinate, game]);

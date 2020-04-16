@@ -5,13 +5,14 @@ import {
   Level,
   NextStateFunction,
   assertNever,
+  calculateCoordinate,
   createGame,
   isCmdName,
 } from '../Game';
 
 import { NumeralSystem } from './Board/getContent';
 import { ISettings } from './Settings/SettingsDialog';
-import { ITheme } from '../Theme';
+import { ITheme } from '../Theme/theme';
 import log from '../lib/log';
 import { chunk } from '../lib';
 
@@ -32,9 +33,6 @@ export type IState = {
 };
 
 export type CmdAction =
-  | {
-      type: 'NONE';
-    }
   | {
       type: 'TOGGLE_PAUSE';
     }
@@ -128,9 +126,8 @@ const calulateElapsedTime = (timingEvents: TimingEvent[]) => {
 
 const commandActionReducer = (state: IState, action: CmdAction): IState => {
   if (
-    action.type === 'NONE' ||
-    (action.type === 'TOGGLE_PAUSE' &&
-      ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state))
+    action.type === 'TOGGLE_PAUSE' &&
+    ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state)
   ) {
     return state;
   }
@@ -157,11 +154,24 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
     t.push(Date.now());
   }
   newState.board = board;
+  if (state.board.state !== board.state) {
+    log.debug('State changed', {
+      old: GameState[state.board.state],
+      new: GameState[newState.board.state],
+    });
+  }
   return newState;
 };
 
 const reducer = (state: IState, action: Action): IState => {
-  log.debug(action);
+  if (action.type === 'POKE' || action.type === 'FLAG') {
+    log.debug({
+      ...action,
+      ...calculateCoordinate(state.board.level.cols, action.coordinate),
+    });
+  } else {
+    log.debug(action);
+  }
   if (isCmdAction(action)) {
     return commandActionReducer(state, action);
   }

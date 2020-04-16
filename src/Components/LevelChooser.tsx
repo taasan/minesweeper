@@ -14,6 +14,8 @@ import {
 import './LevelChooser.scss';
 import SvgCell from './Board/SvgCell';
 import { CloseButton } from './CloseButton';
+import FormatNumber from './FormatNumber';
+import { NumeralSystem, formatNumber } from './Board/getContent';
 
 interface LevelLite extends Omit<Level, 'type' | 'topology'> {}
 
@@ -41,12 +43,53 @@ type LevelChooserProps = {
   level: Level;
   onChange: (level: Level) => void;
   onCancel(): void;
+  numeralSystem: NumeralSystem;
 };
+
+const custom = 'Custom';
+
+export const formatLevel = ({
+  rows,
+  cols,
+  mines,
+  numeralSystem,
+  name,
+  asString,
+}: LevelLite & {
+  name?: string;
+  numeralSystem: NumeralSystem;
+  asString?: boolean;
+}) => {
+  if (asString === true) {
+    const [r, c, m] = [rows, cols, mines].map(n =>
+      formatNumber(numeralSystem, n)
+    );
+    return (name != null ? `${name} : ` : '') + `${c} / ${r} (${m})`;
+  }
+  return (
+    <>
+      {name != null ? `${name}: ` : ''}
+      <FormatNumber numeralSystem={numeralSystem} n={rows} />
+      {' / '}
+      <FormatNumber numeralSystem={numeralSystem} n={cols} />
+      {' ('}
+      <FormatNumber numeralSystem={numeralSystem} n={mines} />
+      {')'}
+    </>
+  );
+}; /*
+  (v.name != null ? `${v.name}: ` : '') +
+  [v.rows, v.cols, v.mines]
+    .map(n => formatNumber(v.numeralSystem, n))
+    .join('; ');
+    */
+// `${v.name}: ${v.cols} x ${v.rows} (${v.mines})`;
 
 export const LevelChooser: React.FC<LevelChooserProps> = ({
   onChange,
   level: initialLevel,
   onCancel,
+  numeralSystem,
 }) => {
   const [level, setLevel] = useState(initialLevel);
   const { rows, cols, mines, type } = level;
@@ -76,11 +119,6 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
     [level]
   );
 
-  const custom = 'Custom';
-
-  const formatLevel = (v: LevelLite & { name: string }) =>
-    `${v.name}: ${v.cols} x ${v.rows} (${v.mines})`;
-
   return (
     <div className="LevelChooser">
       <form
@@ -102,11 +140,18 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
             }}
           >
             <option hidden={selectedLevel != null} value={custom}>
-              {formatLevel({ name: custom, cols, rows, mines })}
+              {formatLevel({
+                name: custom,
+                cols,
+                rows,
+                mines,
+                numeralSystem,
+                asString: true,
+              })}
             </option>
             {[...predefinedLevels.entries()].map(([k, v]) => (
               <option value={v.name} key={k}>
-                {formatLevel(v)}
+                {formatLevel({ ...v, numeralSystem, asString: true })}
               </option>
             ))}
           </select>
@@ -114,7 +159,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
         <fieldset>
           <legend>Custom level</legend>
           <label>
-            Rows: {rows}
+            Rows: <FormatNumber numeralSystem={numeralSystem} n={rows} />
             <input
               onChange={e =>
                 setLevel({
@@ -130,7 +175,8 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
             />
           </label>
           <label>
-            Columns: {cols}
+            Columns:
+            <FormatNumber numeralSystem={numeralSystem} n={cols} />
             <input
               onChange={e =>
                 setLevel({
@@ -146,7 +192,14 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
             />
           </label>
           <label>
-            Mines: {mines} ({((100 * mines) / (rows * cols)).toFixed(1)}%)
+            Mines:
+            <FormatNumber numeralSystem={numeralSystem} n={mines} /> (
+            <FormatNumber
+              numeralSystem={numeralSystem}
+              n={(100 * mines) / (rows * cols)}
+              fractionDigits={1}
+            />
+            ﹪)
             <input
               min={minM}
               max={maxM}

@@ -5,7 +5,7 @@ import { NumeralSystem, renderThreats } from '../Board/getContent';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
-import { ITheme } from '../../Theme';
+import { ITheme } from '../../Theme/theme';
 import { ModalAction, SettingsAction } from '../reducer';
 import { CloseButton } from '../CloseButton';
 

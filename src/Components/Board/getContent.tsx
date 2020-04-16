@@ -6,6 +6,7 @@ import {
   isNumThreats,
   randomInt,
 } from '../../Game';
+import { toRomanNumeral } from '../../lib';
 
 /*
 # http://unicode.org/Public/UNIDATA/UnicodeData.txt
@@ -14,6 +15,96 @@ grep -E '(NUMERAL EIGHT|DIGIT EIGHT);' /usr/share/unicode/ucd/UnicodeData.txt \
   | sed 's|^DIGIT|ASCII|'
   | xclip -selection clipboard
 */
+
+/*
+adlm	Adlam digits
+ahom	Ahom digits
+arab	Arabic-Indic digits
+arabext	Extended Arabic-Indic digits
+armn	Armenian upper case numerals — algorithmic
+armnlow	Armenian lower case numerals — algorithmic
+bali	Balinese digits
+beng	Bengali digits
+bhks	Bhaiksuki digits
+brah	Brahmi digits
+cakm	Chakma digits
+cham	Cham digits
+cyrl	Cyrillic numerals — algorithmic
+deva	Devanagari digits
+ethi	Ethiopic numerals — algorithmic
+finance	Financial numerals — may be algorithmic
+fullwide	Full width digits
+geor	Georgian numerals — algorithmic
+gong	Gunjala Gondi digits
+gonm	Masaram Gondi digits
+grek	Greek upper case numerals — algorithmic
+greklow	Greek lower case numerals — algorithmic
+gujr	Gujarati digits
+guru	Gurmukhi digits
+hanidays	Han-character day-of-month numbering for lunar/other traditional calendars
+hanidec	Positional decimal system using Chinese number ideographs as digits
+hans	Simplified Chinese numerals — algorithmic
+hansfin	Simplified Chinese financial numerals — algorithmic
+hant	Traditional Chinese numerals — algorithmic
+hantfin	Traditional Chinese financial numerals — algorithmic
+hebr	Hebrew numerals — algorithmic
+hmng	Pahawh Hmong digits
+hmnp	Nyiakeng Puachue Hmong digits
+java	Javanese digits
+jpan	Japanese numerals — algorithmic
+jpanfin	Japanese financial numerals — algorithmic
+jpanyear	Japanese first-year Gannen numbering for Japanese calendar
+kali	Kayah Li digits
+khmr	Khmer digits
+knda	Kannada digits
+lana	Tai Tham Hora (secular) digits
+lanatham	Tai Tham Tham (ecclesiastical) digits
+laoo	Lao digits
+latn	Latin digits
+lepc	Lepcha digits
+limb	Limbu digits
+mathbold	Mathematical bold digits
+mathdbl	Mathematical double-struck digits
+mathmono	Mathematical monospace digits
+mathsanb	Mathematical sans-serif bold digits
+mathsans	Mathematical sans-serif digits
+mlym	Malayalam digits
+modi	Modi digits
+mong	Mongolian digits
+mroo	Mro digits
+mtei	Meetei Mayek digits
+mymr	Myanmar digits
+mymrshan	Myanmar Shan digits
+mymrtlng	Myanmar Tai Laing digits
+native	Native digits
+newa	Newa digits
+nkoo	N'Ko digits
+olck	Ol Chiki digits
+orya	Oriya digits
+osma	Osmanya digits
+rohg	Hanifi Rohingya digits
+roman	Roman upper case numerals — algorithmic
+romanlow	Roman lowercase numerals — algorithmic
+saur	Saurashtra digits
+shrd	Sharada digits
+sind	Khudawadi digits
+sinh	Sinhala Lith digits
+sora	Sora_Sompeng digits
+sund	Sundanese digits
+takr	Takri digits
+talu	New Tai Lue digits
+taml	Tamil numerals — algorithmic
+tamldec	Modern Tamil decimal digits
+telu	Telugu digits
+thai	Thai digits
+tirh	Tirhuta digits
+tibt	Tibetan digits
+traditio	Traditional numerals — may be algorithmic
+vaii	Vai digits
+wara	Warang Citi digits
+wcho	Wancho digits
+*/
+
 export enum NumeralSystem {
   ascii = 0x0038 - 8,
   ROMAN_NUMERAL = 0x2167 - 8,
@@ -105,7 +196,120 @@ export enum NumeralSystem {
   SEGMENTED = 0x1fbf8 - 8,
 }
 
-export const formatNumber = (_ns: NumeralSystem, n: number) => n;
+// type NumeralSystemName = keyof typeof NumeralSystem;
+
+export const NumeralSystemLocaleMap: {
+  [key: string]: string;
+} = Object.freeze({
+  // ascii: undefined,
+  ROMAN_NUMERAL: 'roman',
+  SMALL_ROMAN_NUMERAL: 'romanlow',
+  // HANGZHOU_NUMERAL: 0x3028 - 8,
+  // MAYAN_NUMERAL: 0x1d2e8 - 8,
+  // COUNTING_ROD_UNIT: 0x1d367 - 8,
+  ARABIC_INDIC: 'arab',
+  EXTENDED_ARABIC_INDIC: 'arabext',
+  NKO: 'nkoo',
+  DEVANAGARI: 'deva',
+  BENGALI: 'beng',
+  GURMUKHI: 'guru',
+  GUJARATI: 'gujr',
+  ORIYA: 'orya',
+  // TODO taml eller tamldec?
+  TAMIL: 'tamldec',
+  TELUGU: 'telu',
+  KANNADA: 'knda',
+  MALAYALAM: 'mlym',
+  SINHALA_LITH: 'sinh',
+  THAI: 'thai',
+  LAO: 'laoo',
+  TIBETAN: 'tibt',
+  MYANMAR: 'mymr',
+  MYANMAR_SHAN: 'mymrshan',
+  ETHIOPIC: 'ethi',
+  KHMER: 'khmr',
+  MONGOLIAN: 'mong',
+  LIMBU: 'limb',
+  NEW_TAI_LUE: 'talu',
+  TAI_THAM_HORA: 'lana',
+  TAI_THAM_THAM: 'lanatham',
+  BALINESE: 'bail',
+  SUNDANESE: 'sund',
+  LEPCHA: 'lepc',
+  OL_CHIKI: 'olck',
+  /*
+  SUPERSCRIPT : 0x2078 - 8,
+  SUBSCRIPT : 0x2088 - 8,
+  CIRCLED : 0x2467 - 8,
+  PARENTHESIZED : 0x247b - 8,
+  DOUBLE_CIRCLED : 0x24fc - 8,
+  DINGBAT_NEGATIVE_CIRCLED : 0x277d - 8,
+  DINGBAT_CIRCLED_SANS_SERIF : 0x2787 - 8,
+  DINGBAT_NEGATIVE_CIRCLED_SANS_SERIF : 0x2791 - 8,
+  */
+  VAI: 'vaii',
+  SAURASHTRA: 'saur',
+  KAYAH_LI: 'kali',
+  JAVANESE: 'java',
+  MYANMAR_TAI_LAING: 'mymrtlng',
+  CHAM: 'cham',
+  MEETEI_MAYEK: 'mtei',
+  // FULLWIDTH : 0xff18 - 8,
+  // COPTIC_EPACT: 0x102e8 - 8,
+  OSMANYA: 'osma',
+  HANIFI_ROHINGYA: 'rohg',
+  // RUMI: 0x10e67 - 8,
+  BRAHMI: 'brah',
+  SORA_SOMPENG: 'sora',
+  CHAKMA: 'cakm',
+  SHARADA: 'shrd',
+  // SINHALA_ARCHAIC: 0x111e8 - 8,
+  KHUDAWADI: 'sind',
+  NEWA: 'newa',
+  TIRHUTA: 'tirh',
+  MODI: 'modi',
+  TAKRI: 'takr',
+  AHOM: 'ahom',
+  WARANG_CITI: 'wara',
+  // DIVES_AKURU: 0x11958 - 8, // Unicode version 13.0
+  BHAIKSUKI: 'bhks',
+  MASARAM_GONDI: 'gonm',
+  GUNJALA_GONDI: 'gong',
+  MRO: 'mroo',
+  PAHAWH_HMONG: 'hmng',
+  // MEDEFAIDRIN: 0x16e88 - 8,
+  /*
+  MATHEMATICAL_BOLD : 0x1d7d6 - 8,
+  MATHEMATICAL_DOUBLE_STRUCK : 0x1d7e0 - 8,
+  MATHEMATICAL_SANS_SERIF : 0x1d7ea - 8,
+  MATHEMATICAL_SANS_SERIF_BOLD : 0x1d7f4 - 8,
+  MATHEMATICAL_MONOSPACE : 0x1d7fe - 8,
+  */
+  NYIAKENG_PUACHUE_HMONG: 'hmnp',
+  WANCHO: 'wcho',
+  // MENDE_KIKAKUI: 0x1e8ce - 8,
+  ADLAM: 'adlm',
+  // SEGMENTED: 0x1fbf8 - 8,
+});
+
+export const formatNumber = (
+  ns: NumeralSystem,
+  n: number,
+  options?: Intl.NumberFormatOptions
+) => {
+  if (
+    (Number.isInteger(n) && ns === NumeralSystem.ROMAN_NUMERAL) ||
+    ns === NumeralSystem.SMALL_ROMAN_NUMERAL
+  ) {
+    const r = toRomanNumeral(n, false);
+    return r;
+    // return ns === NumeralSystem.SMALL_ROMAN_NUMERAL ? r.toLowerCase() : r;
+  }
+  const numberingSystem = NumeralSystemLocaleMap[NumeralSystem[ns]];
+  const locale =
+    numberingSystem != null ? `en-u-nu-${numberingSystem}` : undefined;
+  return n.toLocaleString(locale, options);
+};
 
 export const MINES = Object.freeze([
   '🤒',
@@ -125,7 +329,11 @@ export const MINES = Object.freeze([
   '🦠',
 ]);
 
-export const FLAG = '☣️';
+export const getFlag = () => {
+  const today = new Date();
+  const isMay17 = today.getDate() === 17 && today.getMonth() === 4;
+  return isMay17 ? '🇳🇴' : '☣️';
+};
 
 export function getContent(
   state: CellState,
@@ -163,7 +371,7 @@ export function getContent(
   }
   switch (state) {
     case CellState.FLAGGED:
-      return (demo || gameOver) && !isMined ? '💩' : FLAG;
+      return (demo || gameOver) && !isMined ? '💩' : getFlag();
     case CellState.UNCERTAIN:
       return '❓';
     case CellState.OPEN:
@@ -179,4 +387,5 @@ export function getContent(
 
 export function renderThreats(numeralSystem: NumeralSystem, n: NumThreats) {
   return String.fromCodePoint(numeralSystem + n);
+  // return formatNumber(numeralSystem, n); // String.fromCodePoint(numeralSystem + n);
 }

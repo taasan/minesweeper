@@ -1,5 +1,6 @@
 import React from 'react';
-import Themes, { ITheme } from '../../Theme';
+import Themes from '../../Theme';
+import { ITheme } from '../../Theme/theme';
 
 const themes = Themes();
 

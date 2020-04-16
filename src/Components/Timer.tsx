@@ -1,0 +1,32 @@
+import React from 'react';
+import { NumeralSystem } from './Board/getContent';
+import { useTicker } from '../Hooks';
+import FormatNumber from './FormatNumber';
+
+interface Props {
+  elapsedTime(): number;
+  running: boolean;
+  numeralSystem: NumeralSystem;
+}
+
+const Timer: React.FC<Props> = React.memo(
+  ({ running, elapsedTime, numeralSystem }) => {
+    const [timer, setTimer] = React.useState(0);
+
+    useTicker(
+      1000,
+      running,
+      React.useCallback(() => setTimer(Math.floor(elapsedTime() / 1000)), [
+        elapsedTime,
+      ])
+    );
+
+    return (
+      <span className="Timer" title={timer.toString()}>
+        <FormatNumber numeralSystem={numeralSystem} n={timer} />
+      </span>
+    );
+  }
+);
+
+export default Timer;

@@ -15,15 +15,24 @@ import ErrorBoundary from './ErrorBoundary';
 import { useReducer } from 'react';
 import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
-import { LevelChooser } from './LevelChooser';
+import { LevelChooser, formatLevel } from './LevelChooser';
 import Modal from './Modal';
-import { NumeralSystem, formatNumber } from './Board/getContent';
+import { NumeralSystem, getFlag } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
-import reducer, { Action, IState, ModalType, onGameOver } from './reducer';
+import reducer, {
+  CmdAction,
+  IState,
+  LevelAction,
+  ModalAction,
+  ModalType,
+  onGameOver,
+} from './reducer';
 import { defaultTheme } from '../Theme';
-import { useTheme, useTicker } from '../Hooks';
+import { useTheme } from '../Hooks';
 import { GameOfLife } from './GameOfLife';
 import { log } from '../lib';
+import FormatNumber from './FormatNumber';
+import Timer from './Timer';
 
 type ILevels = {
   [keyof: string]: Level;
@@ -51,7 +60,7 @@ function init({ level, containerRef }: IStateInit): IState {
       maxHeight: 'revert',
       maxWidth: 'revert',
     },
-    numeralSystem: NumeralSystem.BENGALI,
+    numeralSystem: NumeralSystem.HANGZHOU_NUMERAL,
     modalStack: [],
     theme: defaultTheme,
     timingEvents: [],
@@ -198,6 +207,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
             });
           }}
           level={board.level}
+          numeralSystem={numeralSystem}
         />
       </Modal>
       <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
@@ -212,7 +222,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
 
 interface ControlsProps {
   board: GameRecord;
-  dispatch: React.Dispatch<Action>;
+  dispatch: React.Dispatch<ModalAction | CmdAction | LevelAction>;
   elapsedTime(): number;
   numeralSystem: NumeralSystem;
 }
@@ -222,17 +232,6 @@ const Controls = React.memo(
     ({ board, dispatch, elapsedTime, numeralSystem }, ref) => {
       const { level, state } = board;
       const remaining = level.mines - board.cellStates[CellState.FLAGGED];
-
-      // TODO
-      const [timer, setTimer] = React.useState(0);
-
-      useTicker(
-        1000,
-        state === GameState.PLAYING,
-        React.useCallback(() => setTimer(Math.floor(elapsedTime() / 1000)), [
-          elapsedTime,
-        ])
-      );
 
       const handleGameStateClick = () => {
         switch (board.state) {
@@ -245,7 +244,6 @@ const Controls = React.memo(
           case GameState.COMPLETED:
           case GameState.GAME_OVER:
           case GameState.ERROR:
-            setTimer(0);
             dispatch({
               type: 'setLevel',
               level: board.level,
@@ -261,10 +259,23 @@ const Controls = React.memo(
               dispatch({ type: 'showModal', modal: ModalType.SELECT_LEVEL })
             }
           >
-            {level.cols} x {level.rows} / {level.mines}
+            {formatLevel({
+              rows: level.rows,
+              cols: level.cols,
+              mines: level.mines,
+              numeralSystem,
+            })}
           </div>
           <div role="button" onClick={handleGameStateClick}>
-            {formatNumber(numeralSystem, timer)}
+            {board.state === GameState.NOT_INITIALIZED ? (
+              <FormatNumber numeralSystem={numeralSystem} n={0} />
+            ) : (
+              <Timer
+                numeralSystem={numeralSystem}
+                elapsedTime={elapsedTime}
+                running={state === GameState.PLAYING}
+              />
+            )}
           </div>
           <div
             role="button"
@@ -280,9 +291,9 @@ const Controls = React.memo(
             }
           >
             <span role="img" aria-label="Remaining mines">
-              {remaining >= 0 ? '☣️' : '💩'}
+              {remaining >= 0 ? getFlag() : '💩'}
             </span>{' '}
-            <span>{remaining}</span>
+            <FormatNumber numeralSystem={numeralSystem} n={remaining} />
           </div>
           <div
             role="button"

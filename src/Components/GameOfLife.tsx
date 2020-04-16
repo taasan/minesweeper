@@ -249,8 +249,6 @@ const reducer = (state: IState, action: Action): IState => {
         ...state,
         isActive: !state.isActive,
       };
-    case 'NONE':
-      return state;
     case 'FLAG':
     case 'POKE':
       const cells = [...state.gol.cells];
