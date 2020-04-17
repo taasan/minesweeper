@@ -179,8 +179,11 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       >
         <Controls
           gameState={board.state}
-          level={board.level}
-          flaggedCells={board.cellStates[CellState.FLAGGED]}
+          remainingMines={
+            board.level.mines -
+            board.cellStates[CellState.FLAGGED] -
+            board.cellStates[CellState.EXPLODED]
+          }
           dispatch={dispatch}
           elapsedTime={elapsedTimeCb}
           numeralSystem={numeralSystem}
@@ -224,8 +227,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
 
 interface ControlsProps {
   gameState: GameState;
-  level: Level;
-  flaggedCells: number;
+  remainingMines: number;
   dispatch: React.Dispatch<ModalAction | CmdAction | LevelAction | MenuAction>;
   elapsedTime(): number;
   numeralSystem: NumeralSystem;
@@ -241,13 +243,10 @@ const Controls = React.memo(
         numeralSystem,
         showMenu,
         gameState,
-        level,
-        flaggedCells,
+        remainingMines: remaining,
       },
       ref
     ) => {
-      const remaining = level.mines - flaggedCells;
-
       const handleGameStateClick = React.useCallback(() => {
         switch (gameState) {
           case GameState.PAUSED:
@@ -261,10 +260,9 @@ const Controls = React.memo(
           case GameState.ERROR:
             dispatch({
               type: 'setLevel',
-              level,
             });
         }
-      }, [dispatch, gameState, level]);
+      }, [dispatch, gameState]);
 
       const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
       return (
@@ -307,9 +305,9 @@ const Controls = React.memo(
               </span>
             </summary>
             <nav>
-              <ul className="Menu__List">
+              <ul role="menu" className="Menu__List">
                 <li
-                  role="button"
+                  role="menuitem"
                   onClick={() =>
                     dispatch({
                       type: 'showModal',
@@ -320,7 +318,7 @@ const Controls = React.memo(
                   Select level
                 </li>
                 <li
-                  role="button"
+                  role="menuitem"
                   onClick={() =>
                     dispatch({ type: 'showModal', modal: ModalType.SETTINGS })
                   }

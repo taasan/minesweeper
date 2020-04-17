@@ -22,7 +22,12 @@ const Timer: React.FC<Props> = React.memo(
     );
 
     return (
-      <span className="Timer" title={timer.toString()}>
+      <span
+        role="timer"
+        aria-live={running ? 'polite' : 'off'}
+        className="Timer"
+        title={timer.toString()}
+      >
         <FormatNumber numeralSystem={numeralSystem} n={timer} />
       </span>
     );

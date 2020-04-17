@@ -71,7 +71,7 @@ export type SettingsAction = {
 
 export type LevelAction = {
   type: 'setLevel';
-  level: Level;
+  level?: Level;
 };
 
 export type BoardAction = {
@@ -214,7 +214,10 @@ const reducer: ReducerFunction<IState, Action> = (state, action) => {
   const modalStackSize = state.modalStack.length;
   switch (action.type) {
     case 'setLevel':
-      const { board, nextState } = createGame(action.level, onGameOver);
+      const { board, nextState } = createGame(
+        action.level != null ? action.level : state.board.level,
+        onGameOver
+      );
       return {
         ...state,
         timingEvents: [],
