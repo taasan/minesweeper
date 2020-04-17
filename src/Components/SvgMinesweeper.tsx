@@ -177,7 +177,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         onPointerDown={handlePointerDown}
         onContextMenu={done ? handleRestartGame : onContextMenu}
       >
-        <Controls
+        <StatusBar
           gameState={board.state}
           remainingMines={
             board.level.mines -
@@ -234,7 +234,7 @@ interface ControlsProps {
   showMenu: boolean;
 }
 
-const Controls = React.memo(
+const StatusBar = React.memo(
   React.forwardRef<HTMLDivElement, ControlsProps>(
     (
       {
