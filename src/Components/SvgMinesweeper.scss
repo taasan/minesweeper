@@ -9,7 +9,13 @@
 }
 
 .SvgMinesweeper {
+  .SvgBoard[data-state='PLAYING'] {
+    .SvgMinesweeper__Controls {
+      grid-template-columns: 1fr 2em 1fr 0;
+    }
+  }
   .SvgMinesweeper__Controls {
+    direction: ltr;
     cursor: default;
     min-height: 10px;
     min-width: 10px;
@@ -23,6 +29,66 @@
     place-content: space-between;
     padding: 5px 5px 2px 5px;
     margin: 5px 5px 2px 5px;
+
+    display: grid;
+    grid-auto-flow: column;
+    grid-template: revert;
+    grid-template-columns: 1fr 2em 1fr 1.2em;
+
+    .SvgMinesweeper__Controls__Item {
+      text-align: end;
+    }
+
+    summary.SvgMinesweeper__Controls__Item {
+      list-style: none;
+    }
+
+    ul.Menu__List {
+      position: absolute;
+      right: 0;
+      border-radius: 10px;
+      padding: 15px;
+      background-color: var(--background-base2);
+
+      list-style: none;
+
+      li:hover {
+        color: var(--cell-threats-1-color);
+      }
+    }
+    /**
+ * Accordion (<details>)
+ * Inspiration: https://codepen.io/koca/pen/RyeLLV
+ */
+
+    details {
+      display: block;
+
+      summary {
+        list-style-type: none;
+        cursor: pointer;
+
+        // Reset marker
+        &::-webkit-details-marker {
+          display: none;
+        }
+        &::marker {
+          display: none;
+        }
+        &::-moz-list-bullet {
+          list-style-type: none;
+        }
+
+        // Marker
+        &::after {
+          display: none;
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
+    }
   }
 }
 

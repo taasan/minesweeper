@@ -2,7 +2,6 @@ import * as React from 'react';
 import './SvgMinesweeper.scss';
 import {
   CellState,
-  GameRecord,
   GameState,
   GridType,
   Level,
@@ -15,7 +14,7 @@ import ErrorBoundary from './ErrorBoundary';
 import { useReducer } from 'react';
 import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
-import { LevelChooser, formatLevel } from './LevelChooser';
+import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
 import { NumeralSystem, getFlag } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
@@ -23,13 +22,13 @@ import reducer, {
   CmdAction,
   IState,
   LevelAction,
+  MenuAction,
   ModalAction,
   ModalType,
   onGameOver,
 } from './reducer';
 import { defaultTheme } from '../Theme';
 import { useTheme } from '../Hooks';
-import { GameOfLife } from './GameOfLife';
 import { log } from '../lib';
 import FormatNumber from './FormatNumber';
 import Timer from './Timer';
@@ -65,6 +64,8 @@ function init({ level, containerRef }: IStateInit): IState {
     theme: defaultTheme,
     timingEvents: [],
     elapsedTime: 0,
+    showMenu: false,
+    lives: 2,
   };
 }
 
@@ -93,6 +94,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     theme,
     elapsedTime,
     timingEvents,
+    showMenu,
   } = state;
 
   const elapsedTimeCb = React.useCallback(() => {
@@ -110,7 +112,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   React.useEffect(() => {
     dispatch({ type: 'fitWindow' });
     // return registerEvent('resize', () => dispatch({ type: 'fitWindow' }));
-  }, []);
+  }, [dispatch]);
 
   const modal = modalStack[modalStack.length - 1];
   React.useEffect(
@@ -122,7 +124,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
           e.keyCode === 80 && dispatch({ type: 'TOGGLE_PAUSE' })
       ),
 
-    [containerRef]
+    [containerRef, dispatch]
   );
 
   React.useEffect(() => {
@@ -134,7 +136,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         dispatch({ type: 'TOGGLE_PAUSE' });
       }
     });
-  }, [board.state]);
+  }, [board.state, dispatch]);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
   // const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
@@ -165,7 +167,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         level: board.level,
       });
     },
-    [board.level]
+    [board.level, dispatch]
   );
 
   return (
@@ -176,10 +178,13 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         onContextMenu={done ? handleRestartGame : onContextMenu}
       >
         <Controls
-          board={board}
+          gameState={board.state}
+          level={board.level}
+          flaggedCells={board.cellStates[CellState.FLAGGED]}
           dispatch={dispatch}
           elapsedTime={elapsedTimeCb}
           numeralSystem={numeralSystem}
+          showMenu={showMenu}
         />
         <ErrorBoundary>
           <SvgBoard
@@ -213,28 +218,38 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
       <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
         <SettingsDialog initialState={state} dispatch={dispatch} />
       </Modal>
-      <Modal isOpen={modal === ModalType.GOL} onRequestClose={closeModal}>
-        <GameOfLife onClose={closeModal} />
-      </Modal>
     </div>
   );
 };
 
 interface ControlsProps {
-  board: GameRecord;
-  dispatch: React.Dispatch<ModalAction | CmdAction | LevelAction>;
+  gameState: GameState;
+  level: Level;
+  flaggedCells: number;
+  dispatch: React.Dispatch<ModalAction | CmdAction | LevelAction | MenuAction>;
   elapsedTime(): number;
   numeralSystem: NumeralSystem;
+  showMenu: boolean;
 }
 
 const Controls = React.memo(
   React.forwardRef<HTMLDivElement, ControlsProps>(
-    ({ board, dispatch, elapsedTime, numeralSystem }, ref) => {
-      const { level, state } = board;
-      const remaining = level.mines - board.cellStates[CellState.FLAGGED];
+    (
+      {
+        dispatch,
+        elapsedTime,
+        numeralSystem,
+        showMenu,
+        gameState,
+        level,
+        flaggedCells,
+      },
+      ref
+    ) => {
+      const remaining = level.mines - flaggedCells;
 
-      const handleGameStateClick = () => {
-        switch (board.state) {
+      const handleGameStateClick = React.useCallback(() => {
+        switch (gameState) {
           case GameState.PAUSED:
           case GameState.PLAYING:
             dispatch({
@@ -246,65 +261,75 @@ const Controls = React.memo(
           case GameState.ERROR:
             dispatch({
               type: 'setLevel',
-              level: board.level,
+              level,
             });
         }
-      };
+      }, [dispatch, gameState, level]);
 
+      const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
       return (
         <div className="SvgMinesweeper__Controls" ref={ref}>
-          <div
-            role="button"
-            onClick={() =>
-              dispatch({ type: 'showModal', modal: ModalType.SELECT_LEVEL })
-            }
-          >
-            {formatLevel({
-              rows: level.rows,
-              cols: level.cols,
-              mines: level.mines,
-              numeralSystem,
-            })}
-          </div>
-          <div role="button" onClick={handleGameStateClick}>
-            {board.state === GameState.NOT_INITIALIZED ? (
+          <div role="button" onClick={handleGameStateClick} {...itemsProps}>
+            {gameState === GameState.NOT_INITIALIZED ? (
               <FormatNumber numeralSystem={numeralSystem} n={0} />
             ) : (
               <Timer
                 numeralSystem={numeralSystem}
                 elapsedTime={elapsedTime}
-                running={state === GameState.PLAYING}
+                running={gameState === GameState.PLAYING}
               />
             )}
           </div>
           <div
+            {...itemsProps}
             role="button"
             onClick={handleGameStateClick}
-            aria-label={`Game state: ${GameState[board.state]}`}
+            aria-label={`Game state: ${GameState[gameState]}`}
           >
-            {renderGameState(board.state)}
+            {renderGameState(gameState)}
           </div>
-          <div
-            role="button"
-            onClick={() =>
-              dispatch({ type: 'showModal', modal: ModalType.GOL })
-            }
-          >
+          <div {...itemsProps} role="button">
+            <FormatNumber numeralSystem={numeralSystem} n={remaining} />
             <span role="img" aria-label="Remaining mines">
               {remaining >= 0 ? getFlag() : '💩'}
             </span>{' '}
-            <FormatNumber numeralSystem={numeralSystem} n={remaining} />
           </div>
-          <div
-            role="button"
-            onClick={() =>
-              dispatch({ type: 'showModal', modal: ModalType.SETTINGS })
-            }
-          >
-            <span role="img" aria-label="Settings">
-              ⚙️
-            </span>
-          </div>
+          <details open={showMenu}>
+            <summary
+              onClick={e => {
+                e.preventDefault();
+                dispatch({ type: 'toggleMenu' });
+              }}
+              {...itemsProps}
+            >
+              <span role="img" aria-label="menu">
+                🍔
+              </span>
+            </summary>
+            <nav>
+              <ul className="Menu__List">
+                <li
+                  role="button"
+                  onClick={() =>
+                    dispatch({
+                      type: 'showModal',
+                      modal: ModalType.SELECT_LEVEL,
+                    })
+                  }
+                >
+                  Select level
+                </li>
+                <li
+                  role="button"
+                  onClick={() =>
+                    dispatch({ type: 'showModal', modal: ModalType.SETTINGS })
+                  }
+                >
+                  Settings
+                </li>
+              </ul>
+            </nav>
+          </details>
         </div>
       );
     }

@@ -4,6 +4,7 @@ import { CellState, Coordinate, GridType, NumThreats } from '../../Game';
 
 import { CmdAction } from '../reducer';
 import { onContextMenu } from '..';
+import useAsyncDispatch from '../../Hooks/useAsyncDispatch';
 
 type ICellProps = {
   coordinate: Coordinate;
@@ -19,7 +20,7 @@ export const cellSize = 33;
 
 const SvgCell: FC<ICellProps> = props => {
   const {
-    dispatch,
+    dispatch: _dispatch,
     state,
     coordinate,
     threats,
@@ -27,6 +28,12 @@ const SvgCell: FC<ICellProps> = props => {
     mined,
     gridType,
   } = props;
+
+  const dispatch = useAsyncDispatch(_dispatch, {
+    onfulfilled: action => console.log('fulfilled', { action }),
+    onrejected: (action, err) => console.error('rejected', { action, err }),
+    onfinally: action => console.log('finally', { action }),
+  });
 
   const handleClick = (e: MouseEvent) => {
     if (dispatch != null && (state === CellState.OPEN || e.button === 0))

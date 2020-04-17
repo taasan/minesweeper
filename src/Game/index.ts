@@ -360,7 +360,7 @@ function openNeighbours(
   let flaggedNeighboursCount = 0;
   visitNeighbours(level, origin, coord => {
     const c = board.cells.get(coord)!;
-    if (c.state === CellState.FLAGGED) {
+    if (c.state === CellState.FLAGGED || c.state === CellState.EXPLODED) {
       flaggedNeighboursCount++;
     }
   });
@@ -427,7 +427,7 @@ function nextState(
     if (mutable !== board) {
       const stats = getCellStates(mutable.cells);
       mutable.set('cellStates', stats);
-      if (stats[CellState.EXPLODED] > 0) {
+      if (mutable.cells.get(coordinate)!.state === CellState.EXPLODED) {
         mutable.set('state', GameState.GAME_OVER);
         try {
           board.onGameOver();

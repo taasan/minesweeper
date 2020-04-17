@@ -1,4 +1,5 @@
 import {
+  CellState,
   Cmd,
   GameRecord,
   GameState,
@@ -18,7 +19,7 @@ import { chunk } from '../lib';
 
 type TimingEvent = number;
 
-export type IState = {
+export type IState = Readonly<{
   board: GameRecord;
   nextState: NextStateFunction;
   loading: boolean;
@@ -30,7 +31,9 @@ export type IState = {
   theme: ITheme;
   timingEvents: TimingEvent[];
   elapsedTime: number;
-};
+  showMenu: boolean;
+  lives: 0 | 1 | 2;
+}>;
 
 export type CmdAction =
   | {
@@ -50,6 +53,17 @@ export enum ModalType {
   SETTINGS,
   GOL,
 }
+
+export type MenuAction =
+  | {
+      type: 'showMenu';
+    }
+  | {
+      type: 'hideMenu';
+    }
+  | {
+      type: 'toggleMenu';
+    };
 
 export type SettingsAction = {
   type: 'applySettings';
@@ -88,7 +102,8 @@ export type Action =
   | SettingsAction
   | FitWindowAction
   | ModalAction
-  | CmdAction;
+  | CmdAction
+  | MenuAction;
 
 export const onGameOver = () => {
   window.navigator.vibrate(
@@ -122,6 +137,26 @@ const calulateElapsedTime = (timingEvents: TimingEvent[]) => {
   )
     .map(([a, b]) => (b != null ? b - a : b))
     .reduce((result, n) => result + n, 0);
+};
+
+const menuActionReducer = (state: IState, action: MenuAction): IState => {
+  let { showMenu } = state;
+  switch (action.type) {
+    case 'hideMenu':
+      showMenu = false;
+      break;
+    case 'showMenu':
+      showMenu = false;
+      break;
+    case 'toggleMenu':
+      showMenu = !showMenu;
+      break;
+  }
+
+  return {
+    ...state,
+    showMenu,
+  };
 };
 
 const commandActionReducer = (state: IState, action: CmdAction): IState => {
@@ -163,7 +198,9 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
   return newState;
 };
 
-const reducer = (state: IState, action: Action): IState => {
+type ReducerFunction<S, A> = (state: S, action: A) => S;
+
+const reducer: ReducerFunction<IState, Action> = (state, action) => {
   if (action.type === 'POKE' || action.type === 'FLAG') {
     log.debug({
       ...action,
@@ -186,6 +223,7 @@ const reducer = (state: IState, action: Action): IState => {
         board,
         nextState,
         modalStack: [],
+        history: [],
       };
     case 'setBoard':
       return {
@@ -194,6 +232,7 @@ const reducer = (state: IState, action: Action): IState => {
         timingEvents: [],
         elapsedTime: 0,
         loading: false,
+        history: [],
       };
     case 'applySettings':
       return {
@@ -211,6 +250,7 @@ const reducer = (state: IState, action: Action): IState => {
       return {
         ...newState,
         modalStack: [...state.modalStack].concat([action.modal]),
+        showMenu: false,
       };
     }
     case 'closeModal':
@@ -229,15 +269,73 @@ const reducer = (state: IState, action: Action): IState => {
         ...state,
         maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
       };
+    case 'showMenu':
+    case 'hideMenu':
+    case 'toggleMenu':
+      return menuActionReducer(state, action);
   }
   assertNever(action);
 };
 
-export default reducer;
-/*
-export default (state: IState, action: Action): IState => {
-  const s = reducer(state, action);
-  log.debug({ newState: s });
-  return s;
+export type IHistoryState = IState & {
+  history: Pick<GameRecord, 'cells' | 'cellStates' | 'state'>[];
 };
-*/
+
+const ensureHistory = (state: any): IHistoryState => {
+  if (!stateIsHistoryState(state)) {
+    state = { ...state, history: [] };
+  }
+
+  return state;
+};
+
+const stateIsHistoryState = (
+  state: IHistoryState | IState
+): state is IHistoryState => (state as IHistoryState).history !== undefined;
+
+export const withHistory: ReducerFunction<IHistoryState, Action> = (
+  state,
+  action
+): IHistoryState => {
+  state = ensureHistory(state);
+  const newState = ensureHistory(reducer(state, action));
+
+  if (action.type === 'FLAG' || action.type === 'POKE') {
+    const { cellStates, cells, state: gameState } = newState.board;
+    return {
+      ...newState,
+      history: [
+        ...state.history,
+        {
+          cellStates,
+          cells,
+          state: gameState,
+        },
+      ],
+    };
+  }
+  return newState;
+};
+
+export const withLives: (
+  lives: number,
+  reducer: ReducerFunction<IState, Action>
+) => ReducerFunction<IState, Action> = (
+  lives: number,
+  // eslint-disable-next-line no-shadow
+  reducer: ReducerFunction<IState, Action>
+) => (state: IState, action: Action) => {
+  const newState = reducer(state, action);
+  if (
+    newState.board.state === GameState.GAME_OVER &&
+    lives >= newState.board.cellStates[CellState.EXPLODED]
+  ) {
+    return {
+      ...newState,
+      board: newState.board.set('state', GameState.PLAYING),
+    };
+  }
+  return newState;
+};
+
+export default withLives(2, reducer);

@@ -7,21 +7,16 @@ type Props = {
   aria?: AriaAttributes;
 };
 
-export const CloseButton: React.FC<Props> = ({
-  close,
-  text,
-  tooltip,
-  aria,
-}) => {
-  return (
-    <button
-      title={tooltip}
-      className="CloseButton"
-      type="button"
-      onClick={close}
-      {...aria}
-    >
-      {text}
-    </button>
-  );
-};
+const CloseButton: React.FC<Props> = ({ close, text, tooltip, aria }) => (
+  <button
+    {...aria}
+    title={tooltip}
+    className="CloseButton"
+    type="button"
+    onClick={close}
+  >
+    {text}
+  </button>
+);
+
+export default React.memo(CloseButton);

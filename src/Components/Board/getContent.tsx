@@ -341,6 +341,10 @@ export function getContent(
   gameState: GameState,
   numeralSystem: NumeralSystem
 ): string | NumThreats {
+  if (state === CellState.EXPLODED) {
+    return '💀';
+  }
+
   const disarmedMine = '🥰';
   const isMined = threats === 0xff;
   const gameWon = gameState === GameState.COMPLETED;
@@ -355,13 +359,10 @@ export function getContent(
   if (isDisarmed) {
     return disarmedMine;
   }
-  if (
-    ((gameOver && state !== CellState.EXPLODED) || state === CellState.OPEN) &&
-    threats === 0xff
-  ) {
+  if ((gameOver || state === CellState.OPEN) && threats === 0xff) {
     return MINES[randomInt(MINES.length)];
   }
-  if (gameState === GameState.COMPLETED && state !== CellState.EXPLODED) {
+  if (gameState === GameState.COMPLETED) {
     return getContent(
       CellState.OPEN,
       threats,
@@ -378,8 +379,6 @@ export function getContent(
       return isNumThreats(threats)
         ? renderThreats(numeralSystem, threats)
         : '\u00A0';
-    case CellState.EXPLODED:
-      return '💀';
     default:
       return '\u00A0';
   }

@@ -17,6 +17,7 @@ import { NumeralSystem, getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
 import { hexOffset, hexagonPoints, onContextMenu } from '..';
 import log from '../../lib/log';
+import { isEqual } from 'lodash';
 
 const hexPoints = () =>
   hexagonPoints()
@@ -199,4 +200,4 @@ const SvgBoard = React.forwardRef<SVGSVGElement, IProps>((props, ref) => {
   );
 });
 
-export default React.memo(SvgBoard);
+export default React.memo(SvgBoard, isEqual);
