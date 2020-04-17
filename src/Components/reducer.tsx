@@ -51,7 +51,6 @@ export function isCmdAction(s: Action): s is CmdAction {
 export enum ModalType {
   SELECT_LEVEL,
   SETTINGS,
-  GOL,
 }
 
 export type MenuAction =
