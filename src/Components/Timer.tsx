@@ -13,13 +13,7 @@ const Timer: React.FC<Props> = React.memo(
   ({ running, elapsedTime, numeralSystem }) => {
     const [timer, setTimer] = React.useState(0);
 
-    useTicker(
-      1000,
-      running,
-      React.useCallback(() => setTimer(Math.floor(elapsedTime() / 1000)), [
-        elapsedTime,
-      ])
-    );
+    useTicker(1000, running, () => setTimer(Math.floor(elapsedTime() / 1000)));
 
     return (
       <span
