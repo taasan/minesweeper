@@ -427,7 +427,10 @@ function nextState(
     if (mutable !== board) {
       const stats = getCellStates(mutable.cells);
       mutable.set('cellStates', stats);
-      if (mutable.cells.get(coordinate)!.state === CellState.EXPLODED) {
+      if (
+        mutable.cellStates[CellState.EXPLODED] >
+        board.cellStates[CellState.EXPLODED]
+      ) {
         mutable.set('state', GameState.GAME_OVER);
         try {
           board.onGameOver();
