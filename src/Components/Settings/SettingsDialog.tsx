@@ -12,6 +12,7 @@ import {
   NumeralSystemContext,
   useSettingsContext,
 } from '../../store/contexts/settings';
+import { useDomTokenList } from '../../Hooks';
 
 export type SettingsDialogProps = {
   dispatch: React.Dispatch<ModalAction>;
@@ -42,9 +43,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 }) => {
   const { state: initialState, setState } = useSettingsContext();
   const [theme, setTheme] = React.useState(initialState.theme);
-  const [fitWindow, setFitWindow] = React.useState(initialState.fitWindow);
   const [numeralSystem, setNumeralSystem] = React.useState(
     initialState.numeralSystem
+  );
+  useDomTokenList(
+    containerDiv,
+    theme.styles.map(t => t.Theme)
   );
   React.useEffect(() => {
     const classes = theme.styles.map(t => t.Theme);
@@ -53,26 +57,19 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     return () => classList?.remove(...classes);
   });
 
-  const handleOnFitWindowChange = React.useCallback(
-    (e: React.SyntheticEvent<HTMLInputElement>) =>
-      setFitWindow(e.currentTarget?.checked),
-    []
-  );
-
   const closeModal = React.useCallback(() => dispatch({ type: 'closeModal' }), [
     dispatch,
   ]);
 
   const handleOnSubmit = (e: React.SyntheticEvent<any>) => {
     e.preventDefault();
-    setState({ theme, numeralSystem, fitWindow });
+    setState({ ...initialState, theme, numeralSystem });
     closeModal();
   };
   const handleOnReset = (e: React.SyntheticEvent<any>) => {
     e.preventDefault();
     setTheme(initialState.theme);
     setNumeralSystem(initialState.numeralSystem);
-    setFitWindow(initialState.fitWindow);
   };
   return (
     <form
@@ -97,17 +94,6 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
         <fieldset>
           <legend>Theme</legend>
           <ThemeChooser theme={theme} onChange={setTheme} />
-        </fieldset>
-        <fieldset>
-          <legend>Scaling</legend>
-          <label>
-            <input
-              type="checkbox"
-              checked={fitWindow}
-              onChange={handleOnFitWindowChange}
-            />
-            Fit to window
-          </label>
         </fieldset>
         <section className="SvgMinesweeper">
           <div

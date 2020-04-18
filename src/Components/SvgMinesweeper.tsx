@@ -29,6 +29,7 @@ import { NumeralSystem, log } from '../lib';
 import FormatNumber from './FormatNumber';
 import Timer from './Timer';
 import SettingsContextProvider, {
+  FitWindowContext,
   useSettingsContext,
 } from '../store/contexts/settings';
 
@@ -224,6 +225,7 @@ const StatusBar = React.memo(
         }
       }, [dispatch, gameState]);
 
+      const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
       const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
       return (
         <div className="SvgMinesweeper__Controls" ref={ref}>
@@ -284,6 +286,20 @@ const StatusBar = React.memo(
                   }
                 >
                   Settings
+                </li>
+                <li role="menuitemcheckbox" aria-checked={fitWindow}>
+                  <label>
+                    <input
+                      onChange={React.useCallback(
+                        (e: React.SyntheticEvent<HTMLInputElement>) =>
+                          setFitWindow(e.currentTarget?.checked),
+                        [setFitWindow]
+                      )}
+                      type="checkbox"
+                      checked={fitWindow}
+                    />
+                    Fit to window
+                  </label>
                 </li>
               </ul>
             </nav>
