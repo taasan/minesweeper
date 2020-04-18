@@ -18,7 +18,8 @@ import SvgCell, { cellSize } from './SvgCell';
 import { onContextMenu } from '..';
 import log from '../../lib/log';
 import { isEqual } from 'lodash';
-import { NumeralSystem, hexOffset, hexagonPoints } from '../../lib';
+import { hexOffset, hexagonPoints } from '../../lib';
+import { NumeralSystemContext } from '../../store/contexts/settings';
 
 const hexPoints = () =>
   hexagonPoints()
@@ -40,14 +41,13 @@ const squarePoints = () => {
 type IProps = {
   board: GameRecord;
   dispatch?: Dispatch<CmdAction>;
-  numeralSystem: NumeralSystem;
   style?: React.CSSProperties;
 };
 
 const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
   (props, ref) => {
-    const { dispatch, numeralSystem, board, style } = props;
-
+    const { dispatch, board, style } = props;
+    const { numeralSystem } = React.useContext(NumeralSystemContext);
     const boardState = board.state;
     switch (board.state) {
       case GameState.ERROR:

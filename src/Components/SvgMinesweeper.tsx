@@ -151,7 +151,6 @@ const SvgMinesweeper: React.FC<IProps> = () => {
             ref={state.containerRef}
             dispatch={dispatch}
             board={board}
-            numeralSystem={numeralSystem}
             style={
               fitWindow === true ? { ...state.maxBoardDimensions } : undefined
             }

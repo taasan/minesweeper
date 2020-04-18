@@ -8,7 +8,10 @@ import ThemeChooser from './ThemeChooser';
 import { ISettings, ModalAction } from '../../store';
 import CloseButton from '../CloseButton';
 import { NumeralSystem } from '../../lib';
-import { useSettingsContext } from '../../store/contexts/settings';
+import {
+  NumeralSystemContext,
+  useSettingsContext,
+} from '../../store/contexts/settings';
 
 export type SettingsDialogProps = {
   dispatch: React.Dispatch<ModalAction>;
@@ -113,7 +116,11 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               height: 'auto',
             }}
           >
-            <SvgBoard board={legend().board} numeralSystem={numeralSystem} />
+            <NumeralSystemContext.Provider
+              value={{ numeralSystem, setNumeralSystem: () => void 0 }}
+            >
+              <SvgBoard board={legend().board} />
+            </NumeralSystemContext.Provider>
           </div>
         </section>
       </div>
