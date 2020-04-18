@@ -47,7 +47,6 @@ export type IState = Readonly<{
   containerRef: React.RefObject<SVGSVGElement>;
   maxBoardDimensions: { maxWidth: string; maxHeight: string };
   modalStack: ModalType[];
-  settings: ISettings;
   timingEvents: TimingEvent[];
   elapsedTime: number;
   showMenu: boolean;
@@ -90,7 +89,6 @@ export const initialState: IState = {
     maxWidth: 'revert',
   },
   modalStack: [],
-  settings: initialSettings,
   timingEvents: [],
   elapsedTime: 0,
   showMenu: false,

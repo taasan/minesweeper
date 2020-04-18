@@ -29,8 +29,7 @@ import { NumeralSystem, log } from '../lib';
 import FormatNumber from './FormatNumber';
 import Timer from './Timer';
 import SettingsContextProvider, {
-  NumeralSystemContext,
-  ThemeContext,
+  useSettingsContext,
 } from '../store/contexts/settings';
 
 export type IProps = { level: Level };
@@ -45,7 +44,6 @@ const SvgMinesweeper: React.FC<IProps> = () => {
 
   const {
     game,
-    settings,
     modalStack,
     containerRef,
     elapsedTime,
@@ -53,7 +51,6 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     showMenu,
   } = state;
   const { board } = game;
-  const { fitWindow } = settings;
   const elapsedTimeCb = React.useCallback(() => {
     const len = timingEvents.length;
     if ((len & 1) !== 1) {
@@ -63,9 +60,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     const a = elapsedTime + Date.now() - lastStart;
     return a;
   }, [elapsedTime, timingEvents]);
-
-  const { theme } = React.useContext(ThemeContext);
-  const { numeralSystem } = React.useContext(NumeralSystemContext);
+  const { theme, numeralSystem, fitWindow } = useSettingsContext().state;
   useTheme(theme);
 
   React.useEffect(() => {
@@ -128,6 +123,9 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     },
     [board.level]
   );
+  const [settingsModalDiv, setSettingsModalDiv] = React.useState<
+    HTMLDivElement
+  >();
 
   return (
     <div>
@@ -177,8 +175,12 @@ const SvgMinesweeper: React.FC<IProps> = () => {
           numeralSystem={numeralSystem}
         />
       </Modal>
-      <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
-        <SettingsDialog dispatch={dispatch} />
+      <Modal
+        isOpen={modal === ModalType.SETTINGS}
+        onRequestClose={closeModal}
+        overlayRef={setSettingsModalDiv}
+      >
+        <SettingsDialog dispatch={dispatch} containerDiv={settingsModalDiv} />
       </Modal>
     </div>
   );

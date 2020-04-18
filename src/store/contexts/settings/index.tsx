@@ -1,9 +1,9 @@
 import React from 'react';
-import ThemeContextProvider from './theme';
-import FitWindowContextProvider from './fitWindow';
-import NumeralSystemContextProvider from './numeralSystem';
-
-// import fp from 'lodash/fp';
+import ThemeContextProvider, { ThemeContext } from './theme';
+import FitWindowContextProvider, { FitWindowContext } from './fitWindow';
+import NumeralSystemContextProvider, {
+  NumeralSystemContext,
+} from './numeralSystem';
 
 export {
   FitWindowContextProvider,
@@ -34,5 +34,40 @@ export const createSettingsContext: <T extends object>(
   ThemeContextProvider,
   NumeralSystemContextProvider
 );
+
+type SettingsContext = ThemeContext & NumeralSystemContext & FitWindowContext;
+
+export const useSettingsContext = () => {
+  const { theme: initialTheme, setTheme } = React.useContext(ThemeContext);
+  const { fitWindow: initialFitWindow, setFitWindow } = React.useContext(
+    FitWindowContext
+  );
+  const {
+    numeralSystem: initialNumeralSystem,
+    setNumeralSystem,
+  } = React.useContext(NumeralSystemContext);
+
+  const state: SettingsContext = {
+    fitWindow: initialFitWindow,
+    setFitWindow,
+    theme: initialTheme,
+    setTheme,
+    numeralSystem: initialNumeralSystem,
+    setNumeralSystem,
+  };
+
+  return {
+    state,
+    setState({
+      theme,
+      fitWindow,
+      numeralSystem,
+    }: Pick<SettingsContext, 'theme' | 'fitWindow' | 'numeralSystem'>): void {
+      setTheme(theme);
+      setFitWindow(fitWindow);
+      setNumeralSystem(numeralSystem);
+    },
+  };
+};
 
 export default createSettingsContext;

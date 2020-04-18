@@ -13,7 +13,7 @@ import {
 
 import log from '../lib/log';
 import { chunk } from '../lib';
-import { ISettings, IState, TimingEvent } from './context';
+import { IState, TimingEvent } from './context';
 
 export type CmdAction =
   | {
@@ -44,11 +44,6 @@ export type MenuAction =
       type: 'toggleMenu';
     };
 
-export type SettingsAction = {
-  type: 'applySettings';
-  settings: ISettings;
-};
-
 export type LevelAction = {
   type: 'setLevel';
   level?: Level;
@@ -78,7 +73,6 @@ export type ModalAction =
 export type Action =
   | LevelAction
   | BoardAction
-  | SettingsAction
   | FitWindowAction
   | ModalAction
   | CmdAction
@@ -91,6 +85,7 @@ export const onGameOver = () => {
 };
 
 const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
+  console.log('calculateCssMaxDimensions', board.current);
   if (board.current == null) {
     return {
       maxHeight: 'revert',
@@ -214,12 +209,6 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
         elapsedTime: 0,
         loading: false,
       };
-    case 'applySettings':
-      return {
-        ...state,
-        // settings: action.settings,
-        modalStack: [],
-      };
     case 'showModal': {
       let newState = state;
       if (state.game.board.state === GameState.PLAYING) {
@@ -245,13 +234,10 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
         modalStack,
       };
     case 'fitWindow':
-      if (state.containerRef != null) {
-        return {
-          ...state,
-          maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
-        };
-      }
-      return state;
+      return {
+        ...state,
+        maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
+      };
     case 'showMenu':
     case 'hideMenu':
     case 'toggleMenu':
