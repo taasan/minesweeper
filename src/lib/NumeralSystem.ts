@@ -1,13 +1,3 @@
-import {
-  CellState,
-  GameState,
-  Mine,
-  NumThreats,
-  isNumThreats,
-  randomInt,
-} from '../../Game';
-import { toRomanNumeral } from '../../lib';
-
 /*
 # http://unicode.org/Public/UNIDATA/UnicodeData.txt
 grep -E '(NUMERAL EIGHT|DIGIT EIGHT);' /usr/share/unicode/ucd/UnicodeData.txt \
@@ -15,6 +5,8 @@ grep -E '(NUMERAL EIGHT|DIGIT EIGHT);' /usr/share/unicode/ucd/UnicodeData.txt \
   | sed 's|^DIGIT|ASCII|'
   | xclip -selection clipboard
 */
+
+import toRomanNumeral from './toRomanNumeral';
 
 /*
 adlm	Adlam digits
@@ -105,7 +97,7 @@ wara	Warang Citi digits
 wcho	Wancho digits
 */
 
-export enum NumeralSystem {
+enum NumeralSystem {
   ascii = 0x0038 - 8,
   ROMAN_NUMERAL = 0x2167 - 8,
   SMALL_ROMAN_NUMERAL = 0x2177 - 8,
@@ -142,15 +134,15 @@ export enum NumeralSystem {
   LEPCHA = 0x1c48 - 8,
   OL_CHIKI = 0x1c58 - 8,
   /*
-  SUPERSCRIPT = 0x2078 - 8,
-  SUBSCRIPT = 0x2088 - 8,
-  CIRCLED = 0x2467 - 8,
-  PARENTHESIZED = 0x247b - 8,
-  DOUBLE_CIRCLED = 0x24fc - 8,
-  DINGBAT_NEGATIVE_CIRCLED = 0x277d - 8,
-  DINGBAT_CIRCLED_SANS_SERIF = 0x2787 - 8,
-  DINGBAT_NEGATIVE_CIRCLED_SANS_SERIF = 0x2791 - 8,
-  */
+    SUPERSCRIPT = 0x2078 - 8,
+    SUBSCRIPT = 0x2088 - 8,
+    CIRCLED = 0x2467 - 8,
+    PARENTHESIZED = 0x247b - 8,
+    DOUBLE_CIRCLED = 0x24fc - 8,
+    DINGBAT_NEGATIVE_CIRCLED = 0x277d - 8,
+    DINGBAT_CIRCLED_SANS_SERIF = 0x2787 - 8,
+    DINGBAT_NEGATIVE_CIRCLED_SANS_SERIF = 0x2791 - 8,
+    */
   VAI = 0xa628 - 8,
   SAURASHTRA = 0xa8d8 - 8,
   KAYAH_LI = 0xa908 - 8,
@@ -183,12 +175,12 @@ export enum NumeralSystem {
   PAHAWH_HMONG = 0x16b58 - 8,
   MEDEFAIDRIN = 0x16e88 - 8,
   /*
-  MATHEMATICAL_BOLD = 0x1d7d6 - 8,
-  MATHEMATICAL_DOUBLE_STRUCK = 0x1d7e0 - 8,
-  MATHEMATICAL_SANS_SERIF = 0x1d7ea - 8,
-  MATHEMATICAL_SANS_SERIF_BOLD = 0x1d7f4 - 8,
-  MATHEMATICAL_MONOSPACE = 0x1d7fe - 8,
-  */
+    MATHEMATICAL_BOLD = 0x1d7d6 - 8,
+    MATHEMATICAL_DOUBLE_STRUCK = 0x1d7e0 - 8,
+    MATHEMATICAL_SANS_SERIF = 0x1d7ea - 8,
+    MATHEMATICAL_SANS_SERIF_BOLD = 0x1d7f4 - 8,
+    MATHEMATICAL_MONOSPACE = 0x1d7fe - 8,
+    */
   NYIAKENG_PUACHUE_HMONG = 0x1e148 - 8,
   WANCHO = 0x1e2f8 - 8,
   MENDE_KIKAKUI = 0x1e8ce - 8,
@@ -238,15 +230,15 @@ export const NumeralSystemLocaleMap: {
   LEPCHA: 'lepc',
   OL_CHIKI: 'olck',
   /*
-  SUPERSCRIPT : 0x2078 - 8,
-  SUBSCRIPT : 0x2088 - 8,
-  CIRCLED : 0x2467 - 8,
-  PARENTHESIZED : 0x247b - 8,
-  DOUBLE_CIRCLED : 0x24fc - 8,
-  DINGBAT_NEGATIVE_CIRCLED : 0x277d - 8,
-  DINGBAT_CIRCLED_SANS_SERIF : 0x2787 - 8,
-  DINGBAT_NEGATIVE_CIRCLED_SANS_SERIF : 0x2791 - 8,
-  */
+    SUPERSCRIPT : 0x2078 - 8,
+    SUBSCRIPT : 0x2088 - 8,
+    CIRCLED : 0x2467 - 8,
+    PARENTHESIZED : 0x247b - 8,
+    DOUBLE_CIRCLED : 0x24fc - 8,
+    DINGBAT_NEGATIVE_CIRCLED : 0x277d - 8,
+    DINGBAT_CIRCLED_SANS_SERIF : 0x2787 - 8,
+    DINGBAT_NEGATIVE_CIRCLED_SANS_SERIF : 0x2791 - 8,
+    */
   VAI: 'vaii',
   SAURASHTRA: 'saur',
   KAYAH_LI: 'kali',
@@ -279,12 +271,12 @@ export const NumeralSystemLocaleMap: {
   PAHAWH_HMONG: 'hmng',
   // MEDEFAIDRIN: 0x16e88 - 8,
   /*
-  MATHEMATICAL_BOLD : 0x1d7d6 - 8,
-  MATHEMATICAL_DOUBLE_STRUCK : 0x1d7e0 - 8,
-  MATHEMATICAL_SANS_SERIF : 0x1d7ea - 8,
-  MATHEMATICAL_SANS_SERIF_BOLD : 0x1d7f4 - 8,
-  MATHEMATICAL_MONOSPACE : 0x1d7fe - 8,
-  */
+    MATHEMATICAL_BOLD : 0x1d7d6 - 8,
+    MATHEMATICAL_DOUBLE_STRUCK : 0x1d7e0 - 8,
+    MATHEMATICAL_SANS_SERIF : 0x1d7ea - 8,
+    MATHEMATICAL_SANS_SERIF_BOLD : 0x1d7f4 - 8,
+    MATHEMATICAL_MONOSPACE : 0x1d7fe - 8,
+    */
   NYIAKENG_PUACHUE_HMONG: 'hmnp',
   WANCHO: 'wcho',
   // MENDE_KIKAKUI: 0x1e8ce - 8,
@@ -311,80 +303,4 @@ export const formatNumber = (
   return n.toLocaleString(locale, options);
 };
 
-export const MINES = Object.freeze([
-  '🤒',
-  '😷',
-  '🤮',
-  '🤢',
-  '🤡',
-  '🧟',
-  '🤥',
-  '🤕',
-  '🤧',
-  '👻',
-  '🥵',
-  '🥶',
-  '👹',
-  '👺',
-  '🦠',
-]);
-
-export const getFlag = () => {
-  const today = new Date();
-  const isMay17 = today.getDate() === 17 && today.getMonth() === 4;
-  return isMay17 ? '🇳🇴' : '☣️';
-};
-
-export function getContent(
-  state: CellState,
-  threats: NumThreats | Mine,
-  gameState: GameState,
-  numeralSystem: NumeralSystem
-): string | NumThreats {
-  if (state === CellState.EXPLODED) {
-    return '💀';
-  }
-
-  const disarmedMine = '🥰';
-  const isMined = threats === 0xff;
-  const gameWon = gameState === GameState.COMPLETED;
-  const gameOver = gameState === GameState.GAME_OVER;
-  const demo = gameState === GameState.DEMO;
-  const done = gameOver || gameWon || demo;
-  const isFlagged = state === CellState.FLAGGED;
-  const isDisarmed = done && isMined && isFlagged && (gameWon || gameOver);
-  if (gameWon && isMined && state !== CellState.FLAGGED) {
-    return '🥺';
-  }
-  if (isDisarmed) {
-    return disarmedMine;
-  }
-  if ((gameOver || state === CellState.OPEN) && threats === 0xff) {
-    return MINES[randomInt(MINES.length)];
-  }
-  if (gameState === GameState.COMPLETED) {
-    return getContent(
-      CellState.OPEN,
-      threats,
-      GameState.PLAYING,
-      numeralSystem
-    );
-  }
-  switch (state) {
-    case CellState.FLAGGED:
-      return (demo || gameOver) && !isMined ? '💩' : getFlag();
-    case CellState.UNCERTAIN:
-      return '❓';
-    case CellState.OPEN:
-      return isNumThreats(threats)
-        ? renderThreats(numeralSystem, threats)
-        : '\u00A0';
-    default:
-      return '\u00A0';
-  }
-}
-
-export function renderThreats(numeralSystem: NumeralSystem, n: NumThreats) {
-  return String.fromCodePoint(numeralSystem + n);
-  // return formatNumber(numeralSystem, n); // String.fromCodePoint(numeralSystem + n);
-}
+export default NumeralSystem;

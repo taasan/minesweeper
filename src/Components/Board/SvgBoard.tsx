@@ -12,12 +12,13 @@ import {
   isNumThreats,
 } from '../../Game';
 import { Dispatch } from 'react';
-import { CmdAction } from '../reducer';
-import { NumeralSystem, getContent } from './getContent';
+import { CmdAction } from '../../store';
+import { getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
-import { hexOffset, hexagonPoints, onContextMenu } from '..';
+import { onContextMenu } from '..';
 import log from '../../lib/log';
 import { isEqual } from 'lodash';
+import { NumeralSystem, hexOffset, hexagonPoints } from '../../lib';
 
 const hexPoints = () =>
   hexagonPoints()

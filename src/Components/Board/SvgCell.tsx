@@ -2,7 +2,7 @@ import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
 import { CellState, Coordinate, GridType, NumThreats } from '../../Game';
 
-import { CmdAction } from '../reducer';
+import { CmdAction } from '../../store';
 import { onContextMenu } from '..';
 import useAsyncDispatch from '../../Hooks/useAsyncDispatch';
 

@@ -1,6 +1,7 @@
 import React from 'react';
-import { NumeralSystem, formatNumber } from './Board/getContent';
 import './FormatNumber.scss';
+import { NumeralSystem, formatNumber } from '../lib';
+import { NumeralSystemContext } from '../store/contexts/settings';
 
 export type Props = {
   n: number;
@@ -9,16 +10,12 @@ export type Props = {
   fractionDigits?: undefined | 1 | 2;
 };
 
-const FormatNumber: React.FC<Props> = ({
-  n,
-  numeralSystem,
-  className,
-  fractionDigits,
-}) => {
+const FormatNumber: React.FC<Props> = ({ n, className, fractionDigits }) => {
   const options = {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   };
+  const { numeralSystem } = React.useContext(NumeralSystemContext);
   return (
     <span
       className={className ?? 'FormatNumber'}

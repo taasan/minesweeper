@@ -1,23 +1,21 @@
 import * as React from 'react';
 import SvgBoard from '../Board/SvgBoard';
 import { NumThreats, legend } from '../../Game';
-import { NumeralSystem, renderThreats } from '../Board/getContent';
+import { renderThreats } from '../Board/getContent';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
-import { ITheme } from '../../Theme/theme';
-import { ModalAction, SettingsAction } from '../reducer';
+import { ISettings, ModalAction, SettingsAction } from '../../store';
 import CloseButton from '../CloseButton';
-
-export type ISettings = {
-  numeralSystem: NumeralSystem;
-  fitWindow: boolean;
-  theme: ITheme;
-};
+import { NumeralSystem } from '../../lib';
+import {
+  FitWindowContext,
+  NumeralSystemContext,
+  ThemeContext,
+} from '../../store/contexts/settings';
 
 export type SettingsDialogProps = {
   dispatch: React.Dispatch<SettingsAction | ModalAction>;
-  initialState: ISettings;
 };
 
 export type Action =
@@ -53,27 +51,35 @@ const reducer = (state: ISettings, action: Action): ISettings => {
   return state;
 };
 
-const SettingsDialog: React.FC<SettingsDialogProps> = ({
-  initialState,
-  dispatch: parentDispatch,
-}) => {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+const SettingsDialog: React.FC<SettingsDialogProps> = ({ dispatch }) => {
+  const { theme: initialTheme, setTheme } = React.useContext(ThemeContext);
+  const { fitWindow: initialFitWindow, setFitWindow } = React.useContext(
+    FitWindowContext
+  );
+  const {
+    numeralSystem: initialNumeralSystem,
+    setNumeralSystem,
+  } = React.useContext(NumeralSystemContext);
+
+  const initialState = {
+    fitWindow: initialFitWindow,
+    theme: initialTheme,
+    numeralSystem: initialNumeralSystem,
+  };
+
+  const [state, localDispatch] = React.useReducer(reducer, initialState);
+
   const { theme, numeralSystem, fitWindow } = state;
-  // const [theme, setTheme] = React.useState<ITheme>(initialState.theme);
-  // const [numeralSystem, setNumeralSystem] = React.useState<NumeralSystem>(
-  //  initialState.numeralSystem
-  // );
-  // const [fitWindow, setFitWindow] = React.useState(initialState.fitWindow);
 
   const handleOnThemeChange = React.useCallback(
     // eslint-disable-next-line no-shadow
-    theme => dispatch({ type: 'setTheme', payload: { theme } }),
+    theme => localDispatch({ type: 'setTheme', payload: { theme } }),
     []
   );
 
   const handleOnFitWindowChange = React.useCallback(
     e =>
-      dispatch({
+      localDispatch({
         type: 'setFitWindow',
         payload: { fitWindow: e.currentTarget.checked },
       }),
@@ -83,29 +89,28 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const handleNumeralSystemChange = React.useCallback(
     // eslint-disable-next-line no-shadow
     numeralSystem =>
-      dispatch({ type: 'setNumeralSystem', payload: { numeralSystem } }),
+      localDispatch({ type: 'setNumeralSystem', payload: { numeralSystem } }),
     []
   );
 
-  const closeModal = React.useCallback(
-    () => parentDispatch({ type: 'closeModal' }),
-    [parentDispatch]
-  );
+  const closeModal = React.useCallback(() => dispatch({ type: 'closeModal' }), [
+    dispatch,
+  ]);
+
+  const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setTheme(theme);
+    setNumeralSystem(numeralSystem);
+    setFitWindow(fitWindow);
+    closeModal();
+  };
   return (
     <form
       className="SettingsDialog"
-      onSubmit={e => {
-        e.preventDefault();
-        parentDispatch({
-          type: 'applySettings',
-          settings: {
-            ...state,
-          },
-        });
-      }}
+      onSubmit={handleOnSubmit}
       onReset={e => {
         e.preventDefault();
-        dispatch({ type: 'apply', payload: initialState });
+        localDispatch({ type: 'apply', payload: initialState });
       }}
     >
       <div

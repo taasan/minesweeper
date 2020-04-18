@@ -3,11 +3,8 @@ import './SvgMinesweeper.scss';
 import {
   CellState,
   GameState,
-  GridType,
   Level,
-  Topology,
   assertNever,
-  createGame,
   // legend,
 } from '../Game';
 import ErrorBoundary from './ErrorBoundary';
@@ -16,70 +13,30 @@ import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
 import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
-import { NumeralSystem, getFlag } from './Board/getContent';
+import { getFlag } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
-import reducer, {
+import {
   CmdAction,
-  IState,
   LevelAction,
   MenuAction,
   ModalAction,
   ModalType,
-  onGameOver,
-} from './reducer';
-import { defaultTheme } from '../Theme';
+  initialState,
+  reducer,
+} from '../store';
 import { useTheme } from '../Hooks';
-import { log } from '../lib';
+import { NumeralSystem, log } from '../lib';
 import FormatNumber from './FormatNumber';
 import Timer from './Timer';
+import SettingsContextProvider, {
+  NumeralSystemContext,
+  ThemeContext,
+} from '../store/contexts/settings';
 
-type ILevels = {
-  [keyof: string]: Level;
-};
-const type = GridType.HEX;
-const topology = Topology.LIMITED;
+export type IProps = { level: Level };
 
-export const LEVELS: ILevels = {
-  BEGINNER: { rows: 6, cols: 10, mines: 10, type, topology },
-  INTERMEDIATE: { rows: 16, cols: 16, mines: 40, type, topology },
-  EXPERT: { mines: 99, rows: 16, cols: 30, type, topology },
-};
-
-type IStateInit = Pick<IState, 'containerRef'> & {
-  level: Level;
-};
-
-function init({ level, containerRef }: IStateInit): IState {
-  return {
-    ...createGame(level, onGameOver),
-    loading: false,
-    containerRef,
-    fitWindow: true,
-    maxBoardDimensions: {
-      maxHeight: 'revert',
-      maxWidth: 'revert',
-    },
-    numeralSystem: NumeralSystem.HANGZHOU_NUMERAL,
-    modalStack: [],
-    theme: defaultTheme,
-    timingEvents: [],
-    elapsedTime: 0,
-    showMenu: false,
-    lives: 2,
-  };
-}
-
-type IProps = { level: Level };
-
-const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
-  const [state, dispatch] = useReducer(
-    reducer,
-    {
-      level: initialLevel,
-      containerRef: React.useRef<SVGSVGElement>(null),
-    },
-    init
-  );
+const SvgMinesweeper: React.FC<IProps> = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const registerEvent = (event: string, callback: (_: any) => void) => {
     window.addEventListener(event, callback);
@@ -87,16 +44,16 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
   };
 
   const {
-    board,
+    game,
+    settings,
     modalStack,
-    numeralSystem,
     containerRef,
-    theme,
     elapsedTime,
     timingEvents,
     showMenu,
   } = state;
-
+  const { board } = game;
+  const { fitWindow } = settings;
   const elapsedTimeCb = React.useCallback(() => {
     const len = timingEvents.length;
     if ((len & 1) !== 1) {
@@ -107,12 +64,14 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
     return a;
   }, [elapsedTime, timingEvents]);
 
+  const { theme } = React.useContext(ThemeContext);
+  const { numeralSystem } = React.useContext(NumeralSystemContext);
   useTheme(theme);
 
   React.useEffect(() => {
     dispatch({ type: 'fitWindow' });
     // return registerEvent('resize', () => dispatch({ type: 'fitWindow' }));
-  }, [dispatch]);
+  }, []);
 
   const modal = modalStack[modalStack.length - 1];
   React.useEffect(
@@ -124,7 +83,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
           e.keyCode === 80 && dispatch({ type: 'TOGGLE_PAUSE' })
       ),
 
-    [containerRef, dispatch]
+    [containerRef]
   );
 
   React.useEffect(() => {
@@ -136,7 +95,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         dispatch({ type: 'TOGGLE_PAUSE' });
       }
     });
-  }, [board.state, dispatch]);
+  }, [board.state]);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
   // const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
@@ -167,7 +126,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         level: board.level,
       });
     },
-    [board.level, dispatch]
+    [board.level]
   );
 
   return (
@@ -196,7 +155,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
             board={board}
             numeralSystem={numeralSystem}
             style={
-              state.fitWindow ? { ...state.maxBoardDimensions } : undefined
+              fitWindow === true ? { ...state.maxBoardDimensions } : undefined
             }
           />
         </ErrorBoundary>
@@ -219,7 +178,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ level: initialLevel }) => {
         />
       </Modal>
       <Modal isOpen={modal === ModalType.SETTINGS} onRequestClose={closeModal}>
-        <SettingsDialog initialState={state} dispatch={dispatch} />
+        <SettingsDialog dispatch={dispatch} />
       </Modal>
     </div>
   );
@@ -354,4 +313,6 @@ function renderGameState(state: GameState) {
   assertNever(state);
 }
 
-export default SvgMinesweeper;
+const ConnectedMinesweeper = SettingsContextProvider(SvgMinesweeper);
+
+export default ConnectedMinesweeper;

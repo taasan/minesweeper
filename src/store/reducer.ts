@@ -11,29 +11,9 @@ import {
   isCmdName,
 } from '../Game';
 
-import { NumeralSystem } from './Board/getContent';
-import { ISettings } from './Settings/SettingsDialog';
-import { ITheme } from '../Theme/theme';
 import log from '../lib/log';
 import { chunk } from '../lib';
-
-type TimingEvent = number;
-
-export type IState = Readonly<{
-  board: GameRecord;
-  nextState: NextStateFunction;
-  loading: boolean;
-  containerRef: React.RefObject<SVGSVGElement>;
-  fitWindow: boolean;
-  maxBoardDimensions: { maxWidth: string; maxHeight: string };
-  modalStack: ModalType[];
-  numeralSystem: NumeralSystem;
-  theme: ITheme;
-  timingEvents: TimingEvent[];
-  elapsedTime: number;
-  showMenu: boolean;
-  lives: 0 | 1 | 2;
-}>;
+import { ISettings, IState, TimingEvent } from './context';
 
 export type CmdAction =
   | {
@@ -161,17 +141,17 @@ const menuActionReducer = (state: IState, action: MenuAction): IState => {
 const commandActionReducer = (state: IState, action: CmdAction): IState => {
   if (
     action.type === 'TOGGLE_PAUSE' &&
-    ![GameState.PAUSED, GameState.PLAYING].includes(state.board.state)
+    ![GameState.PAUSED, GameState.PLAYING].includes(state.game.board.state)
   ) {
     return state;
   }
-  const board = state.nextState(Cmd[action.type], [
+  const board = state.game.nextState(Cmd[action.type], [
     action.type === 'TOGGLE_PAUSE' ? -1 : action.coordinate,
-    state.board,
+    state.game.board,
   ]);
 
   let addTimingEvent = action.type === 'TOGGLE_PAUSE';
-  switch (state.board.state) {
+  switch (state.game.board.state) {
     case GameState.NOT_INITIALIZED:
     case GameState.INITIALIZED:
       addTimingEvent = action.type === 'POKE' || action.type === 'FLAG';
@@ -187,11 +167,11 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
     newState.elapsedTime = elapsedTime;
     t.push(Date.now());
   }
-  newState.board = board;
-  if (state.board.state !== board.state) {
+  newState.game.board = board;
+  if (state.game.board.state !== board.state) {
     log.debug('State changed', {
-      old: GameState[state.board.state],
-      new: GameState[newState.board.state],
+      old: GameState[state.game.board.state],
+      new: GameState[newState.game.board.state],
     });
   }
   return newState;
@@ -199,11 +179,11 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
 
 type ReducerFunction<S, A> = (state: S, action: A) => S;
 
-const reducer: ReducerFunction<IState, Action> = (state, action) => {
+const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
   if (action.type === 'POKE' || action.type === 'FLAG') {
     log.debug({
       ...action,
-      ...calculateCoordinate(state.board.level.cols, action.coordinate),
+      ...calculateCoordinate(state.game.board.level.cols, action.coordinate),
     });
   } else {
     log.debug(action);
@@ -213,38 +193,36 @@ const reducer: ReducerFunction<IState, Action> = (state, action) => {
   }
   const modalStackSize = state.modalStack.length;
   switch (action.type) {
-    case 'setLevel':
-      const { board, nextState } = createGame(
-        action.level != null ? action.level : state.board.level,
+    case 'setLevel': {
+      const game = createGame(
+        action.level != null ? action.level : state.game.board.level,
         onGameOver
       );
       return {
         ...state,
         timingEvents: [],
         elapsedTime: 0,
-        board,
-        nextState,
+        game,
         modalStack: [],
-        history: [],
       };
+    }
     case 'setBoard':
       return {
         ...state,
-        ...action.game,
+        game: action.game,
         timingEvents: [],
         elapsedTime: 0,
         loading: false,
-        history: [],
       };
     case 'applySettings':
       return {
         ...state,
-        ...action.settings,
+        // settings: action.settings,
         modalStack: [],
       };
     case 'showModal': {
       let newState = state;
-      if (state.board.state === GameState.PLAYING) {
+      if (state.game.board.state === GameState.PLAYING) {
         newState = commandActionReducer(newState, {
           type: 'TOGGLE_PAUSE',
         });
@@ -267,10 +245,13 @@ const reducer: ReducerFunction<IState, Action> = (state, action) => {
         modalStack,
       };
     case 'fitWindow':
-      return {
-        ...state,
-        maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
-      };
+      if (state.containerRef != null) {
+        return {
+          ...state,
+          maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
+        };
+      }
+      return state;
     case 'showMenu':
     case 'hideMenu':
     case 'toggleMenu':
@@ -303,7 +284,7 @@ export const withHistory: ReducerFunction<IHistoryState, Action> = (
   const newState = ensureHistory(reducer(state, action));
 
   if (action.type === 'FLAG' || action.type === 'POKE') {
-    const { cellStates, cells, state: gameState } = newState.board;
+    const { cellStates, cells, state: gameState } = newState.game.board;
     return {
       ...newState,
       history: [
@@ -326,15 +307,18 @@ export const withLives: (
   lives: number,
   // eslint-disable-next-line no-shadow
   reducer: ReducerFunction<IState, Action>
-) => (state: IState, action: Action) => {
+) => (state: IState, action: Action): IState => {
   const newState = reducer(state, action);
   if (
-    newState.board.state === GameState.GAME_OVER &&
-    lives >= newState.board.cellStates[CellState.EXPLODED]
+    newState.game.board.state === GameState.GAME_OVER &&
+    lives >= newState.game.board.cellStates[CellState.EXPLODED]
   ) {
     return {
       ...newState,
-      board: newState.board.set('state', GameState.PLAYING),
+      game: {
+        ...newState.game,
+        board: newState.game.board.set('state', GameState.PLAYING),
+      },
     };
   }
   return newState;

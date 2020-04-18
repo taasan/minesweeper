@@ -1,7 +1,7 @@
 import React from 'react';
-import { NumeralSystem } from './Board/getContent';
 import { useTicker } from '../Hooks';
 import FormatNumber from './FormatNumber';
+import { NumeralSystem } from '../lib';
 
 interface Props {
   elapsedTime(): number;
