@@ -1,7 +1,7 @@
 import { ITheme } from '../Theme/theme';
-import { useBodyClass } from './';
+import { useDomTokenList } from './';
 
 const useTheme = (theme: ITheme) =>
-  useBodyClass(theme.styles.map(s => s.Theme));
+  useDomTokenList(document.body, ...theme.styles.map(s => s.Theme));
 
 export default useTheme;
