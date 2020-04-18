@@ -44,7 +44,7 @@ export type IState = Readonly<{
     nextState: NextStateFunction;
   };
   loading: boolean;
-  containerRef?: React.RefObject<SVGSVGElement>;
+  containerRef: React.RefObject<SVGSVGElement>;
   maxBoardDimensions: { maxWidth: string; maxHeight: string };
   modalStack: ModalType[];
   settings: ISettings;
@@ -95,6 +95,7 @@ export const initialState: IState = {
   elapsedTime: 0,
   showMenu: false,
   lives: 2,
+  containerRef: React.createRef(),
 };
 
 export default React.createContext<IState>(initialState);
