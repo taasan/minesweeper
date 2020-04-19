@@ -1,6 +1,7 @@
 import {
   CellState,
   Cmd,
+  Coordinate,
   GameRecord,
   GameState,
   Level,
@@ -21,7 +22,7 @@ export type CmdAction =
     }
   | {
       type: 'POKE' | 'FLAG';
-      coordinate: number;
+      coordinate: Coordinate;
     };
 
 export function isCmdAction(s: Action): s is CmdAction {

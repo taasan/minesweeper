@@ -6,9 +6,11 @@ import {
   GameState,
   GridType,
   ICell,
+  Topology,
   ValidationError,
   assertNever,
   calculateCoordinate,
+  calculateIndex,
   isNumThreats,
 } from '../../Game';
 import { Dispatch } from 'react';
@@ -111,7 +113,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         return assertNever(board.state);
     }
     // const { level } = board;
-    const { cols, rows } = board.level;
+    const { cols, rows, topology } = board.level;
     /*
     const { cols, rows } = !rotated
     ? board.level
@@ -147,35 +149,62 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
     };
     const { xOffset, yFactor, width, height } = getOffsets();
 
-    const mapCell = ([index, cell]: [Coordinate, ICell]) => {
-      const { row, col } = calculateCoordinate(cols, index);
+    const mapCell = ([coordinate, cell]: [Coordinate, ICell]) => {
+      const { row, col } =
+        typeof coordinate === 'number'
+          ? calculateCoordinate(cols, coordinate)
+          : coordinate;
 
       const x = col * cellSize + ((row & 1) === 1 ? xOffset : 0);
       const y = row * cellSize * yFactor;
 
+      const additional: JSX.Element[] = [];
+      if (topology === Topology.TORUS) {
+        if (col === 0) {
+          additional.push(mapCell([{ row, col: cols }, cell]));
+        } else if (col === cols - 1) {
+          additional.push(mapCell([{ row, col: -1 }, cell]));
+        }
+        if (row === 0) {
+          additional.push(mapCell([{ col, row: rows }, cell]));
+        } else if (row === rows - 1) {
+          additional.push(mapCell([{ col, row: -1 }, cell]));
+        }
+      }
       return (
-        <svg key={index} x={x} y={y} width={cellSize} height={cellSize}>
-          <SvgCell
-            coordinate={index}
-            gridType={board.level.type}
-            dispatch={dispatch}
-            content={getContent(
-              cell.state,
-              cell.threatCount,
-              boardState,
-              numeralSystem
-            )}
-            state={cell.state}
-            threats={
-              isNumThreats(cell.threatCount) ? cell.threatCount : undefined
-            }
-            mined={cell.threatCount === 0xff}
-          />
-        </svg>
+        <>
+          {[...additional]}
+          <svg key={`${x},${y}`} x={x} y={y} width={cellSize} height={cellSize}>
+            <SvgCell
+              coordinate={calculateIndex(
+                { cols },
+                { row: (row + rows) % rows, col: (col + cols) % cols }
+              )}
+              gridType={board.level.type}
+              dispatch={dispatch}
+              content={getContent(
+                cell.state,
+                cell.threatCount,
+                boardState,
+                numeralSystem
+              )}
+              state={cell.state}
+              threats={
+                isNumThreats(cell.threatCount) ? cell.threatCount : undefined
+              }
+              mined={cell.threatCount === 0xff}
+            />
+          </svg>
+        </>
       );
     };
 
     const classes = ['SvgBoard'];
+    const viewBox =
+      topology === Topology.LIMITED
+        ? `0 0 ${width} ${height}`
+        : `${-cellSize} ${-cellSize} ${width + cellSize * 2} ${height +
+            cellSize * 2}`;
     return (
       <svg
         ref={ref}
@@ -183,7 +212,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         preserveAspectRatio="xMidYMid meet"
         className={classes.join(' ')}
         pointerEvents={pointerEvents}
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={viewBox}
         data-grid={GridType[board.level.type]}
         data-state={GameState[boardState]}
         data-state2={

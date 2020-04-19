@@ -28,11 +28,11 @@
     border-radius: 50%;
   }
 
-  input[type='radio'] {
+  input.GridTypeRadio[type='radio'] {
     visibility: hidden;
   }
 
-  input[type='radio']:checked + * {
+  input.GridTypeRadio[type='radio']:checked + * {
     background-color: var(--cell-background);
     box-shadow: 0 0 40px var(--foreground-base3),
       0 0 20px var(--cell-threats-2-color);

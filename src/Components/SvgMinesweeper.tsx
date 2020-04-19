@@ -128,6 +128,11 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     HTMLDivElement
   >();
 
+  const boardStyle: React.CSSProperties = fitWindow
+    ? { ...state.maxBoardDimensions }
+    : {};
+  // boardStyle.pointerEvents = modal != null || showMenu ? 'none' : undefined;
+
   return (
     <div>
       <div
@@ -152,9 +157,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
             ref={state.containerRef}
             dispatch={dispatch}
             board={board}
-            style={
-              fitWindow === true ? { ...state.maxBoardDimensions } : undefined
-            }
+            style={boardStyle}
           />
         </ErrorBoundary>
       </div>

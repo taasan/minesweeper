@@ -6,18 +6,32 @@ export enum Mode {
   AUTO,
 }
 
-export type ITheme = Readonly<{
+export type PartialTheme = {
   name: string;
   styles: Array<{ readonly [key: string]: string }>;
   mode?: Mode;
   symbols?: {
     flag: string;
   };
-}>;
+};
 
-const simple: ITheme = {
+export type ITheme = Readonly<
+  PartialTheme & {
+    classNames: ReadonlyArray<string>;
+  }
+>;
+
+export const createTheme = (partial: PartialTheme): ITheme => {
+  console.log('createTheme', { partial });
+  return Object.freeze({
+    ...partial,
+    classNames: Object.freeze(partial.styles.map(t => t.Theme)),
+  });
+};
+
+const simple: ITheme = createTheme({
   name: 'Simple',
   styles: [theme],
-};
+});
 
 export default simple;

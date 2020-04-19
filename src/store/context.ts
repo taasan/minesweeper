@@ -16,7 +16,7 @@ type ILevels = {
   [keyof: string]: Level;
 };
 const type = GridType.HEX;
-const topology = Topology.LIMITED;
+const topology = Topology.TORUS;
 
 export const LEVELS: ILevels = {
   BEGINNER: { rows: 6, cols: 10, mines: 10, type, topology },

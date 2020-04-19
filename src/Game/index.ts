@@ -32,7 +32,8 @@ export const createGameCell: Record.Factory<ICell> = Record<ICell>({
 
 export type CellRecord = RecordOf<ICell>;
 
-export type Coordinate = number;
+export type CoordinateObject = { row: number; col: number };
+export type Coordinate = number | CoordinateObject;
 
 export enum GameState {
   PAUSED,
@@ -116,13 +117,19 @@ const getNeighbourMatrix = (
 };
 
 type IGame = Readonly<{
-  cells: OrderedMap<Coordinate, CellRecord>;
+  cells: OrderedMap<number, CellRecord>;
   state: GameState;
   level: Readonly<Level>;
   cellStates: RecordOf<CellStateStats>;
   error: Readonly<GameError> | null;
   onGameOver(): void;
 }>;
+
+const getCell = (board: IGame, coordinate: Coordinate) =>
+  board.cells.get(calculateIndex(board.level, coordinate));
+
+const setCell = (board: IGame, coordinate: Coordinate, cell: CellRecord) =>
+  board.cells.set(calculateIndex(board.level, coordinate), cell);
 
 export enum Topology {
   LIMITED,
@@ -169,7 +176,7 @@ export type Mine = 0xff;
 type CellStateStats = { [key in CellState]: number };
 
 function getCellStates(
-  cells: Collection<Coordinate, CellRecord>
+  cells: Collection<number, CellRecord>
 ): RecordOf<CellStateStats> {
   return createCellStateStats(
     cells.entrySeq().reduce(
@@ -182,8 +189,8 @@ function getCellStates(
   );
 }
 
-function createEmptyCells({ cols, rows }: Level): Array<[Coordinate, ICell]> {
-  const cells: Array<[Coordinate, ICell]> = [];
+function createEmptyCells({ cols, rows }: Level): Array<[number, ICell]> {
+  const cells: Array<[number, ICell]> = [];
   const dim = rows * cols;
   for (let i = 0; i < dim; i++) {
     cells.push([
@@ -205,9 +212,9 @@ function initialize(
   const cells = createEmptyCells(level);
   const { cols, rows, mines } = level;
 
-  const mineSet = new Set<Coordinate>()
+  const mineSet = new Set<number>()
     // Make sure we don't start with a bang
-    .add(origin);
+    .add(calculateIndex({ cols }, origin));
   let iterations = 0;
   const dim = cols * rows;
   while (mineSet.size <= mines) {
@@ -221,7 +228,7 @@ function initialize(
     }
   }
 
-  const cellRecords: OrderedMap<Coordinate, CellRecord> = OrderedMap(
+  const cellRecords: OrderedMap<number, CellRecord> = OrderedMap(
     cells.map(([coord, cell]) => {
       return [coord, createGameCell(cell)];
     })
@@ -248,7 +255,7 @@ function updateCell(
   board: GameRecord,
   [coordinate, newCell]: [Coordinate, CellRecord]
 ): GameRecord {
-  const oldCell = board.cells.get(coordinate);
+  const oldCell = getCell(board, coordinate);
   if (
     board.state === GameState.PLAYING &&
     oldCell?.threatCount !== newCell.threatCount
@@ -257,17 +264,17 @@ function updateCell(
       `Expected ${newCell.threatCount}, got ${oldCell?.threatCount}`
     );
   }
-  return board.set('cells', board.cells.set(coordinate, newCell));
+  return board.set('cells', setCell(board, coordinate, newCell));
 }
 
 function countThreats(board: GameRecord, p: Coordinate): NumThreats | Mine {
-  const { cells, level } = board;
-  if (cells.get(p)?.threatCount === 0xff) {
+  const { level } = board;
+  if (getCell(board, p)?.threatCount === 0xff) {
     return 0xff;
   }
   let threats: NumThreats = 0;
   visitNeighbours(level, p, coordinate => {
-    const cell = cells.get(coordinate)!;
+    const cell = getCell(board, coordinate)!;
     if (cell.threatCount === 0xff) {
       threats++;
     }
@@ -285,7 +292,10 @@ export function randomInt(max: number): number {
 
 export type GameCellCallback = (coordinate: Coordinate) => void;
 
-export const calculateCoordinate = (cols: number, index: number) => {
+export const calculateCoordinate = (cols: number, index: Coordinate) => {
+  if (typeof index === 'object') {
+    return index;
+  }
   const col = index % cols;
   const row = (index - col) / cols;
   return { col, row };
@@ -293,8 +303,11 @@ export const calculateCoordinate = (cols: number, index: number) => {
 
 export const calculateIndex = (
   { cols }: { cols: number },
-  { row, col }: { row: number; col: number }
-) => col + cols * row;
+  coordinate: Coordinate
+): number =>
+  typeof coordinate === 'number'
+    ? coordinate
+    : coordinate.col + cols * coordinate.row;
 
 export const getNeighbours = (
   { rows, cols, type, topology }: Grid,
@@ -359,7 +372,7 @@ function openNeighbours(
   const { level } = board;
   let flaggedNeighboursCount = 0;
   visitNeighbours(level, origin, coord => {
-    const c = board.cells.get(coord)!;
+    const c = getCell(board, coord)!;
     if (c.state === CellState.FLAGGED || c.state === CellState.EXPLODED) {
       flaggedNeighboursCount++;
     }
@@ -370,7 +383,7 @@ function openNeighbours(
   }
   return board.withMutations(mutable =>
     visitNeighbours(level, origin, coord => {
-      const c = board.cells.get(coord)!;
+      const c = getCell(board, coord)!;
       if (c.state === CellState.NEW || c.state === CellState.UNCERTAIN) {
         toggleOpen([[coord, c], mutable]);
       }
@@ -411,7 +424,7 @@ function nextState(
       board.state === GameState.PAUSED ? GameState.PLAYING : GameState.PAUSED
     );
   }
-  const cell = board.cells.get(coordinate)!;
+  const cell = getCell(board, coordinate)!;
   return board.withMutations(mutable => {
     switch (command) {
       case Cmd.POKE:
@@ -437,7 +450,7 @@ function nextState(
         } catch (err) {
           log.warn('Unhandled exception in onGameOver handler', err);
         }
-      } else if (mutable.cells.get(coordinate)!.state === CellState.OPEN) {
+      } else if (getCell(mutable, coordinate)!.state === CellState.OPEN) {
         const openPlusMines = mutable.level.mines + stats[CellState.OPEN];
         const numCells = mutable.level.cols * mutable.level.rows;
         const done = openPlusMines === numCells;

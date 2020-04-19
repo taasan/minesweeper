@@ -30,7 +30,7 @@ export const getLevel = (
   key: string = 'Beginner',
   type: GridType = GridType.SQUARE
 ): Level => {
-  const topology = Topology.LIMITED;
+  const topology = Topology.TORUS;
   const lvl = predefinedLevels.find(l => l.name === key);
   const v = lvl != null ? lvl : predefinedLevels[0];
   return Object.freeze({ ...v, type, topology });
@@ -92,7 +92,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
   numeralSystem,
 }) => {
   const [level, setLevel] = useState(initialLevel);
-  const { rows, cols, mines, type } = level;
+  const { rows, cols, mines, type, topology } = level;
   const maxM = maxMines({ rows, cols });
   const minM = minMines({ rows, cols });
   if (level.mines > maxM) {
@@ -115,6 +115,17 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
       setLevel({
         ...level,
         type: (GridType[e.currentTarget.value as any] as unknown) as GridType,
+      }),
+    [level]
+  );
+
+  const handleTopologyChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) =>
+      setLevel({
+        ...level,
+        topology: (Topology[
+          e.currentTarget.value as any
+        ] as unknown) as Topology,
       }),
     [level]
   );
@@ -239,6 +250,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
               return (
                 <label className="RadioGroup__Option" key={name}>
                   <input
+                    className="GridTypeRadio"
                     onChange={handleTypeChange}
                     checked={checked}
                     type="radio"
@@ -268,6 +280,23 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
                 </label>
               );
             })}
+          <select onChange={handleTopologyChange} value={Topology[topology]}>
+            {Object.keys(Topology)
+              .filter(name => !isNaN(Number(name)))
+              .map(k => {
+                const t: Topology = (k as unknown) as Topology;
+                const name = Topology[t];
+                // eslint-disable-next-line eqeqeq
+                const checked = t == topology;
+                console.log({ t, topology, checked });
+
+                return (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                );
+              })}
+          </select>
         </fieldset>
         <button type="submit">OK</button>
         <button type="reset">Reset</button>
