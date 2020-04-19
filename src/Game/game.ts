@@ -545,46 +545,42 @@ export const legend: () => {
   board: GameRecord;
   nextState: NextStateFunction;
 } = () => {
-  const cells = [
-    ...[...new Array(8)].map((_, i) =>
-      createGameCell({
-        state: CellState.OPEN,
-        threatCount: (i + 1) as NumThreats,
-      })
-    ),
-    createGameCell({
-      state: CellState.NEW,
-    }),
-    createGameCell({
+  const cells = ([
+    ...[...new Array(8)].map((_, i) => ({
       state: CellState.OPEN,
-      threatCount: 0,
-    }),
+      threatCount: (i + 1) as NumThreats,
+    })),
+    {
+      state: CellState.NEW,
+    },
+    { state: CellState.OPEN, threatCount: 0 },
 
-    createGameCell({
+    {
       state: CellState.FLAGGED,
       threatCount: 0xff,
-    }),
-    createGameCell({
+    },
+    {
       state: CellState.FLAGGED,
       threatCount: 0,
-    }),
-    createGameCell({
+    },
+    {
       state: CellState.UNCERTAIN,
       threatCount: 0xff,
-    }),
-    createGameCell({
+    },
+    {
       state: CellState.UNCERTAIN,
       threatCount: 0,
-    }),
-    createGameCell({
+    },
+    {
       state: CellState.EXPLODED,
       threatCount: 0xff,
-    }),
-    createGameCell({
+    },
+    {
       state: CellState.OPEN,
       threatCount: 0xff,
-    }),
-  ];
+    },
+  ] as ICell[]).map(createGameCell);
+
   const cols = 4;
   const board = createBoard({
     cells: OrderedMap(cells.map((c, i) => [i, c])),
