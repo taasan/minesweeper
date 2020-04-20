@@ -1,8 +1,8 @@
 @import 'colors';
-$lightRed: lighten($violet, 20%);
+
 .Theme {
-  --mine-detonated-background: #{$lightRed};
-  --cell-background-flagged-wrong: #{$lightRed};
+  --mine-detonated-background: #{$red};
+  --cell-background-flagged-wrong: #{$red};
   --cell-threats-1-color: #{$blue};
   --cell-threats-2-color: #{$green};
   --cell-threats-3-color: #{$red};
@@ -11,4 +11,13 @@ $lightRed: lighten($violet, 20%);
   --cell-threats-6-color: #{$cyan};
   --cell-threats-7-color: #{$yellow};
   --cell-threats-8-color: #{$orange};
+}
+
+body {
+  background-image: radial-gradient(
+    circle,
+    var(--background-base3),
+    var(--background-base2),
+    var(--background-base1)
+  );
 }
