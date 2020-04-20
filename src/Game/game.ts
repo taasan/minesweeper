@@ -42,6 +42,7 @@ export const createBoard: Record.Factory<IGame> = Record<IGame>({
   level: createLevel(),
   cellStates: createCellStateStats(),
   error: null,
+  version: 0,
   onGameOver: () => undefined,
 });
 
@@ -438,7 +439,8 @@ function toggleFlagged([[coordinate, cell], board]: [
 
 export type NextStateFunction = (
   cmd: Cmd,
-  currentState: [Coordinate, GameRecord]
+  currentState: [Coordinate, GameRecord],
+  currentVersion: number
 ) => GameRecord;
 
 export type IValidationError = {
@@ -538,7 +540,23 @@ export function createGame(
   };
   return {
     board: createBoard({ level: createLevel(level), cells, onGameOver }),
-    nextState: func,
+    nextState: (cmd, [coordinate, game], version) => {
+      if (
+        game.state !== GameState.NOT_INITIALIZED &&
+        version !== game.version
+      ) {
+        return game.withMutations(mutable => {
+          mutable.set(
+            'error',
+            Object.freeze(new GameError('Version mismatch'))
+          );
+          mutable.set('state', GameState.ERROR);
+        });
+      }
+
+      const b = func(cmd, [coordinate, game], version);
+      return b.set('version', b.version + 1).asImmutable();
+    },
   };
 }
 

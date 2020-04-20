@@ -52,6 +52,7 @@ export type IState = Readonly<{
   showMenu: boolean;
   lives: 0 | 1 | 2;
   rotated: boolean;
+  boardVersion: number;
 }>;
 
 /*
@@ -96,6 +97,7 @@ export const initialState: IState = {
   lives: 2,
   containerRef: React.createRef(),
   rotated: false,
+  boardVersion: 0,
 };
 
 export default React.createContext<IState>(initialState);

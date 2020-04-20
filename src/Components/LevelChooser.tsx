@@ -28,9 +28,9 @@ const predefinedLevels = Object.freeze([
 
 export const getLevel = (
   key: string = 'Beginner',
-  type: GridType = GridType.SQUARE
+  type: GridType = GridType.SQUARE,
+  topology = Topology.LIMITED
 ): Level => {
-  const topology = Topology.LIMITED;
   const lvl = predefinedLevels.find(l => l.name === key);
   const v = lvl != null ? lvl : predefinedLevels[0];
   return Object.freeze({ ...v, type, topology });
@@ -147,7 +147,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
           <select
             value={selectedLevel ?? custom}
             onChange={e => {
-              setLevel(getLevel(e.target.value, level.type));
+              setLevel(getLevel(e.target.value, level.type, level.topology));
             }}
           >
             <option hidden={selectedLevel != null} value={custom}>

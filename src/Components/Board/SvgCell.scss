@@ -94,6 +94,10 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
     fill: var(--cell-background, revert);
   }
 
+  &[data-state='#{$NEW}'] .SvgCell__Cover:hover {
+    fill: var(--mine-detonated-background, revert);
+  }
+
   &[data-state='#{$EXPLODED}'] .SvgCell__Background {
     fill: var(--mine-detonated-background, revert);
   }

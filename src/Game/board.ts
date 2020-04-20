@@ -36,6 +36,7 @@ export type IGame = Readonly<{
   level: Readonly<Level>;
   cellStates: RecordOf<CellStateStats>;
   error: Readonly<GameError> | null;
+  version: number;
   onGameOver(): void;
 }>;
 
