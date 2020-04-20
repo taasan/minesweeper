@@ -30,7 +30,7 @@ export const getLevel = (
   key: string = 'Beginner',
   type: GridType = GridType.SQUARE
 ): Level => {
-  const topology = Topology.TORUS;
+  const topology = Topology.LIMITED;
   const lvl = predefinedLevels.find(l => l.name === key);
   const v = lvl != null ? lvl : predefinedLevels[0];
   return Object.freeze({ ...v, type, topology });

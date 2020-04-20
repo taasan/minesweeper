@@ -45,9 +45,12 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   }
 }
 
+.SvgCell .SvgCell__Text {
+  transform-origin: center;
+}
+
 .SvgBoard.SvgBoard__rotated .SvgCell .SvgCell__Text {
   transform: rotate(-90deg);
-  transform-origin: center;
 }
 
 .SvgCell {
@@ -207,14 +210,17 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   .SvgCell {
     &[data-state='#{$EXPLODED}'] .SvgCell__Text[role='img'] {
       //animation: EXPLODED-animation 1 2s cubic-bezier(0.95, 0.05, 0.795, 0.035);
-      animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11 alternate
-        both running pulse;
+      // animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11 alternate
+      //  both running pulse;
     }
   }
   @each $gameState in $GAME_OVER, $COMPLETED {
     &[data-state='#{$gameState}'] .SvgCell__Text[role='img'] {
-      transform: rotate(-15deg) scale(1.25);
+      transform: rotate(-30deg) scale(1.25);
       transition: transform 0.3s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    }
+    &.SvgBoard__rotated[data-state='#{$gameState}'] .SvgCell .SvgCell__Text {
+      transform: rotate(-105deg) scale(1.25);
     }
   }
 

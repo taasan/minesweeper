@@ -1,8 +1,9 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext } from 'react';
+import useLocalStorage from './useLocalStorage';
 
 export type FitWindowContext = {
   fitWindow: boolean;
-  setFitWindow: (titWindow: boolean) => void;
+  setFitWindow: (fitWindow: boolean) => void;
 };
 const defaultFitWindow = false;
 
@@ -14,7 +15,10 @@ export const FitWindowContext = createContext<FitWindowContext>({
 export const FitWindowContextProvider = (props: {
   children?: React.ReactNode;
 }) => {
-  const [fitWindow, setFitWindow] = useState(defaultFitWindow);
+  const [fitWindow, setFitWindow] = useLocalStorage(
+    'fitWindow',
+    defaultFitWindow as boolean
+  );
   return (
     <FitWindowContext.Provider value={{ fitWindow, setFitWindow }}>
       {props.children}

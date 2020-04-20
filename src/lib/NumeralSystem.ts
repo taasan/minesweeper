@@ -188,6 +188,9 @@ enum NumeralSystem {
   SEGMENTED = 0x1fbf8 - 8,
 }
 
+export const isNumeralSystem = (c: any): c is NumeralSystem =>
+  typeof c === 'number' && NumeralSystem[c] != null;
+
 // type NumeralSystemName = keyof typeof NumeralSystem;
 
 export const NumeralSystemLocaleMap: {

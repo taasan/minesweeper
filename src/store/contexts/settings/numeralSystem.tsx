@@ -1,5 +1,6 @@
-import React, { createContext, useState } from 'react';
-import { NumeralSystem } from '../../../lib';
+import React, { createContext } from 'react';
+import { NumeralSystem, isNumeralSystem } from '../../../lib';
+import useLocalStorage from './useLocalStorage';
 
 export type NumeralSystemContext = {
   numeralSystem: NumeralSystem;
@@ -15,7 +16,13 @@ export const NumeralSystemContext = createContext<NumeralSystemContext>({
 export const NumeralSystemContextProvider = (props: {
   children?: React.ReactNode;
 }) => {
-  const [numeralSystem, setNumeralSystem] = useState(defaultNumeralSystem);
+  let [numeralSystem, setNumeralSystem] = useLocalStorage(
+    'numeralSystem',
+    defaultNumeralSystem
+  );
+  if (!isNumeralSystem(numeralSystem)) {
+    numeralSystem = defaultNumeralSystem;
+  }
   return (
     <NumeralSystemContext.Provider value={{ numeralSystem, setNumeralSystem }}>
       {props.children}

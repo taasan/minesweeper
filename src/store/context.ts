@@ -16,7 +16,7 @@ type ILevels = {
   [keyof: string]: Level;
 };
 const type = GridType.HEX;
-const topology = Topology.TORUS;
+const topology = Topology.LIMITED;
 
 export const LEVELS: ILevels = {
   BEGINNER: { rows: 6, cols: 10, mines: 10, type, topology },
@@ -51,6 +51,7 @@ export type IState = Readonly<{
   elapsedTime: number;
   showMenu: boolean;
   lives: 0 | 1 | 2;
+  rotated: boolean;
 }>;
 
 /*
@@ -94,6 +95,7 @@ export const initialState: IState = {
   showMenu: false,
   lives: 2,
   containerRef: React.createRef(),
+  rotated: false,
 };
 
 export default React.createContext<IState>(initialState);

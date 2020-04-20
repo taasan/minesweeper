@@ -105,7 +105,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
             <NumeralSystemContext.Provider
               value={{ numeralSystem, setNumeralSystem: () => void 0 }}
             >
-              <SvgBoard board={legend().board} />
+              <SvgBoard board={legend().board} rotated={false} />
             </NumeralSystemContext.Provider>
           </div>
         </section>

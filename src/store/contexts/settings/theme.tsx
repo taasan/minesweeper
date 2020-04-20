@@ -1,6 +1,8 @@
-import React, { createContext, useState } from 'react';
-import { defaultTheme } from '../../../Theme';
-import { ITheme } from '../../../Theme/theme';
+import React, { createContext } from 'react';
+import Themes, { defaultTheme } from '../../../Theme';
+import { ITheme, isTheme } from '../../../Theme/theme';
+import useLocalStorage from './useLocalStorage';
+import { log } from '../../../lib';
 
 export type ThemeContext = {
   theme: ITheme;
@@ -11,14 +13,20 @@ export const ThemeContext = createContext<ThemeContext>({
   theme: defaultTheme,
   setTheme: () => undefined,
 });
+const themes = new Map(Themes().map(t => [t.name, t]));
 
 export const ThemeContextProvider = (props: { children?: React.ReactNode }) => {
-  const [theme, setTheme] = useState(defaultTheme);
+  let [name, setTheme] = useLocalStorage('theme', defaultTheme.name);
+  let theme = themes.get(name);
+  if (!isTheme(theme)) {
+    if (theme != null) log.warn('Invalid theme', { name, theme });
+    theme = defaultTheme;
+  }
   return (
     <ThemeContext.Provider
       value={{
         theme,
-        setTheme,
+        setTheme: (t: ITheme) => setTheme(t.name),
       }}
     >
       {props.children}

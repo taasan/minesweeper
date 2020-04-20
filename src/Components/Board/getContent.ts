@@ -32,6 +32,9 @@ export const getFlag = () => {
   return isMay17 ? '🇳🇴' : '☣️';
 };
 
+export const DISARMED_MINE = '🥰';
+export const EXPLODED_MINE = '💀';
+
 export function getContent(
   state: CellState,
   threats: NumThreats | Mine,
@@ -39,10 +42,9 @@ export function getContent(
   numeralSystem: NumeralSystem
 ): string | NumThreats {
   if (state === CellState.EXPLODED) {
-    return '💀';
+    return EXPLODED_MINE;
   }
 
-  const disarmedMine = '🥰';
   const isMined = threats === 0xff;
   const gameWon = gameState === GameState.COMPLETED;
   const gameOver = gameState === GameState.GAME_OVER;
@@ -54,7 +56,7 @@ export function getContent(
     return '🥺';
   }
   if (isDisarmed) {
-    return disarmedMine;
+    return DISARMED_MINE;
   }
   if ((gameOver || state === CellState.OPEN) && threats === 0xff) {
     return MINES[randomInt(MINES.length)];

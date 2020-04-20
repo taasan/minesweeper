@@ -33,7 +33,7 @@
     display: grid;
     grid-auto-flow: column;
     grid-template: revert;
-    grid-template-columns: 1fr 2em 1fr 1.2em;
+    grid-template-columns: 1fr 4em 1fr 1.2em;
 
     .SvgMinesweeper__Controls__Item {
       text-align: end;

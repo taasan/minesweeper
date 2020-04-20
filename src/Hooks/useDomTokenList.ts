@@ -5,11 +5,14 @@ const useDomTokenList = (
   tokens?: string[] | Readonly<string[]>
 ) => {
   useEffect(() => {
+    if (element == null || tokens == null) {
+      return;
+    }
     log.debug('useDomTokenList.useEffect');
     // Set up
-    element?.classList?.add(...tokens);
+    element.classList.add(...tokens);
     // Clean up
-    return () => element?.classList?.remove(...tokens);
+    return () => element.classList.remove(...tokens);
   }, [element, tokens]);
 };
 

@@ -4,6 +4,8 @@ import FitWindowContextProvider, { FitWindowContext } from './fitWindow';
 import NumeralSystemContextProvider, {
   NumeralSystemContext,
 } from './numeralSystem';
+import RotateContextProvider, { RotateContext } from './rotate';
+import { OmitByValueType } from '../../../lib';
 
 export {
   FitWindowContextProvider,
@@ -15,6 +17,10 @@ export * from './fitWindow';
 export * from './theme';
 
 export * from './numeralSystem';
+
+export * from './rotate';
+
+export * from './useLocalStorage';
 
 type Provider<P extends object> = (
   props: React.PropsWithChildren<P>
@@ -32,10 +38,16 @@ export const createSettingsContext: <T extends object>(
 ) => (props: T & JSX.IntrinsicAttributes) => JSX.Element = useProviders(
   FitWindowContextProvider,
   ThemeContextProvider,
-  NumeralSystemContextProvider
+  NumeralSystemContextProvider,
+  RotateContextProvider
 );
 
-type SettingsContext = ThemeContext & NumeralSystemContext & FitWindowContext;
+export type SettingsContext = ThemeContext &
+  NumeralSystemContext &
+  FitWindowContext &
+  RotateContext;
+
+export type SettingsContextValues = OmitByValueType<SettingsContext, Function>;
 
 export const useSettingsContext = () => {
   const { theme: initialTheme, setTheme } = React.useContext(ThemeContext);
@@ -47,6 +59,8 @@ export const useSettingsContext = () => {
     setNumeralSystem,
   } = React.useContext(NumeralSystemContext);
 
+  const { rotate: initialRotate, setRotate } = React.useContext(RotateContext);
+
   const state: SettingsContext = {
     fitWindow: initialFitWindow,
     setFitWindow,
@@ -54,6 +68,8 @@ export const useSettingsContext = () => {
     setTheme,
     numeralSystem: initialNumeralSystem,
     setNumeralSystem,
+    rotate: initialRotate,
+    setRotate,
   };
 
   return {
@@ -62,10 +78,12 @@ export const useSettingsContext = () => {
       theme,
       fitWindow,
       numeralSystem,
-    }: Pick<SettingsContext, 'theme' | 'fitWindow' | 'numeralSystem'>): void {
+      rotate,
+    }: SettingsContextValues): void {
       setTheme(theme);
       setFitWindow(fitWindow);
       setNumeralSystem(numeralSystem);
+      setRotate(rotate);
     },
   };
 };

@@ -13,7 +13,7 @@ import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '.';
 import { LevelChooser } from './LevelChooser';
 import Modal from './Modal';
-import { getFlag } from './Board/getContent';
+import { DISARMED_MINE, EXPLODED_MINE, getFlag } from './Board/getContent';
 import SettingsDialog from './Settings/SettingsDialog';
 import {
   CmdAction,
@@ -30,9 +30,10 @@ import FormatNumber from './FormatNumber';
 import Timer from './Timer';
 import SettingsContextProvider, {
   FitWindowContext,
+  RotateContext,
   useSettingsContext,
 } from '../store/contexts/settings';
-
+import { Store } from '../store';
 export type IProps = { level: Level };
 
 const SvgMinesweeper: React.FC<IProps> = () => {
@@ -50,6 +51,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     elapsedTime,
     timingEvents,
     showMenu,
+    lives,
   } = state;
   const { board } = game;
   const elapsedTimeCb = React.useCallback(() => {
@@ -61,7 +63,12 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     const a = elapsedTime + Date.now() - lastStart;
     return a;
   }, [elapsedTime, timingEvents]);
-  const { theme, numeralSystem, fitWindow } = useSettingsContext().state;
+  const {
+    theme,
+    numeralSystem,
+    fitWindow,
+    rotate: rotated,
+  } = useSettingsContext().state;
   useTheme(theme);
 
   React.useEffect(() => {
@@ -141,6 +148,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
         onContextMenu={done ? handleRestartGame : onContextMenu}
       >
         <StatusBar
+          remainingLives={lives - board.cellStates[CellState.EXPLODED]}
           gameState={board.state}
           remainingMines={
             board.level.mines -
@@ -154,6 +162,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
         />
         <ErrorBoundary>
           <SvgBoard
+            rotated={rotated}
             ref={state.containerRef}
             dispatch={dispatch}
             board={board}
@@ -192,6 +201,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
 interface ControlsProps {
   gameState: GameState;
   remainingMines: number;
+  remainingLives: number;
   dispatch: React.Dispatch<ModalAction | CmdAction | LevelAction | MenuAction>;
   elapsedTime(): number;
   numeralSystem: NumeralSystem;
@@ -208,6 +218,7 @@ const StatusBar = React.memo(
         showMenu,
         gameState,
         remainingMines: remaining,
+        remainingLives,
       },
       ref
     ) => {
@@ -227,7 +238,8 @@ const StatusBar = React.memo(
             });
         }
       }, [dispatch, gameState]);
-
+      const { lives } = React.useContext(Store);
+      const { rotate, setRotate } = React.useContext(RotateContext);
       const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
       const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
       return (
@@ -249,7 +261,7 @@ const StatusBar = React.memo(
             onClick={handleGameStateClick}
             aria-label={`Game state: ${GameState[gameState]}`}
           >
-            {renderGameState(gameState)}
+            {renderGameState(gameState, lives, remainingLives)}
           </div>
           <div {...itemsProps} role="button">
             <FormatNumber numeralSystem={numeralSystem} n={remaining} />
@@ -304,6 +316,20 @@ const StatusBar = React.memo(
                     Fit to window
                   </label>
                 </li>
+                <li role="menuitemcheckbox" aria-checked={rotate}>
+                  <label>
+                    <input
+                      onChange={React.useCallback(
+                        (e: React.SyntheticEvent<HTMLInputElement>) =>
+                          setRotate(e.currentTarget?.checked),
+                        [setRotate]
+                      )}
+                      type="checkbox"
+                      checked={rotate}
+                    />
+                    Rotate
+                  </label>
+                </li>
               </ul>
             </nav>
           </details>
@@ -313,14 +339,16 @@ const StatusBar = React.memo(
   )
 );
 
-function renderGameState(state: GameState) {
+function renderGameState(state: GameState, lives: number, remaining: number) {
   switch (state) {
     case GameState.PAUSED:
       return '🧘';
-    case GameState.PLAYING:
-      return '🎮';
     case GameState.COMPLETED:
-      return '🥇';
+    case GameState.PLAYING:
+      return (
+        EXPLODED_MINE.repeat(lives - remaining) +
+        DISARMED_MINE.repeat(remaining + 1)
+      );
     case GameState.ERROR:
       return '🤔';
     case GameState.GAME_OVER:

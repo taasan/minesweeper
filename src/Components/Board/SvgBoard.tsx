@@ -23,6 +23,7 @@ import { isEqual } from 'lodash';
 import { hexOffset, hexagonPoints } from '../../lib';
 import { NumeralSystemContext } from '../../store/contexts/settings';
 
+// @ts-ignore
 const hexPoints = () =>
   hexagonPoints()
     .map(({ x, y }) => `${(x * cellSize) / 2},${(y * cellSize) / 2}`)
@@ -42,6 +43,7 @@ const squarePoints = () => {
 
 type IProps = {
   board: GameRecord;
+  rotated: boolean;
   dispatch?: Dispatch<CmdAction>;
   style?: React.CSSProperties;
 };
@@ -114,11 +116,8 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
     }
     // const { level } = board;
     const { cols, rows, topology } = board.level;
-    /*
-    const { cols, rows } = !rotated
-    ? board.level
-    : { rows: level.cols, cols: level.rows };
-*/
+    const rotated = props.rotated && rows !== cols;
+
     const done =
       boardState === GameState.GAME_OVER ||
       boardState === GameState.COMPLETED ||
@@ -149,15 +148,34 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
     };
     const { xOffset, yFactor, width, height } = getOffsets();
 
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const rotate = ({ x, y }: { x: number; y: number }) => {
+      const translationx = cols / 2;
+      const translationy = rows / 2;
+      const cos = 1;
+      const sin = 0;
+      return {
+        x: cos * (x - width / 2) + sin * (y - height / 2) + translationx,
+        y: cos * (y - height / 2) - sin * (x - width / 2) + translationy,
+      };
+    };
+
     const mapCell = ([coordinate, cell]: [Coordinate, ICell]) => {
       const { row, col } =
         typeof coordinate === 'number'
           ? calculateCoordinate(cols, coordinate)
           : coordinate;
 
-      const x = col * cellSize + ((row & 1) === 1 ? xOffset : 0);
-      const y = row * cellSize * yFactor;
-
+      let x = col * cellSize + ((row & 1) === 1 ? xOffset : 0);
+      let y = row * cellSize * yFactor;
+      /*
+      if (rotated) {
+        const p = rotate({ x, y });
+        x = p.x;
+        y = p.y;
+      }
+*/
       const additional: JSX.Element[] = [];
       if (topology === Topology.TORUS) {
         if (col === 0) {
@@ -172,9 +190,9 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         }
       }
       return (
-        <>
+        <g key={`${x},${y}`}>
           {[...additional]}
-          <svg key={`${x},${y}`} x={x} y={y} width={cellSize} height={cellSize}>
+          <svg x={x} y={y} width={cellSize} height={cellSize}>
             <SvgCell
               coordinate={calculateIndex(
                 { cols },
@@ -195,16 +213,40 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
               mined={cell.threatCount === 0xff}
             />
           </svg>
-        </>
+        </g>
       );
     };
 
-    const classes = ['SvgBoard'];
-    const viewBox =
+    const v =
       topology === Topology.LIMITED
-        ? `0 0 ${width} ${height}`
-        : `${-cellSize} ${-cellSize} ${width + cellSize * 2} ${height +
-            cellSize * 2}`;
+        ? {
+            x: 0,
+            y: 0,
+            width,
+            height,
+          }
+        : {
+            x: -cellSize,
+            y: -cellSize,
+            width: width + cellSize * 2,
+            height: height + cellSize * 2,
+          };
+    const v2 = rotated
+      ? {
+          ...v,
+          width: v.height,
+          height: v.width,
+        }
+      : v;
+    const classes = ['SvgBoard'];
+    if (rotated) {
+      classes.push('SvgBoard__rotated');
+    }
+    const viewBox = `${v2.x} ${v2.y} ${v2.width} ${v2.height}`;
+    const transform = rotated
+      ? `translate(${height} 0) rotate(90 0 0)`
+      : undefined;
+
     return (
       <svg
         ref={ref}
@@ -222,9 +264,17 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         }
         onContextMenu={onContextMenu}
       >
-        <rect x="0" y="0" width="100%" height="100%" />
-        {[...board.cells].map(mapCell)}
+        <g transform={transform}>
+          <rect x="0" y="0" width="100%" height="100%" />
+          {[...board.cells].map(mapCell)}
+        </g>
         <defs>
+          <circle
+            id="circle"
+            cx={cellSize / 2}
+            cy={cellSize / 2}
+            r={cellSize / 2 - 2}
+          />
           <polygon id={GridType[GridType.HEX]} points={hexPoints()} />
           <polygon id={GridType[GridType.SQUARE]} points={squarePoints()} />
         </defs>
