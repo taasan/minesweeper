@@ -1,6 +1,6 @@
 import React from 'react';
 import './FormatNumber.scss';
-import { NumeralSystem, formatNumber } from '../lib';
+import { NumeralSystem, formatNumber, formatTime } from '../lib';
 import { NumeralSystemContext } from '../store/contexts/settings';
 
 export type Props = {
@@ -8,14 +8,21 @@ export type Props = {
   numeralSystem: NumeralSystem;
   className?: string;
   fractionDigits?: undefined | 1 | 2;
+  asTime?: true;
 };
 
-const FormatNumber: React.FC<Props> = ({ n, className, fractionDigits }) => {
+const FormatNumber: React.FC<Props> = ({
+  n,
+  className,
+  fractionDigits,
+  asTime,
+}) => {
   const options = {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   };
   const { numeralSystem } = React.useContext(NumeralSystemContext);
+  const format = asTime === true ? formatTime : formatNumber;
   return (
     <span
       className={className ?? 'FormatNumber'}
@@ -23,7 +30,7 @@ const FormatNumber: React.FC<Props> = ({ n, className, fractionDigits }) => {
       title={n.toString()}
       aria-label={n.toString()}
     >
-      {formatNumber(numeralSystem, n, options)}
+      {format(numeralSystem, n, options)}
     </span>
   );
 };

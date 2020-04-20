@@ -56,6 +56,9 @@ const SvgMinesweeper: React.FC<IProps> = () => {
   const { board } = game;
   const elapsedTimeCb = React.useCallback(() => {
     const len = timingEvents.length;
+    if (len === 0) {
+      return 0;
+    }
     if ((len & 1) !== 1) {
       log.error('EEP!');
     }
@@ -82,11 +85,14 @@ const SvgMinesweeper: React.FC<IProps> = () => {
       registerEvent(
         'keyup',
         (e: KeyboardEvent) =>
+          e.keyCode === 80 &&
           // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-          e.keyCode === 80 && dispatch({ type: 'TOGGLE_PAUSE' })
+          dispatch({
+            type: board.state === GameState.PLAYING ? 'PAUSE' : 'UNPAUSE',
+          })
       ),
 
-    [containerRef]
+    [board.state, containerRef]
   );
 
   React.useEffect(() => {
@@ -95,10 +101,25 @@ const SvgMinesweeper: React.FC<IProps> = () => {
         document.visibilityState !== 'visible' &&
         board.state === GameState.PLAYING
       ) {
-        dispatch({ type: 'TOGGLE_PAUSE' });
+        dispatch({ type: 'PAUSE' });
       }
     });
   }, [board.state]);
+
+  React.useEffect(() => {
+    return registerEvent('blur', () => {
+      dispatch({ type: 'PAUSE' });
+    });
+    /*
+    window.onblur = () =>
+      board.state === GameState.PLAYING
+        ? dispatch({ type: 'TOGGLE_PAUSE' })
+        : undefined;
+    return () => {
+      window.onblur = null;
+    };
+    */
+  }, []);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
   // const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
@@ -225,9 +246,13 @@ const StatusBar = React.memo(
       const handleGameStateClick = React.useCallback(() => {
         switch (gameState) {
           case GameState.PAUSED:
+            dispatch({
+              type: 'UNPAUSE',
+            });
+            break;
           case GameState.PLAYING:
             dispatch({
-              type: 'TOGGLE_PAUSE',
+              type: 'PAUSE',
             });
             break;
           case GameState.COMPLETED:
@@ -245,15 +270,11 @@ const StatusBar = React.memo(
       return (
         <div className="SvgMinesweeper__Controls" ref={ref}>
           <div role="button" onClick={handleGameStateClick} {...itemsProps}>
-            {gameState === GameState.NOT_INITIALIZED ? (
-              <FormatNumber numeralSystem={numeralSystem} n={0} />
-            ) : (
-              <Timer
-                numeralSystem={numeralSystem}
-                elapsedTime={elapsedTime}
-                running={gameState === GameState.PLAYING}
-              />
-            )}
+            <Timer
+              numeralSystem={numeralSystem}
+              elapsedTime={elapsedTime}
+              running={gameState === GameState.PLAYING}
+            />
           </div>
           <div
             {...itemsProps}

@@ -287,23 +287,55 @@ export const NumeralSystemLocaleMap: {
   // SEGMENTED: 0x1fbf8 - 8,
 });
 
+export const getLocaleString = (ns: NumeralSystem) => {
+  const numberingSystem = NumeralSystemLocaleMap[NumeralSystem[ns]];
+  const locale =
+    numberingSystem != null ? `en-u-nu-${numberingSystem}` : undefined;
+  return locale;
+};
+
+const isRomanNumeral = (ns: NumeralSystem) =>
+  ns === NumeralSystem.ROMAN_NUMERAL ||
+  ns === NumeralSystem.SMALL_ROMAN_NUMERAL;
+
 export const formatNumber = (
   ns: NumeralSystem,
   n: number,
   options?: Intl.NumberFormatOptions
 ) => {
-  if (
-    (Number.isInteger(n) && ns === NumeralSystem.ROMAN_NUMERAL) ||
-    ns === NumeralSystem.SMALL_ROMAN_NUMERAL
-  ) {
+  if (Number.isInteger(n) && isRomanNumeral(ns)) {
     const r = toRomanNumeral(n, false);
     return r;
     // return ns === NumeralSystem.SMALL_ROMAN_NUMERAL ? r.toLowerCase() : r;
   }
-  const numberingSystem = NumeralSystemLocaleMap[NumeralSystem[ns]];
-  const locale =
-    numberingSystem != null ? `en-u-nu-${numberingSystem}` : undefined;
-  return n.toLocaleString(locale, options);
+
+  return n.toLocaleString(getLocaleString(ns), options);
+};
+
+export const formatTime = (
+  ns: NumeralSystem,
+  n: number,
+  options?: Intl.DateTimeFormatOptions
+) => {
+  const d = new Date(0, 0, 0, 0, 0, n);
+  const seconds = d.getSeconds();
+  const minutes = d.getMinutes();
+  const hours = d.getHours();
+  const arr = [seconds];
+  if (minutes > 0 || hours > 0) {
+    arr.unshift(minutes);
+    if (hours > 0) {
+      arr.unshift(hours);
+    }
+  }
+  if (isRomanNumeral(ns)) {
+    ns = NumeralSystem.ascii;
+  }
+  return arr
+    .map(x => [x, formatNumber(ns, x, options)])
+    .map(([x, s]) => (x < 10 ? formatNumber(ns, 0, options) + s : s))
+    .join(':');
+  // return d.toLocaleTimeString(getLocaleString(ns), { hour12: false, ...options });
 };
 
 export default NumeralSystem;

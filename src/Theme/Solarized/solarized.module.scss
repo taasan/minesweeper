@@ -14,8 +14,7 @@
 }
 
 body {
-  background-image: radial-gradient(
-    circle,
+  background-image: repeating-radial-gradient(
     var(--background-base3),
     var(--background-base2),
     var(--background-base1)

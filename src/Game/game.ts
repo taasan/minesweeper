@@ -211,7 +211,8 @@ export function visitNeighbours(
 export enum Cmd {
   POKE,
   FLAG,
-  TOGGLE_PAUSE,
+  PAUSE,
+  UNPAUSE,
 }
 
 export type CmdName = keyof typeof Cmd;
@@ -245,8 +246,8 @@ function openNeighbours(
 }
 
 function expectUnPause(command: Cmd, board: GameRecord): GameRecord {
-  if (command !== Cmd.TOGGLE_PAUSE) {
-    throw new Error(`Illegal command: expected ${Cmd[Cmd.TOGGLE_PAUSE]}`);
+  if (command !== Cmd.UNPAUSE) {
+    throw new Error(`Illegal command: expected ${Cmd[Cmd.UNPAUSE]}`);
   }
   if (board.state !== GameState.PAUSED) {
     throw new Error(`Invalid state: expected ${GameState.PAUSED}`);
@@ -268,13 +269,13 @@ function nextState(
     ]);
   }
 
-  if (command === Cmd.TOGGLE_PAUSE) {
+  if (command === Cmd.PAUSE || command === Cmd.UNPAUSE) {
     if (![GameState.PAUSED, GameState.PLAYING].includes(board.state)) {
       return board;
     }
     return board.set(
       'state',
-      board.state === GameState.PAUSED ? GameState.PLAYING : GameState.PAUSED
+      command === Cmd.PAUSE ? GameState.PAUSED : GameState.PLAYING
     );
   }
   const cell = getCell(board, coordinate)!;

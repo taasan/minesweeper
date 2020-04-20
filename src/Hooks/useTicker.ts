@@ -1,9 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import log from '../lib/log';
 
-function useTicker(timeout: number, isActive: boolean, callback: () => any) {
-  const cb = useCallback(callback, []);
-
+function useTicker(timeout: number, isActive: boolean, cb: () => any) {
   useEffect(() => {
     if (isActive) {
       const id = setInterval(cb, timeout);

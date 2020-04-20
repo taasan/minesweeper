@@ -16,17 +16,31 @@ import log from '../lib/log';
 import { chunk } from '../lib';
 import { IState, TimingEvent } from './context';
 
-export type CmdAction =
+export type PauseAction =
   | {
-      type: 'TOGGLE_PAUSE';
+      type: 'UNPAUSE';
     }
   | {
-      type: 'POKE' | 'FLAG';
-      coordinate: Coordinate;
+      type: 'PAUSE';
     };
+
+export type GameAction = {
+  type: 'POKE' | 'FLAG';
+  coordinate: Coordinate;
+};
+
+export type CmdAction = GameAction | PauseAction;
 
 export function isCmdAction(s: Action): s is CmdAction {
   return isCmdName(s.type);
+}
+
+export function isPauseAction(action: Action): action is PauseAction {
+  return action.type === 'PAUSE' || action.type === 'UNPAUSE';
+}
+
+export function isGameAction(action: Action): action is GameAction {
+  return action.type === 'POKE' || action.type === 'FLAG';
 }
 
 export enum ModalType {
@@ -135,18 +149,25 @@ const menuActionReducer = (state: IState, action: MenuAction): IState => {
 };
 
 const commandActionReducer = (state: IState, action: CmdAction): IState => {
+  if (action.type === 'PAUSE' && state.game.board.state === GameState.PAUSED) {
+    return state;
+  }
+
+  const isPauseCmd = isPauseAction(action);
+
   if (
-    action.type === 'TOGGLE_PAUSE' &&
+    isPauseCmd &&
     ![GameState.PAUSED, GameState.PLAYING].includes(state.game.board.state)
   ) {
     return state;
   }
+
   const board = state.game.nextState(Cmd[action.type], [
-    action.type === 'TOGGLE_PAUSE' ? -1 : action.coordinate,
+    isGameAction(action) ? action.coordinate : -1,
     state.game.board,
   ]);
 
-  let addTimingEvent = action.type === 'TOGGLE_PAUSE';
+  let addTimingEvent = isPauseCmd;
   switch (state.game.board.state) {
     case GameState.NOT_INITIALIZED:
     case GameState.INITIALIZED:
@@ -214,7 +235,7 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
       let newState = state;
       if (state.game.board.state === GameState.PLAYING) {
         newState = commandActionReducer(newState, {
-          type: 'TOGGLE_PAUSE',
+          type: 'PAUSE',
         });
       }
       return {

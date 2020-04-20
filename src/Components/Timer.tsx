@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTicker } from '../Hooks';
 import FormatNumber from './FormatNumber';
 import { NumeralSystem } from '../lib';
@@ -13,7 +13,11 @@ const Timer: React.FC<Props> = React.memo(
   ({ running, elapsedTime, numeralSystem }) => {
     const [timer, setTimer] = React.useState(0);
 
-    useTicker(1000, running, () => setTimer(Math.floor(elapsedTime() / 1000)));
+    const cb = useCallback(() => setTimer(Math.floor(elapsedTime() / 1000)), [
+      elapsedTime,
+    ]);
+
+    useTicker(1000, running, cb);
 
     return (
       <span
@@ -22,7 +26,7 @@ const Timer: React.FC<Props> = React.memo(
         className="Timer"
         title={timer.toString()}
       >
-        <FormatNumber numeralSystem={numeralSystem} n={timer} />
+        <FormatNumber numeralSystem={numeralSystem} n={timer} asTime={true} />
       </span>
     );
   }
