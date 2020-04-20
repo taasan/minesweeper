@@ -21,6 +21,14 @@ export type ITheme = Readonly<
   }
 >;
 
+export const isTheme = (c: any): c is ITheme =>
+  c != null &&
+  typeof c.name === 'string' &&
+  (c.mode == null || Mode[c.mode] != null) &&
+  Array.isArray(c.styles) &&
+  (c.styles as Array<any>).find(v => typeof v !== 'string') != null &&
+  (c.symbols == null || typeof c.symbols.flag === 'string');
+
 export const createTheme = (partial: PartialTheme): ITheme => {
   console.log('createTheme', { partial });
   return Object.freeze({
