@@ -116,7 +116,10 @@ function initialize(
       'cells',
       board.cells.mapEntries(([coordinate, cell]) => [
         coordinate,
-        cell.set('threatCount', countThreats(board, coordinate)),
+        createGameCell({
+          ...cell,
+          threatCount: countThreats(board, coordinate),
+        }),
       ])
     );
   });
@@ -362,7 +365,8 @@ function toggleOpen([[coordinate, cell], board]: [
     if (board.state === GameState.INITIALIZED) {
       mutable.set('state', GameState.PLAYING);
     }
-    const newCell = cell.set('state', newState);
+    const newCell = createGameCell({ ...cell, state: newState });
+
     updateCell(mutable, [coordinate, newCell]);
 
     if (newCell.threatCount === 0) {
@@ -376,7 +380,7 @@ function toggleOpen([[coordinate, cell], board]: [
         if (predicate(c)) {
           mutable = updateCell(mutable, [
             coord,
-            c.set('state', CellState.OPEN),
+            createGameCell({ ...c, state: CellState.OPEN }),
           ]);
           if (c.threatCount === 0) {
             getNeighbours(mutable.level, coord).forEach(cc => {
@@ -433,7 +437,10 @@ function toggleFlagged([[coordinate, cell], board]: [
     if (board.state === GameState.INITIALIZED) {
       mutable.set('state', GameState.PLAYING);
     }
-    updateCell(mutable, [coordinate, cell.set('state', newCellState)]);
+    updateCell(mutable, [
+      coordinate,
+      createGameCell({ ...cell, state: newCellState }),
+    ]);
   });
 }
 
