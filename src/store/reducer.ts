@@ -15,6 +15,7 @@ import {
 import log from '../lib/log';
 import { chunk } from '../lib';
 import { IState, TimingEvent } from './context';
+import produce from 'immer';
 
 export type PauseAction =
   | {
@@ -162,10 +163,11 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
     return state;
   }
 
-  const board = state.game.nextState(Cmd[action.type], [
-    isGameAction(action) ? action.coordinate : -1,
-    state.game.board,
-  ]);
+  const board = state.game.nextState(
+    Cmd[action.type],
+    [isGameAction(action) ? action.coordinate : -1, state.game.board],
+    state.boardVersion
+  );
 
   let addTimingEvent = isPauseCmd;
   switch (state.game.board.state) {
@@ -175,7 +177,8 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
       break;
   }
 
-  let newState = { ...state };
+  let newState = { ...state, game: { ...state.game } };
+  newState.boardVersion = board.version;
   if (addTimingEvent) {
     const t = [...state.timingEvents];
     const elapsedTime = calulateElapsedTime(t);
@@ -325,7 +328,9 @@ export const withLives: (
       ...newState,
       game: {
         ...newState.game,
-        board: newState.game.board.set('state', GameState.PLAYING),
+        board: produce(newState.game.board, draft => {
+          draft.state = GameState.PLAYING;
+        }),
       },
     };
   }
