@@ -1,16 +1,18 @@
-import { OrderedMap, RecordOf } from 'immutable';
-import { Coordinate, calculateIndex } from './coordinate';
-import { CellRecord, CellStateStats } from './cell';
+import produce, { Immutable, immerable } from 'immer';
+import { Coordinate, calculateCoordinate, calculateIndex } from './coordinate';
+import { CellRecord, CellStateStats, ICell } from './cell';
 import { Grid } from './grid';
 
 export function assertNever(x: never): never {
   throw new Error('Unexpected value: ' + x);
 }
 
-export class GameError extends Error {
+export class GameError {
   readonly cause?: Error;
+  readonly message: string;
+  [immerable] = true;
   constructor(msg: string, err?: Error) {
-    super(msg);
+    this.message = msg;
     this.cause = Object.freeze(err);
   }
 }
@@ -30,23 +32,42 @@ export type Level = Grid & {
   mines: number;
 };
 
-export type IGame = Readonly<{
-  cells: OrderedMap<number, CellRecord>;
+export type IGame = {
+  cells: Map<number, CellRecord>;
   state: GameState;
   level: Readonly<Level>;
-  cellStates: RecordOf<CellStateStats>;
-  error: Readonly<GameError> | null;
+  cellStates: CellStateStats;
+  error: GameError | null;
   version: number;
-  onGameOver(): void;
-}>;
+  onGameOver: () => void;
+};
 
-export type GameRecord = RecordOf<IGame>;
+export type GameRecord = Immutable<IGame>;
 
-export const getCell = (board: IGame, coordinate: Coordinate) =>
-  board.cells.get(calculateIndex(board.level, coordinate));
+export const getCell = (
+  {
+    level,
+    cells,
+  }:
+    | {
+        level: Level;
+        cells: [number, ICell][] | Map<number, ICell>;
+      }
+    | GameRecord,
+  coordinate: Coordinate
+): ICell => {
+  if (Array.isArray(cells)) {
+    const { row, col } = calculateCoordinate(level.cols, coordinate);
+    return cells[row][col] as ICell;
+  }
+  return cells.get(calculateIndex(level, coordinate))!;
+};
 
 export const setCell = (
   board: IGame,
   coordinate: Coordinate,
-  cell: CellRecord
-) => board.cells.set(calculateIndex(board.level, coordinate), cell);
+  cell: ICell
+): ReadonlyMap<number, CellRecord> =>
+  produce(board.cells, draft => {
+    draft.set(calculateIndex(board.level, coordinate), cell);
+  });

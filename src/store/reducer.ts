@@ -15,6 +15,7 @@ import {
 import log from '../lib/log';
 import { chunk } from '../lib';
 import { IState, TimingEvent } from './context';
+import produce from 'immer';
 
 export type PauseAction =
   | {
@@ -327,7 +328,9 @@ export const withLives: (
       ...newState,
       game: {
         ...newState.game,
-        board: newState.game.board.set('state', GameState.PLAYING),
+        board: produce(newState.game.board, draft => {
+          draft.state = GameState.PLAYING;
+        }),
       },
     };
   }
