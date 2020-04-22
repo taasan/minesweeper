@@ -16,14 +16,15 @@ import log from '../lib/log';
 import { chunk } from '../lib';
 import { IState, TimingEvent } from './context';
 import produce from 'immer';
+import { getFitWindowCss } from '../lib';
 
 export type PauseAction =
   | {
-      type: 'UNPAUSE';
-    }
+    type: 'UNPAUSE';
+  }
   | {
-      type: 'PAUSE';
-    };
+    type: 'PAUSE';
+  };
 
 export type GameAction = {
   type: 'POKE' | 'FLAG';
@@ -51,14 +52,14 @@ export enum ModalType {
 
 export type MenuAction =
   | {
-      type: 'showMenu';
-    }
+    type: 'showMenu';
+  }
   | {
-      type: 'hideMenu';
-    }
+    type: 'hideMenu';
+  }
   | {
-      type: 'toggleMenu';
-    };
+    type: 'toggleMenu';
+  };
 
 export type LevelAction = {
   type: 'setLevel';
@@ -79,12 +80,12 @@ export type FitWindowAction = {
 
 export type ModalAction =
   | {
-      type: 'showModal';
-      modal: ModalType;
-    }
+    type: 'showModal';
+    modal: ModalType;
+  }
   | {
-      type: 'closeModal';
-    };
+    type: 'closeModal';
+  };
 
 export type Action =
   | LevelAction
@@ -100,22 +101,6 @@ export const onGameOver = () => {
   );
 };
 
-const calculateCssMaxDimensions = (board: React.RefObject<SVGSVGElement>) => {
-  console.log('calculateCssMaxDimensions', board.current);
-  if (board.current == null) {
-    return {
-      maxHeight: 'revert',
-      maxWidth: 'revert',
-    };
-  }
-
-  const { top } = board.current.getBoundingClientRect();
-  return {
-    maxWidth: '100vw',
-    // Must add 3-5 px to prevent scrollbars
-    maxHeight: `calc(100vh - ${top + 5}px)`,
-  };
-};
 
 const calulateElapsedTime = (timingEvents: TimingEvent[]) => {
   const t = [...timingEvents];
@@ -261,7 +246,7 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
     case 'fitWindow':
       return {
         ...state,
-        maxBoardDimensions: calculateCssMaxDimensions(state.containerRef),
+        maxBoardDimensions: getFitWindowCss(state.containerRef),
       };
     case 'showMenu':
     case 'hideMenu':
