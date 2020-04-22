@@ -1,5 +1,4 @@
 export default function getFitWindowCss(board: React.RefObject<SVGSVGElement>) {
-  console.log('calculateCssMaxDimensions', board.current);
   if (board.current == null) {
     return {
       maxHeight: 'revert',
