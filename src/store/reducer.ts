@@ -20,11 +20,11 @@ import { getFitWindowCss } from '../lib';
 
 export type PauseAction =
   | {
-    type: 'UNPAUSE';
-  }
+      type: 'UNPAUSE';
+    }
   | {
-    type: 'PAUSE';
-  };
+      type: 'PAUSE';
+    };
 
 export type GameAction = {
   type: 'POKE' | 'FLAG';
@@ -52,14 +52,14 @@ export enum ModalType {
 
 export type MenuAction =
   | {
-    type: 'showMenu';
-  }
+      type: 'showMenu';
+    }
   | {
-    type: 'hideMenu';
-  }
+      type: 'hideMenu';
+    }
   | {
-    type: 'toggleMenu';
-  };
+      type: 'toggleMenu';
+    };
 
 export type LevelAction = {
   type: 'setLevel';
@@ -80,12 +80,12 @@ export type FitWindowAction = {
 
 export type ModalAction =
   | {
-    type: 'showModal';
-    modal: ModalType;
-  }
+      type: 'showModal';
+      modal: ModalType;
+    }
   | {
-    type: 'closeModal';
-  };
+      type: 'closeModal';
+    };
 
 export type Action =
   | LevelAction
@@ -100,7 +100,6 @@ export const onGameOver = () => {
     [...new Array(6)].map((_, i) => ((i & 1) === 0 ? 300 : 100))
   );
 };
-
 
 const calulateElapsedTime = (timingEvents: TimingEvent[]) => {
   const t = [...timingEvents];
