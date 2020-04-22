@@ -204,7 +204,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
             boardState,
             numeralSystem
           )}
-          state={cell.state}
+          state={done ? CellState.OPEN : cell.state}
           threats={
             cell.state === CellState.OPEN && isNumThreats(cell.threatCount)
               ? cell.threatCount
