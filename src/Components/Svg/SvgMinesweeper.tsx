@@ -6,15 +6,15 @@ import {
   Level,
   assertNever,
   // legend,
-} from '../Game';
-import ErrorBoundary from './ErrorBoundary';
+} from '../../Game';
+import ErrorBoundary from '../ErrorBoundary';
 import { useReducer } from 'react';
 import SvgBoard from './Board/SvgBoard';
-import { onContextMenu } from '.';
-import { LevelChooser } from './LevelChooser';
-import Modal from './Modal';
+import { onContextMenu } from '..';
+import { LevelChooser } from '../LevelChooser';
+import Modal from '../Modal';
 import { DISARMED_MINE, EXPLODED_MINE, getFlag } from './Board/getContent';
-import SettingsDialog from './Settings/SettingsDialog';
+import SettingsDialog from '../Settings/SettingsDialog';
 import {
   CmdAction,
   LevelAction,
@@ -23,17 +23,17 @@ import {
   ModalType,
   initialState,
   reducer,
-} from '../store';
-import { useTheme } from '../Hooks';
-import { NumeralSystem, log } from '../lib';
-import FormatNumber from './FormatNumber';
-import Timer from './Timer';
+} from '../../store';
+import { useTheme } from '../../Hooks';
+import { NumeralSystem, log } from '../../lib';
+import FormatNumber from '../FormatNumber';
+import Timer from '../Timer';
 import SettingsContextProvider, {
   FitWindowContext,
   RotateContext,
   useSettingsContext,
-} from '../store/contexts/settings';
-import { Store } from '../store';
+} from '../../store/contexts/settings';
+import { Store } from '../../store';
 export type IProps = { level: Level };
 
 const SvgMinesweeper: React.FC<IProps> = () => {

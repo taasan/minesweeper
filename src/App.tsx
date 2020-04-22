@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 // import Minesweeper, { LEVELS } from './Components/Minesweeper';
-import SvgMinesweeper from './Components/SvgMinesweeper';
+import SvgMinesweeper from './Components/Svg/SvgMinesweeper';
 import { GridType } from './Game';
 import { getLevel } from './Components/LevelChooser';
 import { Store } from './store';

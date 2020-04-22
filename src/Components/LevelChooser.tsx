@@ -12,7 +12,7 @@ import {
 } from '../Game';
 
 import './LevelChooser.scss';
-import SvgCell from './Board/SvgCell';
+import SvgCell from './Svg/Board/SvgCell';
 import CloseButton from './CloseButton';
 import FormatNumber from './FormatNumber';
 import { NumeralSystem, formatNumber } from '../lib';

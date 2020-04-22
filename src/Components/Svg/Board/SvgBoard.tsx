@@ -13,16 +13,16 @@ import {
   calculateCoordinate,
   calculateIndex,
   isNumThreats,
-} from '../../Game';
+} from '../../../Game';
 import { Dispatch } from 'react';
-import { CmdAction } from '../../store';
+import { CmdAction } from '../../../store';
 import { getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
-import { onContextMenu } from '..';
-import log from '../../lib/log';
+import { onContextMenu } from '../..';
+import log from '../../../lib/log';
 import { isEqual } from 'lodash';
-import { hexOffset, hexagonPoints } from '../../lib';
-import { NumeralSystemContext } from '../../store/contexts/settings';
+import { hexOffset, hexagonPoints } from '../../../lib';
+import { NumeralSystemContext } from '../../../store/contexts/settings';
 
 // @ts-ignore
 const hexPoints = () =>

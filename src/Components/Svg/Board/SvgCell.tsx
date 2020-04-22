@@ -1,10 +1,10 @@
 import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
-import { CellState, GridType, NumThreats, assertNever } from '../../Game';
+import { CellState, GridType, NumThreats, assertNever } from '../../../Game';
 
-import { CmdAction } from '../../store';
-import { onContextMenu } from '..';
-import useAsyncDispatch from '../../Hooks/useAsyncDispatch';
+import { CmdAction } from '../../../store';
+import { onContextMenu } from '../..';
+import useAsyncDispatch from '../../../Hooks/useAsyncDispatch';
 
 type ICellProps = {
   coordinate: number;

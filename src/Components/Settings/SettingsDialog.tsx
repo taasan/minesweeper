@@ -1,7 +1,7 @@
 import * as React from 'react';
-import SvgBoard from '../Board/SvgBoard';
+import SvgBoard from '../Svg/Board/SvgBoard';
 import { NumThreats, legend } from '../../Game';
-import { renderThreats } from '../Board/getContent';
+import { renderThreats } from '../Svg/Board/getContent';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';

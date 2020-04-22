@@ -5,8 +5,8 @@ import {
   NumThreats,
   isNumThreats,
   randomInt,
-} from '../../Game';
-import { NumeralSystem } from '../../lib';
+} from '../../../Game';
+import { NumeralSystem } from '../../../lib';
 
 export const MINES = Object.freeze([
   '🤒',
