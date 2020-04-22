@@ -8,7 +8,7 @@
   */
 }
 
-.SvgCell[data-state='EXPLODED'] {
+.c[data-s='4'] {
   animation: move linear 0.3s 1;
 }
 

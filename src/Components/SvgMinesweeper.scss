@@ -9,7 +9,7 @@
 }
 
 .SvgMinesweeper {
-  .SvgBoard[data-state='PLAYING'] {
+  .SvgBoard[data-s='PLAYING'] {
     .SvgMinesweeper__Controls {
       grid-template-columns: 1fr 2em 1fr 0;
     }
@@ -121,7 +121,7 @@
 }
 */
 /*
-.Minesweeper[data-state='GAME_OVER'] .Board {
+.Minesweeper[data-s='GAME_OVER'] .Board {
   opacity: 0.5;
 }
 
@@ -143,7 +143,7 @@
   border: 1px solid #808080;
 }
 */
-.Minesweeper[data-state='COMPLETE'] {
+.Minesweeper[data-s='COMPLETE'] {
   background-color: green !important;
 }
 

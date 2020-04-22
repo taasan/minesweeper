@@ -1,6 +1,6 @@
 import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
-import { CellState, GridType, NumThreats } from '../../Game';
+import { CellState, GridType, NumThreats, assertNever } from '../../Game';
 
 import { CmdAction } from '../../store';
 import { onContextMenu } from '..';
@@ -60,70 +60,53 @@ const SvgCell: FC<ICellProps> = props => {
   };
 
   const role = /^\p{Number}$/u.test(content.toString()) ? undefined : 'img';
+
+  const render = () => {
+    const cover = <use href={`#${GridType[gridType]}`} className="cc" />;
+
+    switch (state) {
+      case CellState.NEW:
+        return cover;
+      case CellState.FLAGGED:
+      case CellState.UNCERTAIN:
+        return (
+          <>
+            {cover}
+            <Text role="img" content={content} />
+          </>
+        );
+      case CellState.OPEN:
+      case CellState.EXPLODED:
+        return (
+          <>
+            <use href={`#${GridType[gridType]}`} className="cb" />
+            <Text
+              role={role}
+              content={
+                state === CellState.OPEN && threats === 0 ? undefined : content
+              }
+            />
+            {cover}
+          </>
+        );
+    }
+    assertNever(state);
+  };
+
   return (
     <svg
       viewBox={`0 0 ${cellSize} ${cellSize}`}
-      className="SvgCell"
+      className="c"
       onMouseDown={handleClick}
       onContextMenu={handleContextMenu}
-      data-state={CellState[state]}
-      data-threats={threats}
-      data-mined={mined ? true : undefined}
+      data-s={state}
+      data-t={threats}
+      data-m={mined ? true : undefined}
     >
-      <use
-        href={`#${GridType[gridType]}`}
-        scale={cellSize}
-        className="SvgCell__Background"
-        fillOpacity={1}
-      />
-      <Text
-        role={role}
-        content={
-          state === CellState.OPEN && threats === 0 ? undefined : content
-        }
-      />
-      <use
-        href={`#${GridType[gridType]}`}
-        width={cellSize}
-        height={cellSize}
-        className="SvgCell__Cover"
-        fillOpacity={1}
-        strokeWidth={0}
-      />
-      {state === CellState.FLAGGED || state === CellState.UNCERTAIN ? (
-        <Text role="img" content={content} />
-      ) : (
-        undefined
-      )}
-      {/*}
-      {state === CellState.FLAGGED || state === CellState.UNCERTAIN ? (
-        <text
-          role={role}
-          x={cellSize / 2}
-          y={cellSize / 2}
-          dominantBaseline="central"
-          textAnchor="middle"
-          fill="white"
-          fontSize={fontSize}
-          transform={transform}
-        >
-          <tspan className="SvgCell__Text">{content}</tspan>
-        </text>
-      ) : (
-        undefined
-      )}
-      {/*}
-      <Text
-        className="SvgCell__Cover SvgCell__Text"
-        stroke={'black'}
-        strokeWidth={0.3}
-        fontFamily="monospace"
-        fillOpacity={1}
-        content={coordinate}
-      />
+      {render()}
       {/**}
       <text
-        className="SvgCell__Cover"
+        className="cc"
         x={cellSize / 2}
         y={cellSize / 2}
         dominantBaseline="central"
@@ -155,7 +138,7 @@ const Text = React.memo(
     };
     return (
       <text
-        className="SvgCell__Text"
+        className="ct"
         x={cellSize / 2}
         y={cellSize / 2}
         dominantBaseline="central"
@@ -182,14 +165,14 @@ const Text = React.memo(
       className="SvgCell"
       onMouseDown={handleClick}
       onContextMenu={handleContextMenu}
-      data-state={CellState[state]}
-      data-threats={threats}
-      data-mined={mined ? true : undefined}
+      data-s={CellState[state]}
+      data-t={threats}
+      data-m={mined ? true : undefined}
     >
       <use
         href={`#${GridType[gridType]}`}
         scale={cellSize}
-        className="SvgCell__Background"
+        className="cb"
         fillOpacity={1}
       />
       <Text
@@ -202,7 +185,7 @@ const Text = React.memo(
       <use
         href={`#${GridType[gridType]}`}
         scale={cellSize}
-        className="SvgCell__Cover"
+        className="cc"
         fillOpacity={1}
         strokeWidth={0}
       />
@@ -212,7 +195,7 @@ const Text = React.memo(
         undefined
       )}
       <Text
-        className="SvgCell__Cover"
+        className="cc"
         stroke={'black'}
         strokeWidth={0.3}
         fontFamily="monospace"
@@ -237,7 +220,7 @@ const Text = (
   };
   return (
     <text
-      className="SvgCell__Text"
+      className="ct"
       x={cellSize / 2}
       y={cellSize / 2}
       dominantBaseline="central"
@@ -262,9 +245,9 @@ const Text = (
       role="button"
       onMouseDown={handleClick}
       className="Cell"
-      data-state={CellState[state]}
-      data-threats={threats}
-      data-mined={mined ? true : undefined}
+      data-s={CellState[state]}
+      data-t={threats}
+      data-m={mined ? true : undefined}
       data-mine-type={mined ? random : undefined}
     >
       <span {...ariaProps}>{content}</span>

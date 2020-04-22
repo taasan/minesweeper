@@ -1,6 +1,7 @@
 import * as React from 'react';
 import './SvgBoard.css';
 import {
+  CellState,
   Coordinate,
   GameRecord,
   GameState,
@@ -189,29 +190,39 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           additional.push(mapCell([{ col, row: -1 }, cell]));
         }
       }
-      return (
-        <g key={`${x},${y}`}>
+      const jsx = (
+        <SvgCell
+          coordinate={calculateIndex(
+            { cols },
+            { row: (row + rows) % rows, col: (col + cols) % cols }
+          )}
+          gridType={board.level.type}
+          dispatch={dispatch}
+          content={getContent(
+            cell.state,
+            cell.threatCount,
+            boardState,
+            numeralSystem
+          )}
+          state={cell.state}
+          threats={
+            cell.state === CellState.OPEN && isNumThreats(cell.threatCount)
+              ? cell.threatCount
+              : undefined
+          }
+          mined={cell.state === CellState.OPEN && cell.threatCount === 0xff}
+        />
+      );
+      const key = { key: `${x},${y}` };
+      return additional.length === 0 ? (
+        <svg {...key} x={x} y={y} width={cellSize} height={cellSize}>
+          {jsx}
+        </svg>
+      ) : (
+        <g {...key}>
           {[...additional]}
           <svg x={x} y={y} width={cellSize} height={cellSize}>
-            <SvgCell
-              coordinate={calculateIndex(
-                { cols },
-                { row: (row + rows) % rows, col: (col + cols) % cols }
-              )}
-              gridType={board.level.type}
-              dispatch={dispatch}
-              content={getContent(
-                cell.state,
-                cell.threatCount,
-                boardState,
-                numeralSystem
-              )}
-              state={cell.state}
-              threats={
-                isNumThreats(cell.threatCount) ? cell.threatCount : undefined
-              }
-              mined={cell.threatCount === 0xff}
-            />
+            {jsx}
           </svg>
         </g>
       );
@@ -256,8 +267,8 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         pointerEvents={pointerEvents}
         viewBox={viewBox}
         data-grid={GridType[board.level.type]}
-        data-state={GameState[boardState]}
-        data-state2={
+        data-s={GameState[boardState]}
+        data-s2={
           boardState === GameState.DEMO
             ? GameState[GameState.GAME_OVER]
             : GameState[boardState]
@@ -275,8 +286,22 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
             cy={cellSize / 2}
             r={cellSize / 2 - 2}
           />
-          <polygon id={GridType[GridType.HEX]} points={hexPoints()} />
-          <polygon id={GridType[GridType.SQUARE]} points={squarePoints()} />
+          <polygon
+            id={`${GridType[GridType.HEX]}`}
+            points={hexPoints()}
+            width={cellSize}
+            height={cellSize}
+            fillOpacity={1}
+            strokeWidth={0}
+          />
+          <polygon
+            id={`${GridType[GridType.SQUARE]}`}
+            points={squarePoints()}
+            width={cellSize}
+            height={cellSize}
+            fillOpacity={1}
+            strokeWidth={0}
+          />
         </defs>
       </svg>
     );

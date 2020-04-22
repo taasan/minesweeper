@@ -107,7 +107,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
   }, [board.state]);
 
   React.useEffect(() => {
-    return registerEvent('blur', () => {
+    return registerEvent('blurrr', () => {
       dispatch({ type: 'PAUSE' });
     });
     /*

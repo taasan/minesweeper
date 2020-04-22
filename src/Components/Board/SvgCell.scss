@@ -10,17 +10,23 @@ $DEMO: 'DEMO';
 
 $GAME_STATES: $GAME_OVER, $COMPLETED, $PAUSED, $INITIALIZED, $NOT_INITIALIZED,
   $PLAYING, $ERROR, $DEMO;
-
+/*
+  NEW,
+  OPEN,
+  FLAGGED,
+  UNCERTAIN,
+  EXPLODED,
+*/
 // Cell states
-$OPEN: 'OPEN';
-$FLAGGED: 'FLAGGED';
-$UNCERTAIN: 'UNCERTAIN';
-$NEW: 'NEW';
-$EXPLODED: 'EXPLODED';
+$NEW: 0;
+$OPEN: 1;
+$FLAGGED: 2;
+$UNCERTAIN: 3;
+$EXPLODED: 4;
 
 $CELL_STATES: $OPEN, $FLAGGED, $UNCERTAIN, $NEW, $EXPLODED;
 
-$flagTypes: 'FLAGGED', 'UNCERTAIN';
+$flagTypes: $FLAGGED, $UNCERTAIN;
 
 @function contains($list, $item) {
   @return index($list, $item);
@@ -30,7 +36,11 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   @if ($gameState == $PAUSED) {
     @return false;
   }
-  @if ($gameState == $GAME_OVER or $gameState == $COMPLETED) {
+  @if (
+    $cellState !=
+      $NEW and
+      ($gameState == $GAME_OVER or $gameState == $COMPLETED)
+  ) {
     @return true;
   }
 
@@ -45,15 +55,15 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   }
 }
 
-.SvgCell .SvgCell__Text {
+.c .ct {
   transform-origin: center;
 }
 
-.SvgBoard.SvgBoard__rotated .SvgCell .SvgCell__Text {
+.SvgBoard.SvgBoard__rotated .c .ct {
   transform: rotate(-90deg);
 }
 
-.SvgCell {
+.c {
   font-family: monospace, 'color-emoji';
   user-select: none;
   font-weight: bold;
@@ -75,18 +85,18 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
   * {
     cursor: var(--board-cursor, crosshair);
   }
-  .SvgCell__Text {
+  .ct {
     font-size: 100%;
     transform-origin: center;
   }
 
-  .SvgCell__Background {
+  .cb {
     /*stroke: var(--cell-border, revert);*/
     stroke-width: 0px;
     fill: var(--cell-background-open, revert);
   }
 
-  .SvgCell__Cover {
+  .cc {
     /*
   stroke: var(--cell-border, black);
   stroke-width: 3px;
@@ -94,84 +104,84 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
     fill: var(--cell-background, revert);
   }
 
-  &[data-state='#{$NEW}'] .SvgCell__Cover:hover {
+  &[data-s='#{$NEW}'] .cc:hover {
     fill: var(--mine-detonated-background, revert);
   }
 
-  &[data-state='#{$EXPLODED}'] .SvgCell__Background {
+  &[data-s='#{$EXPLODED}'] .cb {
     fill: var(--mine-detonated-background, revert);
   }
 
-  &[data-state='#{$OPEN}'][data-threats='0'] {
+  &[data-s='#{$OPEN}'][data-t='0'] {
     pointer-events: none;
   }
 
   @for $i from 1 through 8 {
-    &[data-threats='#{$i}'][data-state='OPEN'] .SvgCell__Text {
+    &[data-t='#{$i}'][data-s='#{$OPEN}'] .ct {
       fill: var(--cell-threats-#{$i}-color);
       font-size: 1em;
     }
   }
   /*
-  &[data-state='#{$OPEN}'] *,
+  &[data-s='#{$OPEN}'] *,
   &:disabled {
     fill: var(--cell-background-open, revert);
   }
 */
-  &:active .SvgCell__Background {
+  &:active .cb {
     fill: var(--cell-pressed-color, revert) !important;
   }
 }
 
-.SvgBoard[data-state='#{$PAUSED}'] .SvgCell__Text {
+.SvgBoard[data-s='#{$PAUSED}'] .ct {
   visibility: hidden;
 }
 
 /*
 
-.SvgCell[data-state=#{$FLAGGED}],
-.SvgCell[data-state=#{$UNCERTAIN}] {
+.c[data-s=#{$FLAGGED}],
+.c[data-s=#{$UNCERTAIN}] {
   color: var(--cell-flagged-color);
 }
 
-.SvgBoard[data-state=#{$PAUSED}] .SvgCell {
+.SvgBoard[data-s=#{$PAUSED}] .c {
   fill: var(--cell-background) !important;
   color: transparent !important;
 }
 
-.SvgBoard[data-state=#{$PAUSED}] .SvgCell * {
+.SvgBoard[data-s=#{$PAUSED}] .c * {
   visibility: hidden;
 }
 
-.SvgBoard[data-state=#{$GAME_OVER}]
-  .SvgCell[data-state=#{$FLAGGED}]:not([data-mined]) {
+.SvgBoard[data-s=#{$GAME_OVER}]
+  .c[data-s=#{$FLAGGED}]:not([data-m]) {
   fill: var(--cell-background-flagged-wrong);
   color: var(--cell-color-flagged-wrong, revert);
 }
 
-.SvgCell[data-threats='0']:not([data-state=#{$FLAGGED}]):not([data-state=#{$UNCERTAIN}])
+.c[data-t='0']:not([data-s=#{$FLAGGED}]):not([data-s=#{$UNCERTAIN}])
   > * {
   visibility: hidden;
 }
 */
 
-.SvgBoard[data-state='#{$GAME_OVER}']
-  .SvgCell:not([data-state='#{$OPEN}']):not([data-state='#{$EXPLODED}'])
-  .SvgCell__Background {
+.SvgBoard[data-s='#{$GAME_OVER}']
+  .c:not([data-s='#{$OPEN}']):not([data-s='#{$EXPLODED}'])
+  .cb {
   fill: var(--cell-background-game-over, var(--cell-background, revert));
 }
 
 /*
-.SvgBoard[data-state=#{$PLAYING}] .SvgCell[data-state=#{$FLAGGED}] .SvgCell__Cover,
-.SvgBoard[data-state=#{$PLAYING}] .SvgCell[data-state=#{$FLAGGED}] .SvgCell__Cover,
-.SvgBoard[data-state=#{$PLAYING}]
-  .SvgCell[data-state=#{$UNCERTAIN}]
-  .SvgCell__Cover,
-.SvgBoard[data-state=#{$PLAYING}] .SvgCell[data-state=#{$OPEN}] .SvgCell__Cover {
+.SvgBoard[data-s=#{$PLAYING}] .c[data-s=#{$FLAGGED}] .cc,
+.SvgBoard[data-s=#{$PLAYING}] .c[data-s=#{$FLAGGED}] .cc,
+.SvgBoard[data-s=#{$PLAYING}]
+  .c[data-s=#{$UNCERTAIN}]
+  .cc,
+.SvgBoard[data-s=#{$PLAYING}] .c[data-s=#{$OPEN}] .cc {
   visibility: hidden;
 }
 
-.SvgBoard[data-state=#{$PAUSED}] .SvgCell__Cover {
+.SvgBoard[data-s=#{$PAUSED}] .cc {
   visibility: visible !important;
 }
 */
@@ -179,51 +189,47 @@ $flagTypes: 'FLAGGED', 'UNCERTAIN';
 .SvgBoard {
   @each $gameState in $GAME_STATES {
     @each $cellState in $CELL_STATES {
-      &[data-state='#{$gameState}']
-        .SvgCell[data-state='#{$cellState}']
-        .SvgCell__Cover {
+      &[data-s='#{$gameState}'] .c[data-s='#{$cellState}'] .cc {
         visibility: coverVisibility($gameState, $cellState);
       }
     }
   }
 }
 
-.SvgBoard[data-state='#{$GAME_OVER}']
-  .SvgCell[data-state='#{$FLAGGED}']:not([data-mined])
-  .SvgCell__Background {
+.SvgBoard[data-s='#{$GAME_OVER}'] .c[data-s='#{$FLAGGED}']:not([data-m]) .cb {
   fill: var(--cell-background-flagged-wrong, revert);
 }
 
-.SvgBoard[data-state='#{$GAME_OVER}'] .SvgCell[data-mined] .SvgCell__Cover {
+.SvgBoard[data-s='#{$GAME_OVER}'] .c[data-m] .cc {
   visibility: hidden;
 }
 /*
-.SvgBoard[data-state=#{$GAME_OVER}]
-  .SvgCell[data-mined]:not([data-state=#{$EXPLODED}]),
-.SvgBoard[data-state=#{$COMPLETED}]
-  .SvgCell[data-mined]:not([data-state=#{$EXPLODED}]) {
+.SvgBoard[data-s=#{$GAME_OVER}]
+  .c[data-m]:not([data-s=#{$EXPLODED}]),
+.SvgBoard[data-s=#{$COMPLETED}]
+  .c[data-m]:not([data-s=#{$EXPLODED}]) {
   background-image: var(--mine-disarmed);
 }
 
-.SvgBoard[data-state=#{$GAME_OVER}] .SvgCell[data-mined],
-.SvgBoard[data-state=#{$COMPLETED}] .SvgCell[data-mined] {
+.SvgBoard[data-s=#{$GAME_OVER}] .c[data-m],
+.SvgBoard[data-s=#{$COMPLETED}] .c[data-m] {
   font-size: calc(var(--cell-size) * 0.75);
 }
 */
 @media (prefers-reduced-motion: no-preference) {
-  .SvgCell {
-    &[data-state='#{$EXPLODED}'] .SvgCell__Text[role='img'] {
+  .c {
+    &[data-s='#{$EXPLODED}'] .ct[role='img'] {
       //animation: EXPLODED-animation 1 2s cubic-bezier(0.95, 0.05, 0.795, 0.035);
       // animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11 alternate
       //  both running pulse;
     }
   }
   @each $gameState in $GAME_OVER, $COMPLETED {
-    &[data-state='#{$gameState}'] .SvgCell__Text[role='img'] {
+    &[data-s='#{$gameState}'] .ct[role='img'] {
       transform: rotate(-30deg) scale(1.25);
       transition: transform 0.3s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     }
-    &.SvgBoard__rotated[data-state='#{$gameState}'] .SvgCell .SvgCell__Text {
+    &.SvgBoard__rotated[data-s='#{$gameState}'] .c .ct {
       transform: rotate(-105deg) scale(1.25);
     }
   }

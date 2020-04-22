@@ -9,10 +9,10 @@ export function isNumThreats(n: any): n is NumThreats {
 export type Mine = 0xff;
 
 export enum CellState {
+  NEW,
   OPEN,
   FLAGGED,
   UNCERTAIN,
-  NEW,
   EXPLODED,
 }
 
