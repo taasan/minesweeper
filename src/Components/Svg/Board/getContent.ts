@@ -7,8 +7,10 @@ import {
   randomInt,
 } from '../../../Game';
 import { NumeralSystem } from '../../../lib';
+import { Content, SvgSymbolKey } from '../../../graphics';
+import getSymbol from '../../../graphics/noto-emoji';
 
-export const MINES = Object.freeze([
+const MINES = Object.freeze([
   '🤒',
   '😷',
   '🤮',
@@ -26,23 +28,29 @@ export const MINES = Object.freeze([
   '🦠',
 ]);
 
-export const getFlag = () => {
-  const today = new Date();
-  const isMay17 = today.getDate() === 17 && today.getMonth() === 4;
-  return isMay17 ? '🇳🇴' : '☣️';
-};
+const FLAG = '☣️';
+const UNCERTAIN_FLAG = '❓';
+const UNFLAGGED_MINE = '🥺';
+const MISPLACED_FLAG = '💩';
+const NATIONAL_FLAG = '🇳🇴';
 
 export const DISARMED_MINE = '🥰';
 export const EXPLODED_MINE = '💀';
+
+export const getFlag = () => {
+  const today = new Date();
+  const isMay17 = today.getDate() === 17 && today.getMonth() === 4;
+  return isMay17 ? NATIONAL_FLAG : FLAG;
+};
 
 export function getContent(
   state: CellState,
   threats: NumThreats | Mine,
   gameState: GameState,
   numeralSystem: NumeralSystem
-): string | NumThreats {
+): Content {
   if (state === CellState.EXPLODED) {
-    return EXPLODED_MINE;
+    return getSymbol(EXPLODED_MINE);
   }
 
   const isMined = threats === 0xff;
@@ -53,13 +61,13 @@ export function getContent(
   const isFlagged = state === CellState.FLAGGED;
   const isDisarmed = done && isMined && isFlagged && (gameWon || gameOver);
   if (gameWon && isMined && state !== CellState.FLAGGED) {
-    return '🥺';
+    return getSymbol(UNFLAGGED_MINE);
   }
   if (isDisarmed) {
-    return DISARMED_MINE;
+    return getSymbol(DISARMED_MINE);
   }
   if ((gameOver || state === CellState.OPEN) && threats === 0xff) {
-    return MINES[randomInt(MINES.length)];
+    return getSymbol(MINES[randomInt(MINES.length)] as SvgSymbolKey);
   }
   if (gameState === GameState.COMPLETED) {
     return getContent(
@@ -71,9 +79,11 @@ export function getContent(
   }
   switch (state) {
     case CellState.FLAGGED:
-      return (demo || gameOver) && !isMined ? '💩' : getFlag();
+      return getSymbol(
+        (demo || gameOver) && !isMined ? MISPLACED_FLAG : getFlag()
+      );
     case CellState.UNCERTAIN:
-      return '❓';
+      return getSymbol(UNCERTAIN_FLAG);
     case CellState.OPEN:
       return isNumThreats(threats)
         ? renderThreats(numeralSystem, threats)

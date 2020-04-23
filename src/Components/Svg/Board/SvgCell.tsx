@@ -5,12 +5,13 @@ import { CellState, GridType, NumThreats, assertNever } from '../../../Game';
 import { CmdAction } from '../../../store';
 import { onContextMenu } from '../..';
 import useAsyncDispatch from '../../../Hooks/useAsyncDispatch';
+import { Content, isSvgSymbol } from '../../../graphics';
 
 type ICellProps = {
   coordinate: number;
   gridType: GridType;
   dispatch?: Dispatch<CmdAction>;
-  content: string | NumThreats;
+  content: Content;
   state: CellState;
   threats?: NumThreats;
   mined: boolean;
@@ -129,13 +130,28 @@ const SvgCell: FC<ICellProps> = props => {
 const Text = React.memo(
   (
     props: React.SVGProps<SVGTextElement> & {
-      content?: string | number;
+      content?: Content;
     }
   ) => {
     const domProps = {
       ...props,
       content: undefined,
     };
+    if (isSvgSymbol(props.content)) {
+      const size = (cellSize * 2) / 3;
+      const center = cellSize / 2;
+      const ix = center - size / 2;
+      return (
+        <image
+          className="ct"
+          x={ix}
+          y={ix}
+          width={size}
+          height={size}
+          href={props.content.href}
+        />
+      );
+    }
     return (
       <text
         className="ct"
