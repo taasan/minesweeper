@@ -1,7 +1,6 @@
 import * as React from 'react';
 import './SvgBoard.css';
 import {
-  CellState,
   Coordinate,
   GameRecord,
   GameState,
@@ -204,13 +203,12 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
             boardState,
             numeralSystem
           )}
-          state={done ? CellState.OPEN : cell.state}
+          state={cell.state}
           threats={
-            cell.state === CellState.OPEN && isNumThreats(cell.threatCount)
-              ? cell.threatCount
-              : undefined
+            isNumThreats(cell.threatCount) ? cell.threatCount : undefined
           }
-          mined={cell.state === CellState.OPEN && cell.threatCount === 0xff}
+          mined={cell.threatCount === 0xff}
+          done={done}
         />
       );
       const key = { key: `${x},${y}` };

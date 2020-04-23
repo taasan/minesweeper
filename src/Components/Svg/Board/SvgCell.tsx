@@ -15,6 +15,7 @@ type ICellProps = {
   state: CellState;
   threats?: NumThreats;
   mined: boolean;
+  done?: boolean;
 };
 
 export const cellSize = 33;
@@ -28,6 +29,7 @@ const SvgCell: FC<ICellProps> = props => {
     content,
     mined,
     gridType,
+    done,
   } = props;
 
   const dispatch = useAsyncDispatch(_dispatch, {
@@ -67,7 +69,8 @@ const SvgCell: FC<ICellProps> = props => {
 
     switch (state) {
       case CellState.NEW:
-        return cover;
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        return done ? <Text role={role} content={content} /> : cover;
       case CellState.FLAGGED:
       case CellState.UNCERTAIN:
         return (
@@ -80,7 +83,6 @@ const SvgCell: FC<ICellProps> = props => {
       case CellState.EXPLODED:
         return (
           <>
-            <use href={`#${GridType[gridType]}`} className="cb" />
             <Text
               role={role}
               content={
@@ -104,6 +106,7 @@ const SvgCell: FC<ICellProps> = props => {
       data-t={threats}
       data-m={mined ? true : undefined}
     >
+      <use href={`#${GridType[gridType]}`} className="cb" />
       {render()}
       {/**}
       <text
