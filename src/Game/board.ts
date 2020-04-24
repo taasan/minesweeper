@@ -1,6 +1,6 @@
-import produce, { Immutable, immerable } from 'immer';
+import produce, { immerable } from 'immer';
 import { Coordinate, calculateCoordinate, calculateIndex } from './coordinate';
-import { CellRecord, CellStateStats, ICell } from './cell';
+import { CellRecord, CellStateStats } from './cell';
 import { Grid } from './grid';
 
 export function assertNever(x: never): never {
@@ -32,7 +32,7 @@ export type Level = Grid & {
   mines: number;
 };
 
-export type IGame = {
+export type GameRecord = {
   cells: Map<number, CellRecord>;
   state: GameState;
   level: Readonly<Level>;
@@ -42,8 +42,6 @@ export type IGame = {
   onGameOver: () => void;
 };
 
-export type GameRecord = Immutable<IGame>;
-
 export const getCell = (
   {
     level,
@@ -51,22 +49,22 @@ export const getCell = (
   }:
     | {
         level: Level;
-        cells: [number, ICell][] | Map<number, ICell>;
+        cells: [number, CellRecord][] | Map<number, CellRecord>;
       }
     | GameRecord,
   coordinate: Coordinate
-): ICell => {
+): CellRecord => {
   if (Array.isArray(cells)) {
     const { row, col } = calculateCoordinate(level.cols, coordinate);
-    return cells[row][col] as ICell;
+    return cells[row][col] as CellRecord;
   }
   return cells.get(calculateIndex(level, coordinate))!;
 };
 
 export const setCell = (
-  board: IGame,
+  board: GameRecord,
   coordinate: Coordinate,
-  cell: ICell
+  cell: CellRecord
 ): ReadonlyMap<number, CellRecord> =>
   produce(board.cells, draft => {
     draft.set(calculateIndex(board.level, coordinate), cell);

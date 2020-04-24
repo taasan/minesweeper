@@ -7,7 +7,7 @@ import { onContextMenu } from '../..';
 import useAsyncDispatch from '../../../Hooks/useAsyncDispatch';
 import { Content, isSvgSymbol } from '../../../graphics';
 
-type ICellProps = {
+type CellRecordProps = {
   coordinate: number;
   gridType: GridType;
   dispatch?: Dispatch<CmdAction>;
@@ -20,7 +20,7 @@ type ICellProps = {
 
 export const cellSize = 33;
 
-const SvgCell: FC<ICellProps> = props => {
+const SvgCell: FC<CellRecordProps> = props => {
   const {
     dispatch: _dispatch,
     state,

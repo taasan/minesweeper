@@ -3,7 +3,6 @@ import {
   GameError,
   GameRecord,
   GameState,
-  IGame,
   Level,
   assertNever,
   getCell,
@@ -13,13 +12,12 @@ import {
   CellRecord,
   CellState,
   CellStateStats,
-  ICell,
   Mine,
   NumThreats,
   createGameCell,
 } from './cell';
 import { Grid, GridType, Topology, getNeighbourMatrix } from './grid';
-import produce, { Immutable } from 'immer';
+import produce from 'immer';
 
 const createLevel = (level?: Partial<Level>) =>
   Object.freeze({
@@ -42,7 +40,7 @@ const createCellStateStats = (
   ...stats,
 });
 
-export const createBoard: (game: Partial<IGame>) => Immutable<IGame> = game =>
+export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
   produce(game, draft => ({
     cells: new Map(),
     state: GameState.NOT_INITIALIZED,
@@ -73,8 +71,8 @@ function getCellStates(
   );
 }
 
-function createEmptyCells({ cols, rows }: Level): Array<[number, ICell]> {
-  const cells: Array<[number, ICell]> = [];
+function createEmptyCells({ cols, rows }: Level): Array<[number, CellRecord]> {
+  const cells: Array<[number, CellRecord]> = [];
   const dim = rows * cols;
   for (let i = 0; i < dim; i++) {
     cells.push([
@@ -95,7 +93,7 @@ function mapFromEntries<K, V>(entries: [K, V][]) {
 }
 
 function initialize(
-  game: Pick<IGame, 'level' | 'onGameOver'>,
+  game: Pick<GameRecord, 'level' | 'onGameOver'>,
   origin: Coordinate,
   state: GameState.INITIALIZED | GameState.PLAYING
 ): GameRecord {
@@ -119,7 +117,7 @@ function initialize(
     }
   }
 
-  const cellRecords = mapFromEntries<number, ICell>(cells);
+  const cellRecords = mapFromEntries<number, CellRecord>(cells);
   cells.forEach(([coord, cell]) => {
     cell.threatCount = countThreats({ level, cells: cellRecords }, coord);
   });
@@ -134,7 +132,7 @@ function initialize(
 }
 
 function updateCell(
-  board: IGame,
+  board: GameRecord,
   [coordinate, newCell]: [Coordinate, CellRecord]
 ): void {
   const oldCell = getCell(board, coordinate);
@@ -151,8 +149,8 @@ function updateCell(
 
 function countThreats(
   board:
-    | Pick<IGame, 'level' | 'cells'>
-    | { level: Level; cells: [number, ICell][] },
+    | Pick<GameRecord, 'level' | 'cells'>
+    | { level: Level; cells: [number, CellRecord][] },
   p: Coordinate
 ): NumThreats | Mine {
   if (getCell(board, p)?.threatCount === 0xff) {
@@ -235,7 +233,7 @@ export type CmdName = keyof typeof Cmd;
 
 export const isCmdName = (s: string): s is CmdName => Cmd[s as CmdName] != null;
 
-function openNeighbours(origin: Coordinate, board: IGame): void {
+function openNeighbours(origin: Coordinate, board: GameRecord): void {
   const cell = getCell(board, origin);
   const { level } = board;
   let flaggedNeighboursCount = 0;
@@ -326,7 +324,7 @@ function nextState(
   });
 }
 
-function toggleOpen(coordinate: Coordinate, board: IGame): void {
+function toggleOpen(coordinate: Coordinate, board: GameRecord): void {
   switch (board.state) {
     case GameState.PLAYING:
       break;
@@ -371,7 +369,7 @@ function toggleOpen(coordinate: Coordinate, board: IGame): void {
     const predicate = (cellRecord: CellRecord) =>
       cellRecord.state === CellState.NEW ||
       cellRecord.state === CellState.UNCERTAIN;
-    const visitor = ([coord, c]: [Coordinate, ICell]) => {
+    const visitor = ([coord, c]: [Coordinate, CellRecord]) => {
       if (c.threatCount === 0xff) {
         throw new Error(`Expected 0-8 threatCount, got ${c.threatCount}`);
       }
@@ -393,7 +391,7 @@ function toggleOpen(coordinate: Coordinate, board: IGame): void {
   }
 }
 
-function toggleFlagged(coordinate: Coordinate, board: IGame): void {
+function toggleFlagged(coordinate: Coordinate, board: GameRecord): void {
   const cell = getCell(board, coordinate);
   switch (board.state) {
     case GameState.PLAYING:
@@ -591,7 +589,7 @@ export const legend: () => {
       state: CellState.OPEN,
       threatCount: 0xff,
     },
-  ] as ICell[]).map(createGameCell);
+  ] as CellRecord[]).map(createGameCell);
 
   const cols = 4;
   const board = createBoard({

@@ -1,4 +1,4 @@
-import produce, { Immutable } from 'immer';
+import produce from 'immer';
 
 export type NumThreats = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -16,7 +16,7 @@ export enum CellState {
   EXPLODED,
 }
 
-export const createGameCell: (cell: Partial<ICell>) => ICell = cell =>
+export const createGameCell: (cell: Partial<CellRecord>) => CellRecord = cell =>
   produce(cell, draft => ({
     state: CellState.NEW,
     threatCount: 0,
@@ -27,9 +27,7 @@ export type CellStateName = keyof typeof CellState;
 
 export type CellStateStats = { [key in CellState]: number };
 
-export type ICell = {
+export type CellRecord = {
   state: CellState;
   threatCount: NumThreats | Mine;
 };
-
-export type CellRecord = Immutable<ICell>;

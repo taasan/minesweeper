@@ -2,7 +2,6 @@ import {
   CellState,
   Cmd,
   Coordinate,
-  GameRecord,
   GameState,
   Level,
   assertNever,
@@ -127,10 +126,9 @@ const menuActionReducer = (state: IState, action: MenuAction): IState => {
       break;
   }
 
-  return {
-    ...state,
-    showMenu,
-  };
+  return produce(state, draft => {
+    draft.showMenu = showMenu;
+  });
 };
 
 const commandActionReducer = (state: IState, action: CmdAction): IState => {
@@ -161,38 +159,38 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
       break;
   }
 
-  let newState = { ...state, game: { ...state.game } };
-  newState.boardVersion = board.version;
-  if (addTimingEvent) {
-    const t = [...state.timingEvents];
-    const elapsedTime = () => {
-      const len = t.length;
-      if (len === 0) {
-        return 0;
-      }
-      if (board.state === GameState.PLAYING && (len & 1) !== 1) {
-        log.error('Unexpected array length');
-      }
-      const elapsed = calulateElapsedTime(t);
-      if (board.state === GameState.PLAYING) {
-        const lastStart = t[len - 1];
-        return elapsed + Date.now() - lastStart;
-      }
-      return elapsed;
-    };
+  return produce(state, draft => {
+    draft.boardVersion = board.version;
+    if (addTimingEvent) {
+      const tmp = [...state.timingEvents];
+      const elapsedTime = () => {
+        const len = tmp.length;
+        if (len === 0) {
+          return 0;
+        }
+        if (board.state === GameState.PLAYING && (len & 1) !== 1) {
+          log.error('Unexpected array length');
+        }
+        const elapsed = calulateElapsedTime(tmp);
+        if (board.state === GameState.PLAYING) {
+          const lastStart = tmp[len - 1];
+          return elapsed + Date.now() - lastStart;
+        }
+        return elapsed;
+      };
 
-    newState.timingEvents = t;
-    newState.elapsedTime = elapsedTime;
-    t.push(Date.now());
-  }
-  newState.game.board = board;
-  if (state.game.board.state !== board.state) {
-    log.debug('State changed', {
-      old: GameState[state.game.board.state],
-      new: GameState[newState.game.board.state],
-    });
-  }
-  return newState;
+      draft.timingEvents = tmp;
+      draft.elapsedTime = elapsedTime;
+      draft.timingEvents.push(Date.now());
+    }
+    draft.game.board = board;
+    if (state.game.board.state !== board.state) {
+      log.debug('State changed', {
+        old: GameState[state.game.board.state],
+        new: GameState[draft.game.board.state],
+      });
+    }
+  });
 };
 
 type ReducerFunction<S, A> = (state: S, action: A) => S;
@@ -216,13 +214,12 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
         action.level != null ? action.level : state.game.board.level,
         onGameOver
       );
-      return {
-        ...state,
-        timingEvents: [],
-        elapsedTime: zero,
-        game,
-        modalStack: [],
-      };
+      return produce(state, draft => {
+        draft.timingEvents = [];
+        draft.elapsedTime = zero;
+        draft.game = game;
+        draft.modalStack = [];
+      });
     }
     case 'showModal': {
       let newState = state;
@@ -231,28 +228,23 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
           type: 'PAUSE',
         });
       }
-      return {
-        ...newState,
-        modalStack: [...state.modalStack].concat([action.modal]),
-        showMenu: false,
-      };
+      return produce(newState, draft => {
+        draft.modalStack.push(action.modal);
+        draft.showMenu = false;
+      });
     }
     case 'closeModal':
       if (modalStackSize === 0) {
         log.warn('Modal stack is empty');
         return state;
       }
-      const modalStack = [...state.modalStack];
-      modalStack.pop();
-      return {
-        ...state,
-        modalStack,
-      };
+      return produce(state, draft => {
+        draft.modalStack.pop();
+      });
     case 'fitWindow':
-      return {
-        ...state,
-        maxBoardDimensions: getFitWindowCss(state.containerRef),
-      };
+      return produce(state, draft => {
+        draft.maxBoardDimensions = getFitWindowCss(state.containerRef);
+      });
     case 'showMenu':
     case 'hideMenu':
     case 'toggleMenu':
@@ -271,46 +263,6 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
   assertNever(action);
 };
 
-export type IHistoryState = IState & {
-  history: Pick<GameRecord, 'cells' | 'cellStates' | 'state'>[];
-};
-
-const ensureHistory = (state: any): IHistoryState => {
-  if (!stateIsHistoryState(state)) {
-    state = { ...state, history: [] };
-  }
-
-  return state;
-};
-
-const stateIsHistoryState = (
-  state: IHistoryState | IState
-): state is IHistoryState => (state as IHistoryState).history !== undefined;
-
-export const withHistory: ReducerFunction<IHistoryState, Action> = (
-  state,
-  action
-): IHistoryState => {
-  state = ensureHistory(state);
-  const newState = ensureHistory(reducer(state, action));
-
-  if (action.type === 'FLAG' || action.type === 'POKE') {
-    const { cellStates, cells, state: gameState } = newState.game.board;
-    return {
-      ...newState,
-      history: [
-        ...state.history,
-        {
-          cellStates,
-          cells,
-          state: gameState,
-        },
-      ],
-    };
-  }
-  return newState;
-};
-
 export const withLives: (
   lives: number,
   reducer: ReducerFunction<IState, Action>
@@ -324,15 +276,9 @@ export const withLives: (
     newState.game.board.state === GameState.GAME_OVER &&
     lives >= newState.game.board.cellStates[CellState.EXPLODED]
   ) {
-    return {
-      ...newState,
-      game: {
-        ...newState.game,
-        board: produce(newState.game.board, draft => {
-          draft.state = GameState.PLAYING;
-        }),
-      },
-    };
+    return produce(newState, draft => {
+      draft.game.board.state = GameState.PLAYING;
+    });
   }
   return newState;
 };

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import './SvgBoard.css';
 import {
+  CellRecord,
   Coordinate,
   GameRecord,
   GameState,
   GridType,
-  ICell,
   Topology,
   ValidationError,
   assertNever,
@@ -161,7 +161,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
       };
     };
 
-    const mapCell = ([coordinate, cell]: [Coordinate, ICell]) => {
+    const mapCell = ([coordinate, cell]: [Coordinate, CellRecord]) => {
       const { row, col } =
         typeof coordinate === 'number'
           ? calculateCoordinate(cols, coordinate)
