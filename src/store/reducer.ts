@@ -78,6 +78,14 @@ export type FitWindowAction = {
   type: 'fitWindow';
 };
 
+export type FullscreenAction =
+  | {
+      type: 'requestFullscreen';
+    }
+  | {
+      type: 'exitFullscreen';
+    };
+
 export type ModalAction =
   | {
       type: 'showModal';
@@ -93,7 +101,8 @@ export type Action =
   | FitWindowAction
   | ModalAction
   | CmdAction
-  | MenuAction;
+  | MenuAction
+  | FullscreenAction;
 
 export const onGameOver = () => {
   window.navigator.vibrate(
@@ -251,6 +260,16 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
     case 'hideMenu':
     case 'toggleMenu':
       return menuActionReducer(state, action);
+    case 'requestFullscreen':
+      if (!document.fullscreen) {
+        document.documentElement.requestFullscreen().catch();
+      }
+      return state;
+    case 'exitFullscreen':
+      if (document.fullscreen) {
+        document.exitFullscreen().catch();
+      }
+      return state;
   }
   assertNever(action);
 };

@@ -17,6 +17,7 @@ import { DISARMED_MINE, EXPLODED_MINE, getFlag } from './Board/getContent';
 import SettingsDialog from '../Settings/SettingsDialog';
 import {
   CmdAction,
+  FullscreenAction,
   LevelAction,
   MenuAction,
   ModalAction,
@@ -36,13 +37,13 @@ import SettingsContextProvider, {
 import { Store } from '../../store';
 export type IProps = { level: Level };
 
+const registerEvent = (event: string, callback: (_: any) => void) => {
+  window.addEventListener(event, callback);
+  return () => window.removeEventListener(event, callback);
+};
+
 const SvgMinesweeper: React.FC<IProps> = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  const registerEvent = (event: string, callback: (_: any) => void) => {
-    window.addEventListener(event, callback);
-    return () => window.removeEventListener(event, callback);
-  };
 
   const {
     game,
@@ -223,7 +224,9 @@ interface ControlsProps {
   gameState: GameState;
   remainingMines: number;
   remainingLives: number;
-  dispatch: React.Dispatch<ModalAction | CmdAction | LevelAction | MenuAction>;
+  dispatch: React.Dispatch<
+    ModalAction | CmdAction | LevelAction | MenuAction | FullscreenAction
+  >;
   elapsedTime(): number;
   numeralSystem: NumeralSystem;
   showMenu: boolean;
@@ -266,7 +269,16 @@ const StatusBar = React.memo(
       const { lives } = React.useContext(Store);
       const { rotate, setRotate } = React.useContext(RotateContext);
       const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
+      const [fullScreen, setFullScreen] = React.useState(document.fullscreen);
+
       const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
+
+      React.useEffect(() => {
+        return registerEvent('fullscreenchange', () =>
+          setFullScreen(document.fullscreen)
+        );
+      }, []);
+
       return (
         <div className="SvgMinesweeper__Controls" ref={ref}>
           <div role="button" onClick={handleGameStateClick} {...itemsProps}>
@@ -349,6 +361,22 @@ const StatusBar = React.memo(
                       checked={rotate}
                     />
                     Rotate
+                  </label>
+                </li>
+                <li role="menuitemcheckbox" aria-checked={fullScreen}>
+                  <label>
+                    <input
+                      onChange={() =>
+                        dispatch({
+                          type: fullScreen
+                            ? 'exitFullscreen'
+                            : 'requestFullscreen',
+                        })
+                      }
+                      type="checkbox"
+                      checked={fullScreen}
+                    />
+                    Fullscreen
                   </label>
                 </li>
               </ul>
