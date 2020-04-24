@@ -225,12 +225,18 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
     }
   }
   @each $gameState in $GAME_OVER, $COMPLETED {
-    &[data-s='#{$gameState}'] .ct[role='img'] {
-      transform: rotate(-30deg) scale(1.25);
-      transition: transform 0.3s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    &[data-s='#{$gameState}'] .c > {
+      image.ct,
+      text.ct[role='img'] {
+        transform: rotate(-30deg) scale(1.25);
+        transition: transform 0.3s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+      }
     }
-    &.SvgBoard__rotated[data-s='#{$gameState}'] .c .ct {
-      transform: rotate(-105deg) scale(1.25);
+    &.SvgBoard__rotated[data-s='#{$gameState}'] .c > {
+      image.ct,
+      text.ct[role='img'] {
+        transform: rotate(-150deg) scale(1.25);
+      }
     }
   }
 
