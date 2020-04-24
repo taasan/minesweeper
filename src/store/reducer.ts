@@ -5,7 +5,6 @@ import {
   GameRecord,
   GameState,
   Level,
-  NextStateFunction,
   assertNever,
   calculateCoordinate,
   createGame,
@@ -67,14 +66,6 @@ export type LevelAction = {
   level?: Level;
 };
 
-export type BoardAction = {
-  type: 'setBoard';
-  game: {
-    board: GameRecord;
-    nextState: NextStateFunction;
-  };
-};
-
 export type FitWindowAction = {
   type: 'fitWindow';
 };
@@ -98,7 +89,6 @@ export type ModalAction =
 
 export type Action =
   | LevelAction
-  | BoardAction
   | FitWindowAction
   | ModalAction
   | CmdAction
@@ -234,14 +224,6 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
         modalStack: [],
       };
     }
-    case 'setBoard':
-      return {
-        ...state,
-        game: action.game,
-        timingEvents: [],
-        elapsedTime: zero,
-        loading: false,
-      };
     case 'showModal': {
       let newState = state;
       if (state.game.board.state === GameState.PLAYING) {
