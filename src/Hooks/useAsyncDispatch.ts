@@ -13,8 +13,10 @@ const useAsyncDispatch = <T extends unknown>(
 ) => {
   return useCallback(
     (action: T) => {
-      const promise = (async () =>
-        dispatch != null ? dispatch(action) : undefined)();
+      if (dispatch == null) {
+        return;
+      }
+      const promise = (async () => dispatch(action))();
       if (handlers != null) {
         const { onfinally, onfulfilled, onrejected } = handlers;
 
