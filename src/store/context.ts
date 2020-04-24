@@ -11,6 +11,7 @@ import NumeralSystem from '../lib/NumeralSystem';
 import { defaultTheme } from '../Theme';
 import React from 'react';
 import { ITheme } from '../Theme/theme';
+import { zero } from '../lib';
 
 type ILevels = {
   [keyof: string]: Level;
@@ -48,7 +49,7 @@ export type IState = Readonly<{
   maxBoardDimensions: { maxWidth: string; maxHeight: string };
   modalStack: ModalType[];
   timingEvents: TimingEvent[];
-  elapsedTime: number;
+  elapsedTime(): number;
   showMenu: boolean;
   lives: 0 | 1 | 2;
   rotated: boolean;
@@ -92,7 +93,7 @@ export const initialState: IState = {
   },
   modalStack: [],
   timingEvents: [],
-  elapsedTime: 0,
+  elapsedTime: zero,
   showMenu: false,
   lives: 2,
   containerRef: React.createRef(),

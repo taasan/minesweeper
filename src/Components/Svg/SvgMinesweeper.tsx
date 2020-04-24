@@ -26,7 +26,7 @@ import {
   reducer,
 } from '../../store';
 import { useTheme } from '../../Hooks';
-import { NumeralSystem, log } from '../../lib';
+import { NumeralSystem } from '../../lib';
 import FormatNumber from '../FormatNumber';
 import Timer from '../Timer';
 import SettingsContextProvider, {
@@ -50,23 +50,11 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     modalStack,
     containerRef,
     elapsedTime,
-    timingEvents,
     showMenu,
     lives,
   } = state;
   const { board } = game;
-  const elapsedTimeCb = React.useCallback(() => {
-    const len = timingEvents.length;
-    if (len === 0) {
-      return 0;
-    }
-    if ((len & 1) !== 1) {
-      log.error('EEP!');
-    }
-    const lastStart = timingEvents[len - 1];
-    const a = elapsedTime + Date.now() - lastStart;
-    return a;
-  }, [elapsedTime, timingEvents]);
+
   const {
     theme,
     numeralSystem,
@@ -178,7 +166,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
             board.cellStates[CellState.EXPLODED]
           }
           dispatch={dispatch}
-          elapsedTime={elapsedTimeCb}
+          elapsedTime={elapsedTime}
           numeralSystem={numeralSystem}
           showMenu={showMenu}
         />

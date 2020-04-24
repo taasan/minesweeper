@@ -13,7 +13,7 @@ import {
 } from '../Game';
 
 import log from '../lib/log';
-import { chunk } from '../lib';
+import { chunk, zero } from '../lib';
 import { IState, TimingEvent } from './context';
 import produce from 'immer';
 import { getFitWindowCss } from '../lib';
@@ -174,7 +174,21 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
   newState.boardVersion = board.version;
   if (addTimingEvent) {
     const t = [...state.timingEvents];
-    const elapsedTime = calulateElapsedTime(t);
+    const elapsedTime = () => {
+      const len = t.length;
+      if (len === 0) {
+        return 0;
+      }
+      if (board.state === GameState.PLAYING && (len & 1) !== 1) {
+        log.error('Unexpected array length');
+      }
+      const elapsed = calulateElapsedTime(t);
+      if (board.state === GameState.PLAYING) {
+        const lastStart = t[len - 1];
+        return elapsed + Date.now() - lastStart;
+      }
+      return elapsed;
+    };
 
     newState.timingEvents = t;
     newState.elapsedTime = elapsedTime;
@@ -214,7 +228,7 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
       return {
         ...state,
         timingEvents: [],
-        elapsedTime: 0,
+        elapsedTime: zero,
         game,
         modalStack: [],
       };
@@ -224,7 +238,7 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
         ...state,
         game: action.game,
         timingEvents: [],
-        elapsedTime: 0,
+        elapsedTime: zero,
         loading: false,
       };
     case 'showModal': {
