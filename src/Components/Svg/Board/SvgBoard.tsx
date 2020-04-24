@@ -266,6 +266,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         viewBox={viewBox}
         data-grid={GridType[board.level.type]}
         data-s={GameState[boardState]}
+        data-r={rotated ? 't' : 'f'}
         data-s2={
           boardState === GameState.DEMO
             ? GameState[GameState.GAME_OVER]

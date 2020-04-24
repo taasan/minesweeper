@@ -55,6 +55,13 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
   }
 }
 
+@function _rotate($rotated, $deg) {
+  @if (not $rotated) {
+    @return rotate(#{$deg}deg);
+  }
+  @return rotate(#{$deg - 90}deg);
+}
+
 .c .ct {
   transform-origin: center;
 }
@@ -217,14 +224,26 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
 }
 */
 @media (prefers-reduced-motion: no-preference) {
-  .c {
-    &[data-s='#{$EXPLODED}'] .ct[role='img'] {
-      //animation: EXPLODED-animation 1 2s cubic-bezier(0.95, 0.05, 0.795, 0.035);
-      // animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11 alternate
-      //  both running pulse;
+  @each $rotated in t, f {
+    $name: shake;
+    @if ($rotated == t) {
+      $name: shake_rotated;
+    }
+
+    &[data-r='#{$rotated}'] .c {
+      &[data-s='#{$EXPLODED}'] {
+        image.ct,
+        text.ct[role='img'] {
+          //animation: EXPLODED-animation 1 2s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+          // animation: 0.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 11 alternate
+          //  both running pulse;
+          animation: $name 0.5s;
+        }
+      }
     }
   }
   @each $gameState in $GAME_OVER, $COMPLETED {
+    /*
     &[data-s='#{$gameState}'] .c > {
       image.ct,
       text.ct[role='img'] {
@@ -238,6 +257,7 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
         transform: rotate(-150deg) scale(1.25);
       }
     }
+    */
   }
 
   @keyframes EXPLODED-animation {
@@ -257,6 +277,47 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
     }
     100% {
       transform: scale(1);
+    }
+  }
+  @each $rotated in true, false {
+    $name: shake;
+    @if ($rotated) {
+      $name: shake_rotated;
+    }
+    @keyframes #{$name} {
+      0% {
+        transform: translate(1px, 1px) _rotate($rotated, 0);
+      }
+      10% {
+        transform: translate(-1px, -2px) _rotate($rotated, -1);
+      }
+      20% {
+        transform: translate(-3px, 0px) _rotate($rotated, 1);
+      }
+      30% {
+        transform: translate(3px, 2px) _rotate($rotated, 0);
+      }
+      40% {
+        transform: translate(1px, -1px) _rotate($rotated, 1);
+      }
+      50% {
+        transform: translate(-1px, 2px) _rotate($rotated, -1);
+      }
+      60% {
+        transform: translate(-3px, 1px) _rotate($rotated, 0);
+      }
+      70% {
+        transform: translate(3px, 1px) _rotate($rotated, -1);
+      }
+      80% {
+        transform: translate(-1px, -1px) _rotate($rotated, 1);
+      }
+      90% {
+        transform: translate(1px, 2px) _rotate($rotated, 0);
+      }
+      100% {
+        transform: translate(1px, -2px) _rotate($rotated, -1);
+      }
     }
   }
 }
