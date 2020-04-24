@@ -11,11 +11,10 @@ interface Props {
 
 const Timer: React.FC<Props> = React.memo(
   ({ running, elapsedTime, numeralSystem }) => {
-    const [timer, setTimer] = React.useState(0);
+    const [timer, setTimer] = React.useState(elapsedTime());
+    React.useEffect(() => setTimer(elapsedTime()), [elapsedTime]);
 
-    const cb = useCallback(() => setTimer(Math.floor(elapsedTime() / 1000)), [
-      elapsedTime,
-    ]);
+    const cb = useCallback(() => setTimer(elapsedTime()), [elapsedTime]);
 
     useTicker(1000, running, cb);
 
@@ -26,7 +25,11 @@ const Timer: React.FC<Props> = React.memo(
         className="Timer"
         title={timer.toString()}
       >
-        <FormatNumber numeralSystem={numeralSystem} n={timer} asTime={true} />
+        <FormatNumber
+          numeralSystem={numeralSystem}
+          n={Math.floor(timer / 1000)}
+          asTime={true}
+        />
       </span>
     );
   }
