@@ -13,10 +13,11 @@ import {
 } from '../Game';
 
 import log from '../lib/log';
-import { chunk, zero } from '../lib';
+import { zero } from '../lib';
 import { IState, TimingEvent } from './context';
 import produce from 'immer';
 import { getFitWindowCss } from '../lib';
+import { chunk } from 'lodash';
 
 export type PauseAction =
   | {
