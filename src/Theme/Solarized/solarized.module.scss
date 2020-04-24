@@ -12,11 +12,3 @@
   --cell-threats-7-color: #{$yellow};
   --cell-threats-8-color: #{$orange};
 }
-
-body {
-  background-image: repeating-radial-gradient(
-    var(--background-base3),
-    var(--background-base2),
-    var(--background-base1)
-  );
-}

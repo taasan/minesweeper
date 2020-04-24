@@ -24,13 +24,13 @@
   --board-padding: 3px;
 
   --background-base3: white;
-  --background-base2: white;
-  --background-base1: white;
-  --background-base0: white;
+  --background-base2: #e0e0e0;
+  --background-base1: #c0c0c0;
+  --background-base0: #a0a0a0;
   --foreground-base3: black;
-  --foreground-base2: black;
-  --foreground-base1: black;
-  --foreground-base0: black;
+  --foreground-base2: #202020;
+  --foreground-base1: #404040;
+  --foreground-base0: #606060;
   background-color: var(--background-base3);
   color: var(--foreground-base3);
 }
