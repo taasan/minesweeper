@@ -13,7 +13,7 @@ import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '..';
 import { LevelChooser } from '../LevelChooser';
 import Modal from '../Modal';
-import { DISARMED_MINE, EXPLODED_MINE, getFlag } from './Board/getContent';
+import { DISARMED_MINE, EXPLODED_MINE, getFlag } from '../../graphics';
 import SettingsDialog from '../Settings/SettingsDialog';
 import {
   CmdAction,

@@ -1,6 +1,22 @@
 import { NumThreats, isNumThreats } from '../Game';
+import _ from 'lodash';
 
-const componentMap = Object.freeze({
+export const FLAG = '☣️';
+export const UNCERTAIN_FLAG = '❓';
+export const UNFLAGGED_MINE = '🥺';
+export const MISPLACED_FLAG = '💩';
+export const NATIONAL_FLAG = '🇳🇴';
+
+export const DISARMED_MINE = '🥰';
+export const EXPLODED_MINE = '💀';
+
+export const getFlag = () => {
+  const today = new Date();
+  const isMay17 = today.getDate() === 17 && today.getMonth() === 4;
+  return isMay17 ? NATIONAL_FLAG : FLAG;
+};
+
+const componentMap = {
   '🤒': null, // Mine
   '😷': null, // Mine
   '🤮': null, // Mine
@@ -16,14 +32,19 @@ const componentMap = Object.freeze({
   '👹': null, // Mine
   '👺': null, // Mine
   '🦠': null, // Mine
-  '🇳🇴': null, // National flag
-  '☣️': null, // Flag
-  '❓': null, // Flag uncertain
-  '🥺': null, // Not flagged at game completed
-  '💩': null, // Flagged incorrectly (at game over)
-  '🥰': null, // Flagged and mined at game completed / game over
-  '💀': null, // Exploded mine
-});
+  '\u0000': null, // Separator
+  [NATIONAL_FLAG]: null, // National flag
+  [FLAG]: null, // Flag
+  [UNCERTAIN_FLAG]: null, // Flag uncertain
+  [UNFLAGGED_MINE]: null, // Not flagged at game completed
+  [MISPLACED_FLAG]: null, // Flagged incorrectly (at game over)
+  [DISARMED_MINE]: null, // Flagged and mined at game completed / game over
+  [EXPLODED_MINE]: null, // Exploded mine
+};
+
+export const MINES = Object.freeze(
+  _.takeWhile(Object.keys(componentMap), e => e !== '\u0000')
+);
 
 export type SvgComponent = React.FunctionComponent<
   React.SVGProps<SVGSVGElement> & {
@@ -31,7 +52,7 @@ export type SvgComponent = React.FunctionComponent<
   }
 >;
 
-export type SvgSymbolKey = keyof typeof componentMap;
+export type SvgSymbolKey = keyof Exclude<typeof componentMap, '\u0000'>;
 
 export type SvgSymbolMap = {
   [key in SvgSymbolKey]: SvgSymbol | null;
@@ -59,15 +80,25 @@ export function getContent(
   return sym ?? key;
 }
 
-export function isSvgDataHref(c?: SvgHref | SvgDataHref): c is SvgDataHref {
+export function isSvgDataHref(
+  c?: SvgHref | SvgDataHref | string
+): c is SvgDataHref {
+  if (typeof c !== 'object') {
+    return false;
+  }
   c = c as SvgDataHref | undefined;
   return (
     typeof c?.data === 'string' &&
-    c.data.startsWith('data:image/svg+xml;base64')
+    c.data.startsWith('data:image/svg+xml;base64,')
   );
 }
 
-export function isSvgHref(c?: SvgHref | SvgDataHref): c is SvgDataHref {
+export function isSvgHref(
+  c?: SvgHref | SvgDataHref | string
+): c is SvgDataHref {
+  if (typeof c !== 'object') {
+    return false;
+  }
   c = c as SvgHref | undefined;
   return typeof c?.href === 'string';
 }
@@ -79,7 +110,6 @@ export function isSvgSymbol(c: Content): c is SvgSymbol {
   return (
     typeof c !== 'string' &&
     !isNumThreats(c) &&
-    typeof c === 'object' &&
     (isSvgDataHref(c) || isSvgHref(c))
   );
 }

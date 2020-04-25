@@ -1,4 +1,14 @@
-import { SvgDataHref, SvgSymbolKey } from '..';
+import {
+  DISARMED_MINE,
+  EXPLODED_MINE,
+  FLAG,
+  MISPLACED_FLAG,
+  NATIONAL_FLAG,
+  SvgDataHref,
+  SvgSymbolKey,
+  UNCERTAIN_FLAG,
+  UNFLAGGED_MINE,
+} from '..';
 
 import emoji_u1f1f3 from './emoji_u1f1f3';
 import emoji_u1f479 from './emoji_u1f479';
@@ -39,13 +49,13 @@ export const SYMBOLS: any = Object.freeze({
   '👹': emoji_u1f479,
   '👺': emoji_u1f47a,
   '🦠': emoji_u1f9a0,
-  '🇳🇴': emoji_u1f1f3,
-  '☣️': emoji_u2623,
-  '❓': emoji_u2753,
-  '🥺': emoji_u1f97a,
-  '💩': emoji_u1f4a9,
-  '🥰': emoji_u1f970,
-  '💀': emoji_u1f480,
+  [NATIONAL_FLAG]: emoji_u1f1f3,
+  [FLAG]: emoji_u2623,
+  [UNCERTAIN_FLAG]: emoji_u2753,
+  [UNFLAGGED_MINE]: emoji_u1f97a,
+  [MISPLACED_FLAG]: emoji_u1f4a9,
+  [DISARMED_MINE]: emoji_u1f970,
+  [EXPLODED_MINE]: emoji_u1f480,
 });
 /*
 Object.keys(symbols).forEach(key => {

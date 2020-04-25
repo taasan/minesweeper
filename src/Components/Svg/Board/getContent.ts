@@ -7,41 +7,18 @@ import {
   randomInt,
 } from '../../../Game';
 import { NumeralSystem } from '../../../lib';
-import { Content, SvgSymbolKey } from '../../../graphics';
+import {
+  Content,
+  DISARMED_MINE,
+  EXPLODED_MINE,
+  MINES,
+  MISPLACED_FLAG,
+  SvgSymbolKey,
+  UNCERTAIN_FLAG,
+  UNFLAGGED_MINE,
+  getFlag,
+} from '../../../graphics';
 import getSymbol from '../../../graphics/noto-emoji';
-
-const MINES = Object.freeze([
-  '🤒',
-  '😷',
-  '🤮',
-  '🤢',
-  '🤡',
-  '🧟',
-  '🤥',
-  '🤕',
-  '🤧',
-  '👻',
-  '🥵',
-  '🥶',
-  '👹',
-  '👺',
-  '🦠',
-]);
-
-const FLAG = '☣️';
-const UNCERTAIN_FLAG = '❓';
-const UNFLAGGED_MINE = '🥺';
-const MISPLACED_FLAG = '💩';
-const NATIONAL_FLAG = '🇳🇴';
-
-export const DISARMED_MINE = '🥰';
-export const EXPLODED_MINE = '💀';
-
-export const getFlag = () => {
-  const today = new Date();
-  const isMay17 = today.getDate() === 17 && today.getMonth() === 4;
-  return isMay17 ? NATIONAL_FLAG : FLAG;
-};
 
 export function getContent(
   state: CellState,
