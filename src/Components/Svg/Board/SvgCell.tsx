@@ -5,7 +5,7 @@ import { CellState, GridType, NumThreats, assertNever } from '../../../Game';
 import { CmdAction } from '../../../store';
 import { onContextMenu } from '../..';
 import useAsyncDispatch from '../../../Hooks/useAsyncDispatch';
-import { Content, isSvgSymbol } from '../../../graphics';
+import { Content, isSvgDataHref, isSvgSymbol } from '../../../graphics';
 
 type CellRecordProps = {
   coordinate: number;
@@ -144,7 +144,7 @@ const Text = React.memo(
       const size = (cellSize * 2) / 3;
       const center = cellSize / 2;
       const ix = center - size / 2;
-      return props.content.href.startsWith('data:') ? (
+      return isSvgDataHref(props.content) ? (
         <use
           href={`#${props.content.key}`}
           className="ct"

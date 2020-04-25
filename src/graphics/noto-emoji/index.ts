@@ -1,4 +1,4 @@
-import { Content, SvgSymbolKey } from '..';
+import { SvgDataHref, SvgSymbolKey } from '..';
 
 import emoji_u1f1f3 from './emoji_u1f1f3';
 import emoji_u1f479 from './emoji_u1f479';
@@ -55,13 +55,15 @@ Object.keys(symbols).forEach(key => {
 export default Object.freeze(symbols) as SvgSymbolMap;
 */
 
-export default function getContent(key: SvgSymbolKey): Content | SvgSymbolKey {
-  const href = SYMBOLS[key];
-  if (href == null) {
+export default function getContent(
+  key: SvgSymbolKey
+): SvgDataHref | SvgSymbolKey {
+  const data = SYMBOLS[key];
+  if (data == null) {
     return key;
   }
   return {
     key,
-    href,
+    data,
   };
 }
