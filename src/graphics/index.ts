@@ -61,7 +61,10 @@ export function getContent(
 
 export function isSvgDataHref(c?: SvgHref | SvgDataHref): c is SvgDataHref {
   c = c as SvgDataHref | undefined;
-  return typeof c?.data === 'string' && c.data.startsWith('data:');
+  return (
+    typeof c?.data === 'string' &&
+    c.data.startsWith('data:image/svg+xml;base64')
+  );
 }
 
 export function isSvgHref(c?: SvgHref | SvgDataHref): c is SvgDataHref {
