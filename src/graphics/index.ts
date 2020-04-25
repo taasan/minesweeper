@@ -72,13 +72,15 @@ export function isSvgHref(c?: SvgHref | SvgDataHref): c is SvgDataHref {
   return typeof c?.href === 'string';
 }
 
-export function isSvgSymbol(c?: Content): c is SvgSymbol {
+export function isSvgSymbol(c: Content): c is SvgSymbol {
+  if (c == null) {
+    return false;
+  }
   return (
-    c != null &&
     typeof c !== 'string' &&
     !isNumThreats(c) &&
     typeof c === 'object' &&
-    (c == null || isSvgDataHref(c) || isSvgHref(c))
+    (isSvgDataHref(c) || isSvgHref(c))
   );
 }
 

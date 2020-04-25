@@ -140,7 +140,7 @@ const Text = React.memo(
       ...props,
       content: undefined,
     };
-    if (isSvgSymbol(props.content)) {
+    if (props.content != null && isSvgSymbol(props.content)) {
       const size = (cellSize * 2) / 3;
       const center = cellSize / 2;
       const ix = center - size / 2;
