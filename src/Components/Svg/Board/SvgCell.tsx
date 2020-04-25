@@ -144,7 +144,16 @@ const Text = React.memo(
       const size = (cellSize * 2) / 3;
       const center = cellSize / 2;
       const ix = center - size / 2;
-      return (
+      return props.content.href.startsWith('data:') ? (
+        <use
+          href={`#${props.content.key}`}
+          className="ct"
+          x={ix}
+          y={ix}
+          width={size}
+          height={size}
+        />
+      ) : (
         <image
           className="ct"
           x={ix}

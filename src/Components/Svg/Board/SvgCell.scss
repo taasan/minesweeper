@@ -232,8 +232,9 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
       $name: shake_rotated;
     }
 
-    &[data-r='#{$rotated}'] .c {
+    .SvgBoard[data-r='#{$rotated}'] .c {
       &[data-s='#{$EXPLODED}'] {
+        use.ct,
         image.ct,
         text.ct[role='img'] {
           //animation: EXPLODED-animation 1 2s cubic-bezier(0.95, 0.05, 0.795, 0.035);
