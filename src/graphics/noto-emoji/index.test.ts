@@ -1,23 +1,35 @@
-import symbols, { SvgSymbolKey, isSvgDataHref } from '..';
-import getSymbol, { SYMBOLS } from '.';
+import symbols, { SvgSymbolKey, isSvgHref } from '..';
+import getSymbol from '.';
+import { readFileSync } from 'fs';
 
 const keys = [...Object.getOwnPropertyNames(symbols)].filter(
   s => s !== '\u0000'
 ) as SvgSymbolKey[];
 
-keys.forEach(s => {
-  test(`has symbol ${s}`, () => {
-    const res = getSymbol(s);
-    expect(isSvgDataHref(res)).toBe(true);
-  });
-});
+const svg = './symbols.svg';
 
-const notoKeys = [...Object.getOwnPropertyNames(SYMBOLS)].filter(
-  s => s !== '\u0000'
+const parser = new DOMParser();
+const xmlString = readFileSync(`${__dirname}/${svg}`, {
+  encoding: 'utf8',
+});
+const doc = parser.parseFromString(xmlString, 'image/svg+xml');
+
+const notoKeys = [...doc.querySelectorAll('symbol')].map(
+  e => e.id
 ) as SvgSymbolKey[];
 
 notoKeys.forEach(s => {
   test(`${s} is valid symbol`, () => {
     expect(keys.includes(s)).toBe(true);
+  });
+});
+
+keys.forEach(s => {
+  test(`getSymbol ${s} is svg href`, () => {
+    const res = getSymbol(s);
+    expect(isSvgHref(res)).toBe(true);
+  });
+  test(`has symbol ${s}`, () => {
+    expect(notoKeys.includes(s)).toBe(true);
   });
 });

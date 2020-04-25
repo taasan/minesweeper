@@ -61,6 +61,7 @@ export type SvgSymbolMap = {
 export type SvgHref = {
   key: SvgSymbolKey;
   href: string;
+  external: boolean;
 };
 
 export type SvgDataHref = {
@@ -81,21 +82,19 @@ export function getContent(
 }
 
 export function isSvgDataHref(
-  c?: SvgHref | SvgDataHref | string
+  c: SvgHref | SvgDataHref | string
 ): c is SvgDataHref {
-  if (typeof c !== 'object') {
+  if (c == null || typeof c !== 'object') {
     return false;
   }
-  c = c as SvgDataHref | undefined;
+  c = c as SvgDataHref;
   return (
-    typeof c?.data === 'string' &&
+    typeof c.data === 'string' &&
     c.data.startsWith('data:image/svg+xml;base64,')
   );
 }
 
-export function isSvgHref(
-  c?: SvgHref | SvgDataHref | string
-): c is SvgDataHref {
+export function isSvgHref(c?: SvgHref | SvgDataHref | string): c is SvgHref {
   if (typeof c !== 'object') {
     return false;
   }

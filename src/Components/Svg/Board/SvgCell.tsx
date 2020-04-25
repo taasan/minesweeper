@@ -5,7 +5,12 @@ import { CellState, GridType, NumThreats, assertNever } from '../../../Game';
 import { CmdAction } from '../../../store';
 import { onContextMenu } from '../..';
 import useAsyncDispatch from '../../../Hooks/useAsyncDispatch';
-import { Content, isSvgDataHref, isSvgSymbol } from '../../../graphics';
+import {
+  Content,
+  isSvgDataHref,
+  isSvgHref,
+  isSvgSymbol,
+} from '../../../graphics';
 
 type CellRecordProps = {
   coordinate: number;
@@ -140,13 +145,26 @@ const Text = React.memo(
       ...props,
       content: undefined,
     };
-    if (props.content != null && isSvgSymbol(props.content)) {
+    const { content } = props;
+    if (content != null && isSvgSymbol(content)) {
       const size = (cellSize * 2) / 3;
       const center = cellSize / 2;
       const ix = center - size / 2;
-      return isSvgDataHref(props.content) ? (
+      if (isSvgHref(content) && !content.external) {
+        return (
+          <image
+            className="ct"
+            x={ix}
+            y={ix}
+            width={size}
+            height={size}
+            href={content.href}
+          />
+        );
+      }
+      return isSvgDataHref(content) ? (
         <use
-          href={`#${props.content.key}`}
+          href={`#${content.key}`}
           className="ct"
           x={ix}
           y={ix}
@@ -154,13 +172,13 @@ const Text = React.memo(
           height={size}
         />
       ) : (
-        <image
+        <use
+          href={`${content.href}`}
           className="ct"
           x={ix}
           y={ix}
           width={size}
           height={size}
-          href={props.content.href}
         />
       );
     }
@@ -175,7 +193,7 @@ const Text = React.memo(
         fontSize={cellSize / 2}
         {...domProps}
       >
-        {props.content}
+        {content}
       </text>
     );
   }
