@@ -1,28 +1,28 @@
 import { NumThreats, isNumThreats } from '../Game';
 
 const componentMap = Object.freeze({
-  '🤒': null,
-  '😷': null,
-  '🤮': null,
-  '🤢': null,
-  '🤡': null,
-  '🧟': null,
-  '🤥': null,
-  '🤕': null,
-  '🤧': null,
-  '👻': null,
-  '🥵': null,
-  '🥶': null,
-  '👹': null,
-  '👺': null,
-  '🦠': null,
-  '🇳🇴': null,
-  '☣️': null,
-  '❓': null,
-  '🥺': null,
-  '💩': null,
-  '🥰': null,
-  '💀': null,
+  '🤒': null, // Mine
+  '😷': null, // Mine
+  '🤮': null, // Mine
+  '🤢': null, // Mine
+  '🤡': null, // Mine
+  '🧟': null, // Mine
+  '🤥': null, // Mine
+  '🤕': null, // Mine
+  '🤧': null, // Mine
+  '👻': null, // Mine
+  '🥵': null, // Mine
+  '🥶': null, // Mine
+  '👹': null, // Mine
+  '👺': null, // Mine
+  '🦠': null, // Mine
+  '🇳🇴': null, // National flag
+  '☣️': null, // Flag
+  '❓': null, // Flag uncertain
+  '🥺': null, // Not flagged at game completed
+  '💩': null, // Flagged incorrectly (at game over)
+  '🥰': null, // Flagged and mined at game completed / game over
+  '💀': null, // Exploded mine
 });
 
 export type SvgComponent = React.FunctionComponent<
