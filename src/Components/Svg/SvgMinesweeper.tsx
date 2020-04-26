@@ -71,15 +71,13 @@ const SvgMinesweeper: React.FC<IProps> = () => {
   const modal = modalStack[modalStack.length - 1];
   React.useEffect(
     () =>
-      registerEvent(
-        'keyup',
-        (e: KeyboardEvent) =>
-          e.keyCode === 80 &&
-          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      registerEvent('keyup', (e: KeyboardEvent) => {
+        if (e.keyCode === 80) {
           dispatch({
             type: board.state === GameState.PLAYING ? 'PAUSE' : 'UNPAUSE',
-          })
-      ),
+          });
+        }
+      }),
 
     [board.state, containerRef]
   );
@@ -99,15 +97,6 @@ const SvgMinesweeper: React.FC<IProps> = () => {
     return registerEvent('blur', () => {
       dispatch({ type: 'PAUSE' });
     });
-    /*
-    window.onblur = () =>
-      board.state === GameState.PLAYING
-        ? dispatch({ type: 'TOGGLE_PAUSE' })
-        : undefined;
-    return () => {
-      window.onblur = null;
-    };
-    */
   }, []);
 
   const closeModal = () => dispatch({ type: 'closeModal' });
