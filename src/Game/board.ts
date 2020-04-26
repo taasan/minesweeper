@@ -33,7 +33,7 @@ export type Level = Grid & {
 };
 
 export type GameRecord = {
-  cells: Map<number, CellRecord>;
+  cells: Array<CellRecord>;
   state: GameState;
   level: Readonly<Level>;
   cellStates: CellStateStats;
@@ -49,23 +49,23 @@ export const getCell = (
   }:
     | {
         level: Level;
-        cells: [number, CellRecord][] | Map<number, CellRecord>;
+        cells: [number, CellRecord][] | Array<CellRecord>;
       }
     | GameRecord,
   coordinate: Coordinate
 ): CellRecord => {
-  if (Array.isArray(cells)) {
-    const { row, col } = calculateCoordinate(level.cols, coordinate);
-    return cells[row][col] as CellRecord;
+  if (typeof cells[0] !== 'number') {
+    return cells[calculateIndex(level, coordinate)] as CellRecord;
   }
-  return cells.get(calculateIndex(level, coordinate))!;
+  const { row, col } = calculateCoordinate(level.cols, coordinate);
+  return (cells[row] as CellRecord[])[col] as CellRecord;
 };
 
 export const setCell = (
   board: GameRecord,
   coordinate: Coordinate,
   cell: CellRecord
-): ReadonlyMap<number, CellRecord> =>
+): ReadonlyArray<CellRecord> =>
   produce(board.cells, draft => {
-    draft.set(calculateIndex(board.level, coordinate), cell);
+    draft[calculateIndex(board.level, coordinate)] = cell;
   });

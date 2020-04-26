@@ -161,7 +161,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
       };
     };
 
-    const mapCell = ([coordinate, cell]: [Coordinate, CellRecord]) => {
+    const mapCell = (cell: CellRecord, coordinate: Coordinate) => {
       const { row, col } =
         typeof coordinate === 'number'
           ? calculateCoordinate(cols, coordinate)
@@ -179,14 +179,14 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
       const additional: JSX.Element[] = [];
       if (topology === Topology.TORUS) {
         if (col === 0) {
-          additional.push(mapCell([{ row, col: cols }, cell]));
+          additional.push(mapCell(cell, { row, col: cols }));
         } else if (col === cols - 1) {
-          additional.push(mapCell([{ row, col: -1 }, cell]));
+          additional.push(mapCell(cell, { row, col: -1 }));
         }
         if (row === 0) {
-          additional.push(mapCell([{ col, row: rows }, cell]));
+          additional.push(mapCell(cell, { col, row: rows }));
         } else if (row === rows - 1) {
-          additional.push(mapCell([{ col, row: -1 }, cell]));
+          additional.push(mapCell(cell, { col, row: -1 }));
         }
       }
       const jsx = (

@@ -42,7 +42,7 @@ const createCellStateStats = (
 
 export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
   produce(game, draft => ({
-    cells: new Map(),
+    cells: [],
     state: GameState.NOT_INITIALIZED,
     level: createLevel(),
     cellStates: createCellStateStats(),
@@ -52,44 +52,30 @@ export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
     ...draft,
   }));
 
-type BoardEntry = [number, CellRecord];
-
-function getCellStates(
-  cells: Map<number, CellRecord> | BoardEntry[]
-): CellStateStats {
+function getCellStates(cells: Array<CellRecord>): CellStateStats {
   const reducer: (
     result: CellStateStats,
-    entry: BoardEntry
-  ) => CellStateStats = (result, [, item]) => ({
+    entry: CellRecord
+  ) => CellStateStats = (result, item) => ({
     ...result,
     [item.state]: result[item.state] + 1,
   });
-  const entries = Array.isArray(cells) ? cells : [...cells.entries()];
 
   return createCellStateStats(
-    entries.reduce(reducer, { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 })
+    cells.reduce(reducer, { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 })
   );
 }
 
-function createEmptyCells({ cols, rows }: Level): Array<[number, CellRecord]> {
-  const cells: Array<[number, CellRecord]> = [];
+function createEmptyCells({ cols, rows }: Level): Array<CellRecord> {
+  const cells: Array<CellRecord> = [];
   const dim = rows * cols;
   for (let i = 0; i < dim; i++) {
-    cells.push([
-      i,
-      {
-        state: CellState.NEW,
-        threatCount: 0,
-      },
-    ]);
+    cells[i] = {
+      state: CellState.NEW,
+      threatCount: 0,
+    };
   }
   return cells;
-}
-
-function mapFromEntries<K, V>(entries: [K, V][]) {
-  const map: Map<K, V> = new Map();
-  entries.forEach(([k, v]) => map.set(k, v));
-  return map;
 }
 
 function initialize(
@@ -113,12 +99,12 @@ function initialize(
     const coordinate = randomInt(dim);
     if (!mineSet.has(coordinate)) {
       mineSet.add(coordinate);
-      cells[coordinate][1].threatCount = 0xff;
+      cells[coordinate].threatCount = 0xff;
     }
   }
 
-  const cellRecords = mapFromEntries<number, CellRecord>(cells);
-  cells.forEach(([coord, cell]) => {
+  const cellRecords = [...cells];
+  cells.forEach((cell, coord) => {
     cell.threatCount = countThreats({ level, cells: cellRecords }, coord);
   });
 
@@ -144,7 +130,7 @@ function updateCell(
       `Expected ${newCell.threatCount}, got ${oldCell?.threatCount}`
     );
   }
-  board.cells.set(calculateIndex(board.level, coordinate), newCell);
+  board.cells[calculateIndex(board.level, coordinate)] = newCell;
 }
 
 function countThreats(
@@ -377,7 +363,7 @@ function toggleOpen(coordinate: Coordinate, board: GameRecord): void {
         c.state = CellState.OPEN;
         if (c.threatCount === 0) {
           getNeighbours(board.level, coord).forEach(cc => {
-            const cr = board.cells.get(cc)!;
+            const cr = board.cells[cc]!;
             if (predicate(cr)) {
               visitor([cc, cr]);
             }
@@ -498,7 +484,7 @@ export function createGame(
     return {
       board: createBoard({
         level: createLevel(level),
-        cells: new Map(),
+        cells: [],
         onGameOver,
         state: GameState.ERROR,
         error: Object.freeze(new ValidationError('Invalid level', errors)),
@@ -507,9 +493,7 @@ export function createGame(
     };
   }
 
-  const cells = mapFromEntries(
-    createEmptyCells(level).map(([pos, cell]) => [pos, createGameCell(cell)])
-  );
+  const cells = createEmptyCells(level).map(createGameCell);
 
   const func: NextStateFunction = (cmd, [coordinate, game]) => {
     try {
@@ -593,7 +577,7 @@ export const legend: () => {
 
   const cols = 4;
   const board = createBoard({
-    cells: mapFromEntries(cells.map((c, i) => [i, c])),
+    cells,
     level: createLevel({
       cols,
       rows: Math.ceil(cells.length / cols),
