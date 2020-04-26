@@ -32,7 +32,7 @@ const componentMap = {
   '👹': null, // Mine
   '👺': null, // Mine
   '🦠': null, // Mine
-  '\u0000': null, // Separator
+  '\0': null, // Separator
   [NATIONAL_FLAG]: null, // National flag
   [FLAG]: null, // Flag
   [UNCERTAIN_FLAG]: null, // Flag uncertain
@@ -43,7 +43,7 @@ const componentMap = {
 };
 
 export const MINES = Object.freeze(
-  _.takeWhile(Object.keys(componentMap), e => e !== '\u0000')
+  _.takeWhile(Object.keys(componentMap), e => e !== '\0')
 );
 
 export type SvgComponent = React.FunctionComponent<
@@ -52,7 +52,7 @@ export type SvgComponent = React.FunctionComponent<
   }
 >;
 
-export type SvgSymbolKey = Exclude<keyof typeof componentMap, '\u0000'>;
+export type SvgSymbolKey = Exclude<keyof typeof componentMap, '\0'>;
 
 export type SvgSymbolMap = {
   [key in SvgSymbolKey]: SvgSymbol | null;
