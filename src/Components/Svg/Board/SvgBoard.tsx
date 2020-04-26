@@ -52,6 +52,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
     const { dispatch, board, style } = props;
     const { numeralSystem } = React.useContext(NumeralSystemContext);
     const boardState = board.state;
+
     switch (board.state) {
       case GameState.ERROR:
         const error =
@@ -188,6 +189,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           additional.push(mapCell(cell, { col, row: -1 }));
         }
       }
+
       const jsx = (
         <SvgCell
           coordinate={calculateIndex(

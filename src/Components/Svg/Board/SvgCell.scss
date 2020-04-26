@@ -33,6 +33,9 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
 }
 
 @function removeCover($gameState, $cellState) {
+  @if (contains($flagTypes, $cellState)) {
+    @return false;
+  }
   @if ($gameState == $PAUSED) {
     @return false;
   }
@@ -205,7 +208,11 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
   }
 }
 
-.SvgBoard[data-s='#{$GAME_OVER}'] .c[data-s='#{$FLAGGED}']:not([data-m]) .cb {
+.SvgBoard[data-s='#{$GAME_OVER}'] .c[data-s='#{$FLAGGED}']:not([data-m]) .cc {
+  fill: var(--cell-background-flagged-wrong, revert);
+}
+
+.SvgBoard[data-s='#{$DEMO}'] .c[data-s='#{$FLAGGED}']:not([data-m]) .cc {
   fill: var(--cell-background-flagged-wrong, revert);
 }
 
