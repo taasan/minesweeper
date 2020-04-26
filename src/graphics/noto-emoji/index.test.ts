@@ -1,9 +1,9 @@
-import symbols, { SvgSymbolKey, isSvgHref } from '..';
+import symbols, { NATIONAL_FLAG, SvgSymbolKey, isSvgHref } from '..';
 import getSymbol from '.';
 import { readFileSync } from 'fs';
 
 const keys = [...Object.getOwnPropertyNames(symbols)].filter(
-  s => s !== '\u0000'
+  s => s !== '\0' && s !== NATIONAL_FLAG
 ) as SvgSymbolKey[];
 
 const svg = './symbols.svg';
