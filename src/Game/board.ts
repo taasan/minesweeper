@@ -1,5 +1,5 @@
 import produce, { immerable } from 'immer';
-import { Coordinate, calculateCoordinate, calculateIndex } from './coordinate';
+import { Coordinate, calculateIndex } from './coordinate';
 import { CellRecord, CellStateStats } from './cell';
 import { Grid } from './grid';
 
@@ -49,16 +49,12 @@ export const getCell = (
   }:
     | {
         level: Level;
-        cells: [number, CellRecord][] | Array<CellRecord>;
+        cells: Array<CellRecord>;
       }
     | GameRecord,
   coordinate: Coordinate
 ): CellRecord => {
-  if (typeof cells[0] !== 'number') {
-    return cells[calculateIndex(level, coordinate)] as CellRecord;
-  }
-  const { row, col } = calculateCoordinate(level.cols, coordinate);
-  return (cells[row] as CellRecord[])[col] as CellRecord;
+  return cells[calculateIndex(level, coordinate)] as CellRecord;
 };
 
 export const setCell = (

@@ -1,6 +1,12 @@
 import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
-import { CellRecord, CellState, GridType, assertNever } from '../../../Game';
+import {
+  CellRecord,
+  CellState,
+  GridType,
+  assertNever,
+  toObject,
+} from '../../../Game';
 
 import { CmdAction } from '../../../store';
 import { onContextMenu } from '../..';
@@ -33,7 +39,7 @@ const SvgCell: FC<CellRecordProps> = props => {
     done,
   } = props;
 
-  const { state, threatCount, mine } = cell;
+  const { state, threatCount, mine } = toObject(cell);
   const dispatch = useAsyncDispatch(_dispatch, {
     // onfulfilled: action => console.log('fulfilled', { action }),
     onrejected: (action, err) => console.error('rejected', { action, err }),
@@ -82,7 +88,7 @@ const SvgCell: FC<CellRecordProps> = props => {
           </>
         );
       case CellState.OPEN:
-        if (mine === 0 && threatCount === 0) {
+        if (mine === undefined && threatCount === 0) {
           return undefined;
         }
       // eslint-disable-next-line no-fallthrough
@@ -104,8 +110,8 @@ const SvgCell: FC<CellRecordProps> = props => {
       onMouseDown={handleClick}
       onContextMenu={handleContextMenu}
       data-s={state}
-      data-t={threatCount !== 0 && mine === 0 ? threatCount : undefined}
-      data-m={mine !== 0 ? true : undefined}
+      data-t={threatCount !== 0 && mine === undefined ? threatCount : undefined}
+      data-m={mine !== undefined ? true : undefined}
     >
       <use href={`#${GridType[gridType]}`} className="cb" />
       {render()}

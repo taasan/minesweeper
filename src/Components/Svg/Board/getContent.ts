@@ -4,6 +4,8 @@ import {
   GameState,
   NumThreats,
   isNumThreats,
+  setState,
+  toObject,
 } from '../../../Game';
 import { NumeralSystem } from '../../../lib';
 import {
@@ -24,11 +26,12 @@ export function getContent(
   gameState: GameState,
   numeralSystem: NumeralSystem
 ): Content {
-  const { mine, threatCount: threats, state } = cell;
+  const { state, mine, threatCount } = toObject(cell);
   if (state === CellState.EXPLODED) {
     return getSymbol(EXPLODED_MINE);
   }
-  const isMined = mine !== 0;
+
+  const isMined = mine !== undefined;
   const gameWon = gameState === GameState.COMPLETED;
   const gameOver = gameState === GameState.GAME_OVER;
   const demo = gameState === GameState.DEMO;
@@ -41,12 +44,12 @@ export function getContent(
   if (isDisarmed) {
     return getSymbol(DISARMED_MINE);
   }
-  if ((gameOver || state === CellState.OPEN) && isMined) {
+  if ((gameOver || state === CellState.OPEN) && mine !== undefined) {
     return getSymbol(MINES[mine] as SvgSymbolKey);
   }
   if (gameState === GameState.COMPLETED) {
     return getContent(
-      { state: CellState.OPEN, ...cell },
+      setState(cell, CellState.OPEN),
       GameState.PLAYING,
       numeralSystem
     );
@@ -59,8 +62,8 @@ export function getContent(
     case CellState.UNCERTAIN:
       return getSymbol(UNCERTAIN_FLAG);
     case CellState.OPEN:
-      return isNumThreats(threats)
-        ? renderThreats(numeralSystem, threats)
+      return isNumThreats(threatCount)
+        ? renderThreats(numeralSystem, threatCount)
         : '\u00A0';
     default:
       return '\u00A0';

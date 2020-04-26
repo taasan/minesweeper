@@ -7,6 +7,7 @@ import {
   MAX_LEVEL,
   MIN_LEVEL,
   Topology,
+  fromObject,
   maxMines,
   minMines,
 } from '../Game';
@@ -269,11 +270,11 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
                   >
                     {' '}
                     <SvgCell
-                      cell={{
+                      cell={fromObject({
                         state,
                         threatCount: 2,
-                        mine: 0,
-                      }}
+                        mine: undefined,
+                      })}
                       content={content}
                       coordinate={0}
                       gridType={(GridType[name as any] as unknown) as GridType}
