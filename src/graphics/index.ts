@@ -52,7 +52,7 @@ export type SvgComponent = React.FunctionComponent<
   }
 >;
 
-export type SvgSymbolKey = keyof Exclude<typeof componentMap, '\u0000'>;
+export type SvgSymbolKey = Exclude<keyof typeof componentMap, '\u0000'>;
 
 export type SvgSymbolMap = {
   [key in SvgSymbolKey]: SvgSymbol | null;
