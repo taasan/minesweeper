@@ -18,6 +18,7 @@ import {
 } from './cell';
 import { Grid, GridType, Topology, getNeighbourMatrix } from './grid';
 import produce from 'immer';
+import _ from 'lodash';
 
 const createLevel = (level?: Partial<Level>) =>
   Object.freeze({
@@ -52,19 +53,8 @@ export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
     ...draft,
   }));
 
-function getCellStates(cells: Array<CellRecord>): CellStateStats {
-  const reducer: (
-    result: CellStateStats,
-    entry: CellRecord
-  ) => CellStateStats = (result, item) => ({
-    ...result,
-    [item.state]: result[item.state] + 1,
-  });
-
-  return createCellStateStats(
-    cells.reduce(reducer, { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 })
-  );
-}
+const getCellStates = (cells: Array<CellRecord>) =>
+  createCellStateStats(_.countBy(cells, cell => cell.state));
 
 function createEmptyCells({ cols, rows }: Level): Array<CellRecord> {
   const cells: Array<CellRecord> = [];
