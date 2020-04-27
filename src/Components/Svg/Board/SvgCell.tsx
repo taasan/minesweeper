@@ -1,6 +1,6 @@
 import React, { Dispatch, FC, MouseEvent, memo } from 'react';
 import './SvgCell.scss';
-import { CellState, GridType, NumThreats, assertNever } from '../../../Game';
+import { CellRecord, CellState, GridType, assertNever } from '../../../Game';
 
 import { CmdAction } from '../../../store';
 import { onContextMenu } from '../..';
@@ -17,26 +17,23 @@ type CellRecordProps = {
   gridType: GridType;
   dispatch?: Dispatch<CmdAction>;
   content: Content;
-  state: CellState;
-  threats?: NumThreats;
-  mined: boolean;
   done?: boolean;
+  cell: CellRecord;
 };
 
 export const cellSize = 33;
 
 const SvgCell: FC<CellRecordProps> = props => {
   const {
+    cell,
     dispatch: _dispatch,
-    state,
     coordinate,
-    threats,
     content,
-    mined,
     gridType,
     done,
   } = props;
 
+  const { state, threatCount, mine } = cell;
   const dispatch = useAsyncDispatch(_dispatch, {
     // onfulfilled: action => console.log('fulfilled', { action }),
     onrejected: (action, err) => console.error('rejected', { action, err }),
@@ -85,15 +82,14 @@ const SvgCell: FC<CellRecordProps> = props => {
           </>
         );
       case CellState.OPEN:
+        if (mine === 0 && threatCount === 0) {
+          return undefined;
+        }
+      // eslint-disable-next-line no-fallthrough
       case CellState.EXPLODED:
         return (
           <>
-            <Text
-              role={role}
-              content={
-                state === CellState.OPEN && threats === 0 ? undefined : content
-              }
-            />
+            <Text role={role} content={content} />
             {cover}
           </>
         );
@@ -108,8 +104,8 @@ const SvgCell: FC<CellRecordProps> = props => {
       onMouseDown={handleClick}
       onContextMenu={handleContextMenu}
       data-s={state}
-      data-t={threats}
-      data-m={mined ? true : undefined}
+      data-t={threatCount !== 0 && mine === 0 ? threatCount : undefined}
+      data-m={mine !== 0 ? true : undefined}
     >
       <use href={`#${GridType[gridType]}`} className="cb" />
       {render()}

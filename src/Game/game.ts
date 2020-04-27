@@ -89,7 +89,7 @@ function initialize(
     const coordinate = randomInt(dim);
     if (!mineSet.has(coordinate)) {
       mineSet.add(coordinate);
-      cells[coordinate].threatCount = 0xff;
+      cells[coordinate].mine = (randomInt(14) + 1) as Mine;
     }
   }
 
@@ -128,14 +128,11 @@ function countThreats(
     | Pick<GameRecord, 'level' | 'cells'>
     | { level: Level; cells: [number, CellRecord][] },
   p: Coordinate
-): NumThreats | Mine {
-  if (getCell(board, p)?.threatCount === 0xff) {
-    return 0xff;
-  }
+): NumThreats {
   let threats: NumThreats = 0;
   visitNeighbours(board.level, p, coordinate => {
     const cell = getCell(board, coordinate)!;
-    if (cell.threatCount === 0xff) {
+    if (cell.mine !== 0) {
       threats++;
     }
   });
@@ -329,8 +326,7 @@ function toggleOpen(coordinate: Coordinate, board: GameRecord): void {
   switch (cell.state) {
     case CellState.NEW:
     case CellState.UNCERTAIN:
-      newState =
-        cell.threatCount === 0xff ? CellState.EXPLODED : CellState.OPEN;
+      newState = cell.mine !== 0 ? CellState.EXPLODED : CellState.OPEN;
       break;
     case CellState.EXPLODED:
       return;
@@ -341,13 +337,13 @@ function toggleOpen(coordinate: Coordinate, board: GameRecord): void {
 
   updateCell(board, [coordinate, { ...cell, state: newState }]);
 
-  if (cell.threatCount === 0) {
+  if (cell.threatCount === 0 && newState !== CellState.EXPLODED) {
     const predicate = (cellRecord: CellRecord) =>
       cellRecord.state === CellState.NEW ||
       cellRecord.state === CellState.UNCERTAIN;
     const visitor = ([coord, c]: [Coordinate, CellRecord]) => {
-      if (c.threatCount === 0xff) {
-        throw new Error(`Expected 0-8 threatCount, got ${c.threatCount}`);
+      if (c.mine !== 0) {
+        throw new Error('Expected safe cell');
       }
       if (predicate(c)) {
         c.state = CellState.OPEN;
@@ -541,7 +537,7 @@ export const legend: () => {
 
     {
       state: CellState.FLAGGED,
-      threatCount: 0xff,
+      mine: 1,
     },
     {
       state: CellState.FLAGGED,
@@ -549,7 +545,7 @@ export const legend: () => {
     },
     {
       state: CellState.UNCERTAIN,
-      threatCount: 0xff,
+      mine: 2,
     },
     {
       state: CellState.UNCERTAIN,
@@ -557,11 +553,11 @@ export const legend: () => {
     },
     {
       state: CellState.EXPLODED,
-      threatCount: 0xff,
+      mine: 3,
     },
     {
       state: CellState.OPEN,
-      threatCount: 0xff,
+      mine: 4,
     },
   ] as CellRecord[]).map(createGameCell);
 

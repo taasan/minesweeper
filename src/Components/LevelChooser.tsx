@@ -269,11 +269,13 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
                   >
                     {' '}
                     <SvgCell
-                      threats={2}
+                      cell={{
+                        state,
+                        threatCount: 2,
+                        mine: 0,
+                      }}
                       content={content}
                       coordinate={0}
-                      mined={false}
-                      state={state}
                       gridType={(GridType[name as any] as unknown) as GridType}
                     />
                   </div>

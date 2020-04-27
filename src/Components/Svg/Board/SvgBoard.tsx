@@ -11,7 +11,6 @@ import {
   assertNever,
   calculateCoordinate,
   calculateIndex,
-  isNumThreats,
 } from '../../../Game';
 import { Dispatch } from 'react';
 import { CmdAction } from '../../../store';
@@ -197,17 +196,8 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           )}
           gridType={board.level.type}
           dispatch={dispatch}
-          content={getContent(
-            cell.state,
-            cell.threatCount,
-            boardState,
-            numeralSystem
-          )}
-          state={cell.state}
-          threats={
-            isNumThreats(cell.threatCount) ? cell.threatCount : undefined
-          }
-          mined={cell.threatCount === 0xff}
+          content={getContent(cell, boardState, numeralSystem)}
+          cell={cell}
           done={done}
         />
       );

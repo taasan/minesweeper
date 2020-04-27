@@ -1,10 +1,9 @@
 import {
+  CellRecord,
   CellState,
   GameState,
-  Mine,
   NumThreats,
   isNumThreats,
-  randomInt,
 } from '../../../Game';
 import { NumeralSystem } from '../../../lib';
 import {
@@ -21,16 +20,15 @@ import {
 import getSymbol from '../../../graphics/noto-emoji';
 
 export function getContent(
-  state: CellState,
-  threats: NumThreats | Mine,
+  cell: CellRecord,
   gameState: GameState,
   numeralSystem: NumeralSystem
 ): Content {
+  const { mine, threatCount: threats, state } = cell;
   if (state === CellState.EXPLODED) {
     return getSymbol(EXPLODED_MINE);
   }
-
-  const isMined = threats === 0xff;
+  const isMined = mine !== 0;
   const gameWon = gameState === GameState.COMPLETED;
   const gameOver = gameState === GameState.GAME_OVER;
   const demo = gameState === GameState.DEMO;
@@ -43,13 +41,12 @@ export function getContent(
   if (isDisarmed) {
     return getSymbol(DISARMED_MINE);
   }
-  if ((gameOver || state === CellState.OPEN) && threats === 0xff) {
-    return getSymbol(MINES[randomInt(MINES.length)] as SvgSymbolKey);
+  if ((gameOver || state === CellState.OPEN) && isMined) {
+    return getSymbol(MINES[mine] as SvgSymbolKey);
   }
   if (gameState === GameState.COMPLETED) {
     return getContent(
-      CellState.OPEN,
-      threats,
+      { state: CellState.OPEN, ...cell },
       GameState.PLAYING,
       numeralSystem
     );
