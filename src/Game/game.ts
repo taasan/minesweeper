@@ -56,17 +56,12 @@ export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
 const getCellStates = (cells: Array<CellRecord>) =>
   createCellStateStats(_.countBy(cells, cell => cell.state));
 
-function createEmptyCells({ cols, rows }: Level): Array<CellRecord> {
-  const cells: Array<CellRecord> = [];
-  const dim = rows * cols;
-  for (let i = 0; i < dim; i++) {
-    cells[i] = {
-      state: CellState.NEW,
-      threatCount: 0,
-    };
-  }
-  return cells;
-}
+const createEmptyCells = ({ cols, rows }: Level): Array<CellRecord> =>
+  [...new Array(rows * cols)].map(() => ({
+    state: CellState.NEW,
+    threatCount: 0,
+    mine: 0,
+  }));
 
 function initialize(
   game: Pick<GameRecord, 'level' | 'onGameOver'>,
