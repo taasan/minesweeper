@@ -4,7 +4,6 @@ import {
   CellRecord,
   CellState,
   GridType,
-  assertNever,
   getMine,
   getState,
   getThreats,
@@ -19,6 +18,7 @@ import {
   isSvgHref,
   isSvgSymbol,
 } from '../../../graphics';
+import { assertNever } from '../../../lib';
 
 type CellRecordProps = {
   coordinate: number;

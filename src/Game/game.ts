@@ -1,12 +1,5 @@
 import log from '../lib/log';
-import {
-  GameError,
-  GameRecord,
-  GameState,
-  Level,
-  assertNever,
-  getCell,
-} from './board';
+import { GameError, GameRecord, GameState, Level, getCell } from './board';
 import { Coordinate, calculateCoordinate, calculateIndex } from './coordinate';
 import {
   CellRecord,
@@ -26,7 +19,7 @@ import {
 import { Grid, GridType, Topology, getNeighbourMatrix } from './grid';
 import produce from 'immer';
 import _ from 'lodash';
-import { zero } from '../lib';
+import { assertNever, zero } from '../lib';
 
 const createLevel = (level?: Partial<Level>) =>
   Object.freeze({

@@ -4,14 +4,13 @@ import {
   Coordinate,
   GameState,
   Level,
-  assertNever,
   calculateCoordinate,
   createGame,
   isCmdName,
 } from '../Game';
 
 import log from '../lib/log';
-import { zero } from '../lib';
+import { assertNever, zero } from '../lib';
 import { IState, TimingEvent } from './context';
 import produce from 'immer';
 import { getFitWindowCss } from '../lib';

@@ -8,7 +8,6 @@ import {
   GridType,
   Topology,
   ValidationError,
-  assertNever,
   calculateCoordinate,
   calculateIndex,
 } from '../../../Game';
@@ -19,7 +18,7 @@ import SvgCell, { cellSize } from './SvgCell';
 import { onContextMenu } from '../..';
 import log from '../../../lib/log';
 import { isEqual } from 'lodash';
-import { hexOffset, hexagonPoints } from '../../../lib';
+import { assertNever, hexOffset, hexagonPoints } from '../../../lib';
 import { NumeralSystemContext } from '../../../store/contexts/settings';
 
 // @ts-ignore

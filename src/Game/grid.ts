@@ -1,4 +1,4 @@
-import { assertNever } from './board';
+import { assertNever } from '../lib';
 
 export enum GridType {
   SQUARE,

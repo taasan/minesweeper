@@ -4,7 +4,6 @@ import {
   CellState,
   GameState,
   Level,
-  assertNever,
   // legend,
 } from '../../Game';
 import ErrorBoundary from '../ErrorBoundary';
@@ -26,7 +25,7 @@ import {
   reducer,
 } from '../../store';
 import { useTheme } from '../../Hooks';
-import { NumeralSystem } from '../../lib';
+import { NumeralSystem, assertNever } from '../../lib';
 import FormatNumber from '../FormatNumber';
 import Timer from '../Timer';
 import SettingsContextProvider, {
