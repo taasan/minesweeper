@@ -3,10 +3,6 @@ import { Coordinate, calculateIndex } from './coordinate';
 import { CellRecord, CellStateStats } from './cell';
 import { Grid } from './grid';
 
-export function assertNever(x: never): never {
-  throw new Error('Unexpected value: ' + x);
-}
-
 export class GameError {
   readonly cause?: Error;
   readonly message: string;
