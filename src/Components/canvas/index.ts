@@ -1,2 +1,2 @@
-export { default as Minesweeper } from './Board';
+export { default as Board } from './Board';
 export * from './Board';
