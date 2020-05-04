@@ -166,8 +166,8 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           ? calculateCoordinate(cols, coordinate)
           : coordinate;
 
-      let x = col * cellSize + ((row & 1) === 1 ? xOffset : 0);
-      let y = row * cellSize * yFactor;
+      const x = col * cellSize + ((row & 1) === 1 ? xOffset : 0);
+      const y = row * cellSize * yFactor;
       /*
       if (rotated) {
         const p = rotate({ x, y });
