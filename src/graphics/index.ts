@@ -94,7 +94,9 @@ export function isSvgDataHref(
   );
 }
 
-export function isSvgHref(c?: SvgHref | SvgDataHref | string): c is SvgHref {
+export function isSvgHref(
+  c?: Content | SvgHref | SvgDataHref | string
+): c is SvgHref {
   if (typeof c !== 'object') {
     return false;
   }

@@ -14,6 +14,7 @@ import {
   Content,
   DISARMED_MINE,
   EXPLODED_MINE,
+  FLAG,
   MINES,
   MISPLACED_FLAG,
   SvgSymbolKey,
@@ -21,13 +22,17 @@ import {
   UNFLAGGED_MINE,
   getFlag,
 } from '../../../graphics';
-import getSymbol from '../../../graphics/noto-emoji';
+import render from '../../../graphics/noto-emoji';
 
 export function getContent(
   cell: CellRecord,
   gameState: GameState,
-  numeralSystem: NumeralSystem
+  numeralSystem: NumeralSystem,
+  getSymbol: typeof render = render
 ): Content {
+  if (gameState === GameState.PAUSED) {
+    return '\u00A0';
+  }
   const state = getState(cell);
   const mine = getMine(cell);
   const threatCount = getThreats(cell);
@@ -41,6 +46,9 @@ export function getContent(
   const demo = gameState === GameState.DEMO;
   const done = gameOver || gameWon || demo;
   const isFlagged = state === CellState.FLAGGED;
+  if (!done && isFlagged) {
+    return getSymbol(FLAG);
+  }
   const isDisarmed = done && isMined && isFlagged && (gameWon || gameOver);
   if (gameWon && isMined && state !== CellState.FLAGGED) {
     return getSymbol(UNFLAGGED_MINE);
@@ -55,7 +63,8 @@ export function getContent(
     return getContent(
       setState(cell, CellState.OPEN),
       GameState.PLAYING,
-      numeralSystem
+      numeralSystem,
+      getSymbol
     );
   }
   switch (state) {
