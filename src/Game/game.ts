@@ -96,16 +96,6 @@ function initialize(
     }
   });
 
-  cellRecords.forEach(c => {
-    const mine = getMine(c);
-    const threats = getThreats(c);
-    if (
-      (mine !== undefined && threats !== undefined) ||
-      (mine === undefined && threats === undefined)
-    ) {
-      throw new Error(`${JSON.stringify({ mine, threats })}`);
-    }
-  });
   return createBoard({
     level: createLevel(level),
     cells: cellRecords,
