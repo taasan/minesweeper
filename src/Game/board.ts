@@ -28,8 +28,10 @@ export type Level = Grid & {
   mines: number;
 };
 
+export type CellArray = Uint16Array;
+
 export type GameRecord = {
-  cells: Array<CellRecord>;
+  cells: CellArray;
   state: GameState;
   level: Readonly<Level>;
   cellStates: CellStateStats;
@@ -45,7 +47,7 @@ export const getCell = (
   }:
     | {
         level: Level;
-        cells: Array<CellRecord>;
+        cells: CellArray;
       }
     | GameRecord,
   coordinate: Coordinate
@@ -57,7 +59,7 @@ export const setCell = (
   board: GameRecord,
   coordinate: Coordinate,
   cell: CellRecord
-): ReadonlyArray<CellRecord> =>
+): CellArray =>
   produce(board.cells, draft => {
     draft[calculateIndex(board.level.cols, coordinate)] = cell;
   });

@@ -1,13 +1,20 @@
 import log from '../lib/log';
-import { GameError, GameRecord, GameState, Level, getCell } from './board';
-import { Coordinate, calculateCoordinate, calculateIndex } from './coordinate';
+import {
+  CellArray,
+  GameError,
+  GameRecord,
+  GameState,
+  Level,
+  getCell,
+} from './board';
+import { Coordinate, calculateIndex } from './coordinate';
 import {
   CellRecord,
+  CellRecordObject,
   CellState,
   CellStateStats,
   Mine,
   NumThreats,
-  //  createGameCell,
   fromObject,
   getMine,
   getState,
@@ -43,8 +50,8 @@ const createCellStateStats = (
 });
 
 export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
-  produce(game, draft => ({
-    cells: [],
+  produce(game, (draft: Partial<GameRecord>) => ({
+    cells: new Uint16Array(),
     state: GameState.NOT_INITIALIZED,
     level: createLevel(),
     cellStates: createCellStateStats(),
@@ -54,11 +61,11 @@ export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
     ...draft,
   }));
 
-const getCellStates = (cells: Array<CellRecord>) =>
+const getCellStates = (cells: CellArray) =>
   createCellStateStats(_.countBy(cells, cell => getState(cell)));
 
-const createEmptyCells = ({ cols, rows }: Level): Array<CellRecord> =>
-  [...new Array(rows * cols)].map(() => setThreats(0, 0xf as NumThreats));
+const createEmptyCells = ({ cols, rows }: Level): CellArray =>
+  new Uint16Array(rows * cols);
 
 function initialize(
   game: Pick<GameRecord, 'level' | 'onGameOver'>,
@@ -81,25 +88,20 @@ function initialize(
     const coordinate = randomInt(dim);
     if (!mineSet.has(coordinate)) {
       mineSet.add(coordinate);
-      cells[coordinate] = setThreats(
-        setMine(cells[coordinate], (randomInt(14) + 1) as Mine),
-        0xf as NumThreats
+      cells[coordinate] = setMine(
+        cells[coordinate],
+        (randomInt(14) + 1) as Mine
       );
     }
   }
 
-  const cellRecords = [...cells];
-  cells.forEach((cell, coord) => {
-    const threatCount = countThreats({ level, cells }, coord);
-    if (threatCount !== undefined) {
-      cellRecords[coord] = setThreats(cell, threatCount);
-    }
-  });
-
   return createBoard({
     level: createLevel(level),
-    cells: cellRecords,
-    cellStates: getCellStates(cellRecords),
+    cells: cells.map((cell, coord) => {
+      const threatCount = countThreats({ level, cells }, coord);
+      return threatCount !== undefined ? setThreats(cell, threatCount) : cell;
+    }),
+    cellStates: createCellStateStats({ [CellState.NEW]: mines }),
     state,
     onGameOver,
   });
@@ -151,8 +153,8 @@ export const getNeighbours = (
   { rows, cols, type, topology }: Grid,
   origin: Coordinate
 ) => {
-  let neighbours = getNeighbourMatrix(type)(calculateCoordinate(cols, origin));
-
+  let neighbours = getNeighbourMatrix(type)(cols, calculateIndex(cols, origin));
+  if (origin === 0) console.log(neighbours);
   const torusAdjust = (n: number, max: number) =>
     n === -1 ? max - 1 : n === max ? 0 : n;
   switch (topology) {
@@ -263,7 +265,7 @@ function nextState(
     });
   }
 
-  return produce(board, mutable => {
+  return produce(board, (mutable: GameRecord) => {
     switch (command) {
       case Cmd.POKE:
         toggleOpen(coordinate, mutable);
@@ -470,7 +472,7 @@ export function createGame(
     return {
       board: createBoard({
         level: createLevel(level),
-        cells: [],
+        cells: new Uint16Array(),
         onGameOver,
         state: GameState.ERROR,
         error: Object.freeze(new ValidationError('Invalid level', errors)),
@@ -525,7 +527,7 @@ export const legend: () => {
   board: GameRecord;
   nextState: NextStateFunction;
 } = () => {
-  const cells = [
+  const cells = ([
     ...[...new Array(8)].map((_ignore, i) => ({
       state: CellState.OPEN,
       threatCount: (i + 1) as NumThreats,
@@ -559,11 +561,11 @@ export const legend: () => {
       state: CellState.OPEN,
       mine: 3,
     },
-  ].map(fromObject as any) as CellRecord[];
+  ] as CellRecordObject[]).map(fromObject);
 
   const cols = 4;
   const board = createBoard({
-    cells,
+    cells: new Uint16Array(cells),
     level: createLevel({
       cols,
       rows: Math.ceil(cells.length / cols),
