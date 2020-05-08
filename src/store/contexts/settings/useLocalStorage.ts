@@ -1,7 +1,7 @@
 import { SettingsContextValues } from '.';
 import React from 'react';
 
-const SETTINGS_STORAGE_KEY = 'SvgMinesweeper.settings';
+const SETTINGS_STORAGE_KEY = 'Minesweeper.settings';
 
 function validateType(type: string) {
   if (!['string', 'number', 'boolean', 'object'].includes(type)) {
