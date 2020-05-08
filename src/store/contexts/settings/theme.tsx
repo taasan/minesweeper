@@ -2,7 +2,6 @@ import React, { createContext } from 'react';
 import Themes, { defaultTheme } from '../../../Theme';
 import { ITheme, isTheme } from '../../../Theme/theme';
 import useLocalStorage from './useLocalStorage';
-import { log } from '../../../lib';
 import _ from 'lodash';
 
 export type ThemeContext = {
@@ -20,7 +19,7 @@ export const ThemeContextProvider = (props: { children?: React.ReactNode }) => {
   let [name, setTheme] = useLocalStorage('theme', defaultTheme.name);
   let theme = themes.get(name);
   if (!isTheme(theme)) {
-    if (theme != null) log.warn('Invalid theme', { name, theme });
+    if (theme != null) console.warn('Invalid theme', { name, theme });
     theme = defaultTheme;
   }
   return (

@@ -1,4 +1,3 @@
-import log from '../lib/log';
 import {
   CellArray,
   GameError,
@@ -294,7 +293,7 @@ function nextState(
       try {
         board.onGameOver();
       } catch (err) {
-        log.warn('Unhandled exception in onGameOver handler', err);
+        console.warn('Unhandled exception in onGameOver handler', err);
       }
     } else if (getState(getCell(draft, coordinate)!) === CellState.OPEN) {
       const openPlusMines = draft.level.mines + stats[CellState.OPEN];

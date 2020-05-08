@@ -16,7 +16,6 @@ import { CmdAction } from '../../../store';
 import { getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
 import { onContextMenu } from '../..';
-import log from '../../../lib/log';
 import { isEqual } from 'lodash';
 import { assertNever, hexOffset, hexagonPoints } from '../../../lib';
 import { NumeralSystemContext } from '../../../store/contexts/settings';
@@ -86,7 +85,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
             undefined
           );
         if (board.error != null) {
-          log.error(board.error);
+          console.error(board.error);
         }
         return (
           <main className="Error">

@@ -1,6 +1,5 @@
 import { SettingsContextValues } from '.';
 import React from 'react';
-import { log } from '../../../lib';
 
 const SETTINGS_STORAGE_KEY = 'SvgMinesweeper.settings';
 
@@ -31,13 +30,13 @@ export function loadValue(type: string, key: string) {
         return typeof parsed === 'object' ? parsed : undefined;
       }
       default:
-        log.warn(`Unhandled type ${type}`);
+        console.warn(`Unhandled type ${type}`);
     }
   } catch (err) {
     try {
       localStorage.removeItem(nskey);
     } catch (_err) {}
-    log.warn({ err, type, key });
+    console.warn({ err, type, key });
   }
   return;
 }
@@ -50,7 +49,7 @@ export function saveValue(type: string, key: string, value: any) {
       type === 'object' ? JSON.stringify(value) : value
     );
   } catch (err) {
-    log.warn(err);
+    console.warn(err);
   }
 }
 type Primitive = number | string | boolean;

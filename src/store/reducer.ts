@@ -9,7 +9,6 @@ import {
   isCmdName,
 } from '../Game';
 
-import log from '../lib/log';
 import { assertNever, zero } from '../lib';
 import { IState, TimingEvent } from './context';
 import produce from 'immer';
@@ -168,7 +167,7 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
           return 0;
         }
         if (board.state === GameState.PLAYING && (len & 1) !== 1) {
-          log.error('Unexpected array length');
+          console.error('Unexpected array length');
         }
         const elapsed = calulateElapsedTime(tmp);
         if (board.state === GameState.PLAYING) {
@@ -184,7 +183,7 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
     }
     draft.game.board = board;
     if (state.game.board.state !== board.state) {
-      log.debug('State changed', {
+      console.debug('State changed', {
         old: GameState[state.game.board.state],
         new: GameState[draft.game.board.state],
       });
@@ -196,12 +195,12 @@ type ReducerFunction<S, A> = (state: S, action: A) => S;
 
 const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
   if (action.type === 'POKE' || action.type === 'FLAG') {
-    log.debug({
+    console.debug({
       ...action,
       ...calculateCoordinate(state.game.board.level.cols, action.coordinate),
     });
   } else {
-    log.debug(action);
+    console.debug(action);
   }
   if (isCmdAction(action)) {
     return commandActionReducer(state, action);
@@ -234,7 +233,7 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
     }
     case 'closeModal':
       if (modalStackSize === 0) {
-        log.warn('Modal stack is empty');
+        console.warn('Modal stack is empty');
         return state;
       }
       return produce(state, draft => {

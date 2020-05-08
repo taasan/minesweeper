@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import log from '../lib/log';
 const useDomTokenList = (
   element?: HTMLElement,
   tokens?: string[] | Readonly<string[]>
@@ -8,7 +7,7 @@ const useDomTokenList = (
     if (element == null || tokens == null) {
       return;
     }
-    log.debug('useDomTokenList.useEffect');
+    console.debug('useDomTokenList.useEffect');
     // Set up
     element.classList.add(...tokens);
     // Clean up
