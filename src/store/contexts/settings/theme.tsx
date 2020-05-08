@@ -3,6 +3,7 @@ import Themes, { defaultTheme } from '../../../Theme';
 import { ITheme, isTheme } from '../../../Theme/theme';
 import useLocalStorage from './useLocalStorage';
 import { log } from '../../../lib';
+import _ from 'lodash';
 
 export type ThemeContext = {
   theme: ITheme;
@@ -11,7 +12,7 @@ export type ThemeContext = {
 
 export const ThemeContext = createContext<ThemeContext>({
   theme: defaultTheme,
-  setTheme: () => undefined,
+  setTheme: _.noop,
 });
 const themes = new Map(Themes().map(t => [t.name, t]));
 

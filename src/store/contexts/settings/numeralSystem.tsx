@@ -1,6 +1,7 @@
 import React, { createContext } from 'react';
 import { NumeralSystem, isNumeralSystem } from '../../../lib';
 import useLocalStorage from './useLocalStorage';
+import _ from 'lodash';
 
 export type NumeralSystemContext = {
   numeralSystem: NumeralSystem;
@@ -10,7 +11,7 @@ const defaultNumeralSystem = NumeralSystem.ascii;
 
 export const NumeralSystemContext = createContext<NumeralSystemContext>({
   numeralSystem: defaultNumeralSystem,
-  setNumeralSystem: () => undefined,
+  setNumeralSystem: _.noop,
 });
 
 export const NumeralSystemContextProvider = (props: {

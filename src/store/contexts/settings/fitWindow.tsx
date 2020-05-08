@@ -1,5 +1,6 @@
 import React, { createContext } from 'react';
 import useLocalStorage from './useLocalStorage';
+import _ from 'lodash';
 
 export type FitWindowContext = {
   fitWindow: boolean;
@@ -9,7 +10,7 @@ const defaultFitWindow = false;
 
 export const FitWindowContext = createContext<FitWindowContext>({
   fitWindow: defaultFitWindow,
-  setFitWindow: () => undefined,
+  setFitWindow: _.noop,
 });
 
 export const FitWindowContextProvider = (props: {

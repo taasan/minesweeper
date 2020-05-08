@@ -1,5 +1,6 @@
 import React, { createContext } from 'react';
 import useLocalStorage from './useLocalStorage';
+import _ from 'lodash';
 
 export type RotateContext = {
   rotate: boolean;
@@ -9,7 +10,7 @@ const defaultRotate = false;
 
 export const RotateContext = createContext<RotateContext>({
   rotate: defaultRotate,
-  setRotate: () => undefined,
+  setRotate: _.noop,
 });
 
 export const RotateContextProvider = (props: {

@@ -50,7 +50,7 @@ export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
     cellStates: createCellStateStats(),
     error: null,
     version: 0,
-    onGameOver: () => undefined,
+    onGameOver: _.noop,
     ...draft,
   }));
 
