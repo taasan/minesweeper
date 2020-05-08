@@ -58,32 +58,6 @@ export type IState = Readonly<{
   boardVersion: number;
 }>;
 
-/*
-type IStateInit = Pick<IState, 'containerRef'> & {
-  level: Level;
-};
-
-export function init({ level, containerRef }: IStateInit): IState {
-  return {
-    ...createGame(level, onGameOver),
-    loading: false,
-    containerRef,
-    fitWindow: true,
-    maxBoardDimensions: {
-      maxHeight: 'revert',
-      maxWidth: 'revert',
-    },
-    numeralSystem: NumeralSystem.HANGZHOU_NUMERAL,
-    modalStack: [],
-    theme: defaultTheme,
-    timingEvents: [],
-    elapsedTime: 0,
-    showMenu: false,
-    lives: 2,
-  };
-}
-*/
-
 export const initialState: () => IState = () => {
   let level: Level | undefined;
   try {
