@@ -176,7 +176,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
       }
 */
       const additional: JSX.Element[] = [];
-      if (topology === Topology.TORUS) {
+      if (topology === Topology.TOROIDAL) {
         if (col === 0) {
           additional.push(mapCell(cell, { row, col: cols }));
         } else if (col === cols - 1) {

@@ -7,7 +7,7 @@ export enum GridType {
 
 export enum Topology {
   LIMITED,
-  TORUS,
+  TOROIDAL,
 }
 
 export type Grid = {

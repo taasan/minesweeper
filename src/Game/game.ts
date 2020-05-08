@@ -166,7 +166,7 @@ export const getNeighbours = (
   const torusAdjust = (n: number, max: number) =>
     n === -1 ? max - 1 : n === max ? 0 : n;
   switch (topology) {
-    case Topology.TORUS:
+    case Topology.TOROIDAL:
       neighbours = neighbours.map(({ row, col }) => ({
         row: torusAdjust(row, rows),
         col: torusAdjust(col, cols),
