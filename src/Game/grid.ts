@@ -1,4 +1,6 @@
 import { assertNever } from '../lib';
+import { calculateCoordinate } from './coordinate';
+import _ from 'lodash';
 
 export enum GridType {
   SQUARE,
@@ -17,10 +19,16 @@ export type Grid = {
   topology: Topology;
 };
 
-const hexNeighbours = (origin: {
+const resolver = (a: number, b: number) => (a << 16) | b;
+
+const hexNeighbours = (
+  cols: number,
+  origo: number
+): Array<{
   row: number;
   col: number;
-}): Array<{ row: number; col: number }> => {
+}> => {
+  const origin = calculateCoordinate(cols, origo);
   const [even, odd] = [
     [
       [1, 0],
@@ -49,8 +57,17 @@ const hexNeighbours = (origin: {
     .flat(1);
 };
 
-const squareNeighbours = (origin: { row: number; col: number }) =>
-  [-1, 0, 1]
+const hexNeighboursMemoized = _.memoize(hexNeighbours, resolver);
+
+const squareNeighbours = (
+  cols: number,
+  origo: number
+): Array<{
+  row: number;
+  col: number;
+}> => {
+  const origin = calculateCoordinate(cols, origo);
+  return [-1, 0, 1]
     .map(col =>
       [-1, 0, 1].map(row => ({
         row: row + origin.row,
@@ -58,18 +75,18 @@ const squareNeighbours = (origin: { row: number; col: number }) =>
       }))
     )
     .flat(1);
+};
+
+const squareNeighboursMemoized = _.memoize(squareNeighbours, resolver);
 
 export const getNeighbourMatrix = (
   type: GridType
-): ((origin: {
-  row: number;
-  col: number;
-}) => Array<{ row: number; col: number }>) => {
+): ((cols: number, origo: number) => Array<{ row: number; col: number }>) => {
   switch (type) {
     case GridType.SQUARE:
-      return squareNeighbours;
+      return squareNeighboursMemoized;
     case GridType.HEX:
-      return hexNeighbours;
+      return hexNeighboursMemoized;
   }
   assertNever(type);
 };
