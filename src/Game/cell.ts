@@ -34,15 +34,6 @@ export enum CellState {
   EXPLODED,
 }
 
-/*
-export const createGameCell: (cell: Partial<CellRecord>) => CellRecord = cell =>
-  produce(cell, draft => ({
-    state: CellState.NEW,
-    threatCount: 0,
-    mine: 0,
-    ...draft,
-  }));
-*/
 export type CellStateName = keyof typeof CellState;
 
 export type CellStateStats = { [key in CellState]: number };
