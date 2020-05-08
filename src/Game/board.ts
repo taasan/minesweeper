@@ -14,12 +14,12 @@ export class GameError {
 }
 
 export enum GameState {
-  PAUSED,
-  GAME_OVER,
-  COMPLETED,
+  NOT_INITIALIZED,
   INITIALIZED,
   PLAYING,
-  NOT_INITIALIZED,
+  PAUSED,
+  COMPLETED,
+  GAME_OVER,
   ERROR,
   DEMO,
 }
