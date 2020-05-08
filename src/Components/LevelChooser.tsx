@@ -289,9 +289,6 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
               .map(k => {
                 const t: Topology = (k as unknown) as Topology;
                 const name = Topology[t];
-                // eslint-disable-next-line eqeqeq
-                const checked = t == topology;
-                console.log({ t, topology, checked });
 
                 return (
                   <option key={name} value={name}>

@@ -154,7 +154,6 @@ export const getNeighbours = (
   origin: Coordinate
 ) => {
   let neighbours = getNeighbourMatrix(type)(cols, calculateIndex(cols, origin));
-  if (origin === 0) console.log(neighbours);
   const torusAdjust = (n: number, max: number) =>
     n === -1 ? max - 1 : n === max ? 0 : n;
   switch (topology) {

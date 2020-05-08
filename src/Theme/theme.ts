@@ -30,7 +30,6 @@ export const isTheme = (c: any): c is ITheme =>
   (c.symbols == null || typeof c.symbols.flag === 'string');
 
 export const createTheme = (partial: PartialTheme): ITheme => {
-  console.log('createTheme', { partial });
   return Object.freeze({
     ...partial,
     classNames: Object.freeze(partial.styles.map(t => t.Theme)),
