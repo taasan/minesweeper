@@ -77,18 +77,28 @@ export const getMine = (cell: number): Mine | undefined => {
   return mine !== 0 ? mine : undefined;
 };
 
-export const setThreats = (prev: number, threats: NumThreats) =>
-  setValue(threatsMask, prev, threats);
+export const setThreats = (prev: number, threats: NumThreats) => {
+  if (!isNumThreats(threats)) {
+    throw new RangeError(`Invalid threat count: ${threats}`);
+  }
 
-export const getThreats = (cell: number): NumThreats | undefined => {
+  return setValue(threatsMask, prev, threats);
+};
+
+export const getThreats = (cell: number): NumThreats => {
   const threats = getValue(threatsMask, cell);
-  return isNumThreats(threats) ? threats : undefined;
+  if (!isNumThreats(threats)) {
+    throw new RangeError(`Invalid threat count: ${threats}`);
+  }
+
+  return threats;
 };
 
 export const toObject = (cell: number): CellRecordObject => {
-  const threatCount = getThreats(cell);
   const mine = getMine(cell);
+  const threatCount = mine !== undefined ? getThreats(cell) : undefined;
   const state = getState(cell);
+
   return {
     state,
     threatCount,
