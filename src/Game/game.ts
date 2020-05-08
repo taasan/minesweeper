@@ -57,7 +57,7 @@ const createCellStateStats = (
   ...stats,
 });
 
-export const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
+const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
   produce(game, (draft: Partial<GameRecord>) => ({
     cells: new Uint16Array(),
     state: GameState.NOT_INITIALIZED,
@@ -151,13 +151,13 @@ function countThreats(
   return threats;
 }
 
-export function randomInt(max: number): number {
+function randomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-export type GameCellCallback = (coordinate: number) => void;
+type GameCellCallback = (coordinate: number) => void;
 
-export const getNeighbours = (
+const getNeighbours = (
   { rows, cols, type, topology }: Grid,
   origin: Coordinate
 ) => {
@@ -188,7 +188,7 @@ export const getNeighbours = (
     .filter(c => c !== origin);
 };
 
-export function visitNeighbours(
+function visitNeighbours(
   level: Grid,
   origin: Coordinate,
   ...callbacks: Array<GameCellCallback>
@@ -421,7 +421,7 @@ export type NextStateFunction = (
   currentVersion: number
 ) => GameRecord;
 
-export type IValidationError = {
+type IValidationError = {
   field: string;
   value: any;
   msg: string;

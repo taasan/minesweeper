@@ -6,7 +6,7 @@ export enum Mode {
   AUTO,
 }
 
-export type PartialTheme = {
+type PartialTheme = {
   name: string;
   styles: Array<{ readonly [key: string]: string }>;
   mode?: Mode;

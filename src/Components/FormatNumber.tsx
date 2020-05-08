@@ -3,7 +3,7 @@ import './FormatNumber.scss';
 import { NumeralSystem, formatNumber, formatTime } from '../lib';
 import { NumeralSystemContext } from '../store/contexts/settings';
 
-export type Props = {
+type Props = {
   n: number;
   numeralSystem: NumeralSystem;
   className?: string;

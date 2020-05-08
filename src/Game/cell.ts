@@ -32,8 +32,6 @@ export enum CellState {
   EXPLODED,
 }
 
-export type CellStateName = keyof typeof CellState;
-
 export type CellStateStats = { [key in CellState]: number };
 
 // ?       | State   | Mine    | Threats
@@ -55,7 +53,7 @@ export const setValue = (mask: mask, prev: number, value: value) => {
   return (prev & ~(0xf << mask)) | (value << mask);
 };
 
-export const getValue = (mask: mask, cell: number): value =>
+const getValue = (mask: mask, cell: number): value =>
   ((cell & (0xf << mask)) >> mask) as value;
 
 export const setState = (prev: number, state: CellState) => {

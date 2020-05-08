@@ -49,7 +49,7 @@ type LevelChooserProps = {
 
 const custom = 'Custom';
 
-export const formatLevel = ({
+const formatLevel = ({
   rows,
   cols,
   mines,

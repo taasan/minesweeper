@@ -34,10 +34,11 @@ import SettingsContextProvider, {
   useSettingsContext,
 } from '../../store/contexts/settings';
 import { Store } from '../../store';
-export type IProps = { level: Level };
+
+type IProps = { level: Level };
 
 // TODO: Move
-export const registerEvent = (event: string, callback: (_: any) => void) => {
+const registerEvent = (event: string, callback: (_: any) => void) => {
   window.addEventListener(event, callback);
   return () => window.removeEventListener(event, callback);
 };

@@ -5,7 +5,7 @@ import { renderThreats } from '../Svg/Board/getContent';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
-import { ISettings, ModalAction } from '../../store';
+import { ModalAction } from '../../store';
 import CloseButton from '../CloseButton';
 import { NumeralSystem } from '../../lib';
 import {
@@ -14,28 +14,10 @@ import {
 } from '../../store/contexts/settings';
 import { useDomTokenList } from '../../Hooks';
 
-export type SettingsDialogProps = {
+type SettingsDialogProps = {
   dispatch: React.Dispatch<ModalAction>;
   containerDiv?: HTMLDivElement;
 };
-
-export type Action =
-  | {
-      type: 'setNumeralSystem';
-      payload: Pick<ISettings, 'numeralSystem'>;
-    }
-  | {
-      type: 'setTheme';
-      payload: Pick<ISettings, 'theme'>;
-    }
-  | {
-      type: 'setFitWindow';
-      payload: Pick<ISettings, 'fitWindow'>;
-    }
-  | {
-      type: 'apply';
-      payload: Partial<ISettings>;
-    };
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({
   dispatch,

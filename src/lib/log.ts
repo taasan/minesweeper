@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 type LogFunction = typeof console.log;
 
-export type Logger = {
+type Logger = {
   info: LogFunction;
   error: LogFunction;
   log: LogFunction;
