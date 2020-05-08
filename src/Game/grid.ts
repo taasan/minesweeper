@@ -7,10 +7,16 @@ export enum GridType {
   HEX,
 }
 
+export const isGridType = (c: any): c is GridType =>
+  typeof c === 'number' && GridType[c] != null;
+
 export enum Topology {
   LIMITED,
   TOROIDAL,
 }
+
+export const isTopology = (c: any): c is Topology =>
+  typeof c === 'number' && Topology[c] != null;
 
 export type Grid = {
   cols: number;

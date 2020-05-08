@@ -23,7 +23,14 @@ import {
   setState,
   setThreats,
 } from './cell';
-import { Grid, GridType, Topology, getNeighbourMatrix } from './grid';
+import {
+  Grid,
+  GridType,
+  Topology,
+  getNeighbourMatrix,
+  isGridType,
+  isTopology,
+} from './grid';
 import produce from 'immer';
 import _ from 'lodash';
 import { assertNever, zero } from '../lib';
@@ -452,10 +459,10 @@ export const validateLevel = ({
   } else if (mines > maxMines({ rows, cols })) {
     errors.push({ field: 'mines', value: mines, msg: 'Too large' });
   }
-  if (typeof topology !== 'number' || Topology[topology] === undefined) {
+  if (!isTopology(topology)) {
     errors.push({ field: 'topology', value: topology, msg: 'Invalid' });
   }
-  if (typeof type !== 'number' || GridType[type] === undefined) {
+  if (!isGridType(type)) {
     errors.push({ field: 'type', value: type, msg: 'Invalid' });
   }
 
