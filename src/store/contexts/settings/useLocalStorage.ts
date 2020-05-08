@@ -10,7 +10,7 @@ function validateType(type: string) {
   }
 }
 
-function loadValue(type: string, key: keyof SettingsContextValues) {
+export function loadValue(type: string, key: string) {
   const nskey = `${SETTINGS_STORAGE_KEY}.${key}`;
   try {
     validateType(type);
@@ -42,7 +42,7 @@ function loadValue(type: string, key: keyof SettingsContextValues) {
   return;
 }
 
-function saveValue(type: string, key: keyof SettingsContextValues, value: any) {
+export function saveValue(type: string, key: string, value: any) {
   try {
     validateType(type);
     localStorage.setItem(

@@ -6,12 +6,14 @@ import {
   NextStateFunction,
   Topology,
   createGame,
+  validateLevel,
 } from '../Game';
 import NumeralSystem from '../lib/NumeralSystem';
 import { defaultTheme } from '../Theme';
 import React from 'react';
 import { ITheme } from '../Theme/theme';
 import { zero } from '../lib';
+import { loadValue } from './contexts/settings';
 
 type ILevels = {
   [keyof: string]: Level;
@@ -82,23 +84,30 @@ export function init({ level, containerRef }: IStateInit): IState {
 }
 */
 
-export const initialState: IState = {
-  game: {
-    ...createGame(LEVELS.BEGINNER, onGameOver),
-  },
-  loading: false,
-  maxBoardDimensions: {
-    maxHeight: 'revert',
-    maxWidth: 'revert',
-  },
-  modalStack: [],
-  timingEvents: [],
-  elapsedTime: zero,
-  showMenu: false,
-  lives: 2,
-  containerRef: React.createRef(),
-  rotated: false,
-  boardVersion: 0,
+export const initialState: () => IState = () => {
+  let level = loadValue('object', 'level');
+  if (level == null || validateLevel(level).length > 0) {
+    level = LEVELS.BEGINNER;
+  }
+
+  return {
+    game: {
+      ...createGame(level, onGameOver),
+    },
+    loading: false,
+    maxBoardDimensions: {
+      maxHeight: 'revert',
+      maxWidth: 'revert',
+    },
+    modalStack: [],
+    timingEvents: [],
+    elapsedTime: zero,
+    showMenu: false,
+    lives: 2,
+    containerRef: React.createRef(),
+    rotated: false,
+    boardVersion: 0,
+  };
 };
 
-export default React.createContext<IState>(initialState);
+export default React.createContext<() => IState>(initialState);

@@ -43,7 +43,7 @@ export const registerEvent = (event: string, callback: (_: any) => void) => {
 };
 
 const SvgMinesweeper: React.FC<IProps> = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState());
 
   const {
     game,
@@ -243,7 +243,7 @@ const StatusBar = React.memo(
             });
         }
       }, [dispatch, gameState]);
-      const { lives } = React.useContext(Store);
+      const { lives } = React.useContext(Store)();
       const { rotate, setRotate } = React.useContext(RotateContext);
       const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
       const [fullScreen, setFullScreen] = React.useState(document.fullscreen);

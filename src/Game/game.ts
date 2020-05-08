@@ -27,6 +27,7 @@ import { Grid, GridType, Topology, getNeighbourMatrix } from './grid';
 import produce from 'immer';
 import _ from 'lodash';
 import { assertNever, zero } from '../lib';
+import { saveValue } from '../store/contexts/settings';
 
 const createLevel = (level?: Partial<Level>) =>
   Object.freeze({
@@ -432,6 +433,8 @@ export const validateLevel = ({
   rows,
   cols,
   mines,
+  topology,
+  type,
 }: Level): IValidationError[] => {
   const errors = [];
   if (rows < MIN_LEVEL) {
@@ -448,6 +451,12 @@ export const validateLevel = ({
     errors.push({ field: 'mines', value: mines, msg: 'Too small' });
   } else if (mines > maxMines({ rows, cols })) {
     errors.push({ field: 'mines', value: mines, msg: 'Too large' });
+  }
+  if (typeof topology !== 'number' || Topology[topology] === undefined) {
+    errors.push({ field: 'topology', value: topology, msg: 'Invalid' });
+  }
+  if (typeof type !== 'number' || GridType[type] === undefined) {
+    errors.push({ field: 'type', value: type, msg: 'Invalid' });
   }
 
   return errors;
@@ -479,6 +488,8 @@ export function createGame(
       nextState: (_cmd, [_coordinate, game]) => game,
     };
   }
+
+  saveValue('object', 'level', level);
 
   const cells = createEmptyCells(level).map(zero);
 
