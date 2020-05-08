@@ -272,35 +272,35 @@ function nextState(
     });
   }
 
-  return produce(board, (mutable: GameRecord) => {
+  return produce(board, (draft: GameRecord) => {
     switch (command) {
       case Cmd.POKE:
-        toggleOpen(coordinate, mutable);
+        toggleOpen(coordinate, draft);
         break;
       case Cmd.FLAG:
-        toggleFlagged(coordinate, mutable);
+        toggleFlagged(coordinate, draft);
         break;
       default:
         assertNever(command);
     }
 
-    const stats = getCellStates(mutable.cells);
-    mutable.cellStates = stats;
+    const stats = getCellStates(draft.cells);
+    draft.cellStates = stats;
     if (
-      mutable.cellStates[CellState.EXPLODED] >
+      draft.cellStates[CellState.EXPLODED] >
       board.cellStates[CellState.EXPLODED]
     ) {
-      mutable.state = GameState.GAME_OVER;
+      draft.state = GameState.GAME_OVER;
       try {
         board.onGameOver();
       } catch (err) {
         log.warn('Unhandled exception in onGameOver handler', err);
       }
-    } else if (getState(getCell(mutable, coordinate)!) === CellState.OPEN) {
-      const openPlusMines = mutable.level.mines + stats[CellState.OPEN];
-      const numCells = mutable.level.cols * mutable.level.rows;
+    } else if (getState(getCell(draft, coordinate)!) === CellState.OPEN) {
+      const openPlusMines = draft.level.mines + stats[CellState.OPEN];
+      const numCells = draft.level.cols * draft.level.rows;
       const done = openPlusMines === numCells;
-      mutable.state = done ? GameState.COMPLETED : mutable.state;
+      draft.state = done ? GameState.COMPLETED : draft.state;
     }
   });
 }
@@ -503,12 +503,12 @@ export function createGame(
         });
       } catch (err) {
         console.error(err);
-        return produce(game, mutable => {
-          mutable.error =
+        return produce(game, draft => {
+          draft.error =
             err instanceof GameError
               ? err
               : new GameError(`Command ${Cmd[cmd]} failed`, err);
-          mutable.state = GameState.ERROR;
+          draft.state = GameState.ERROR;
         });
       }
     };
@@ -519,9 +519,9 @@ export function createGame(
           game.state !== GameState.NOT_INITIALIZED &&
           version !== game.version
         ) {
-          return produce(game, mutable => {
-            mutable.error = new GameError('Version mismatch');
-            mutable.state = GameState.ERROR;
+          return produce(game, draft => {
+            draft.error = new GameError('Version mismatch');
+            draft.state = GameState.ERROR;
           });
         }
         return func(cmd, [coordinate, game], version);
