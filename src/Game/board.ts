@@ -1,4 +1,4 @@
-import produce, { immerable } from 'immer';
+import { immerable } from 'immer';
 import { Coordinate, calculateIndex } from './coordinate';
 import { CellRecord, CellStateStats } from './cell';
 import { Grid } from './grid';
@@ -54,12 +54,3 @@ export const getCell = (
 ): CellRecord => {
   return cells[calculateIndex(level.cols, coordinate)] as CellRecord;
 };
-
-export const setCell = (
-  board: GameRecord,
-  coordinate: Coordinate,
-  cell: CellRecord
-): CellArray =>
-  produce(board.cells, draft => {
-    draft[calculateIndex(board.level.cols, coordinate)] = cell;
-  });
