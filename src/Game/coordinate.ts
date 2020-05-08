@@ -10,10 +10,7 @@ export const calculateCoordinate = (cols: number, index: Coordinate) => {
   return { col, row };
 };
 
-export const calculateIndex = (
-  { cols }: { cols: number },
-  coordinate: Coordinate
-): number =>
+export const calculateIndex = (cols: number, coordinate: Coordinate): number =>
   typeof coordinate === 'number'
     ? coordinate
     : coordinate.col + cols * coordinate.row;

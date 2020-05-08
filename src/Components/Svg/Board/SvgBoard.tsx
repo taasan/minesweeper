@@ -191,10 +191,10 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
 
       const jsx = (
         <SvgCell
-          coordinate={calculateIndex(
-            { cols },
-            { row: (row + rows) % rows, col: (col + cols) % cols }
-          )}
+          coordinate={calculateIndex(cols, {
+            row: (row + rows) % rows,
+            col: (col + cols) % cols,
+          })}
           gridType={board.level.type}
           dispatch={dispatch}
           content={getContent(cell, boardState, numeralSystem)}

@@ -50,7 +50,7 @@ export const getCell = (
     | GameRecord,
   coordinate: Coordinate
 ): CellRecord => {
-  return cells[calculateIndex(level, coordinate)] as CellRecord;
+  return cells[calculateIndex(level.cols, coordinate)] as CellRecord;
 };
 
 export const setCell = (
@@ -59,5 +59,5 @@ export const setCell = (
   cell: CellRecord
 ): ReadonlyArray<CellRecord> =>
   produce(board.cells, draft => {
-    draft[calculateIndex(board.level, coordinate)] = cell;
+    draft[calculateIndex(board.level.cols, coordinate)] = cell;
   });

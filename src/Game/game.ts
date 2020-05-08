@@ -71,7 +71,7 @@ function initialize(
 
   const mineSet = new Set<number>()
     // Make sure we don't start with a bang
-    .add(calculateIndex({ cols }, origin));
+    .add(calculateIndex(cols, origin));
   let iterations = 0;
   const dim = cols * rows;
   while (mineSet.size <= mines) {
@@ -125,7 +125,7 @@ function updateCell(
   if (board.state === GameState.PLAYING && oldThreatCount !== newThreatCount) {
     throw new Error(`Expected ${newThreatCount}, got ${oldThreatCount}`);
   }
-  board.cells[calculateIndex(board.level, coordinate)] = newCell;
+  board.cells[calculateIndex(board.level.cols, coordinate)] = newCell;
 }
 
 function countThreats(
