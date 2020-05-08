@@ -41,11 +41,11 @@ const createLevel = (level?: Partial<Level>) =>
 const createCellStateStats = (
   stats?: Partial<CellStateStats>
 ): CellStateStats => ({
-  0: 0,
-  1: 0,
-  2: 0,
-  3: 0,
-  4: 0,
+  [CellState.NEW]: 0,
+  [CellState.OPEN]: 0,
+  [CellState.FLAGGED]: 0,
+  [CellState.UNCERTAIN]: 0,
+  [CellState.EXPLODED]: 0,
   ...stats,
 });
 
