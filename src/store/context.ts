@@ -85,8 +85,15 @@ export function init({ level, containerRef }: IStateInit): IState {
 */
 
 export const initialState: () => IState = () => {
-  let level = loadValue('object', 'level');
-  if (level == null || validateLevel(level).length > 0) {
+  let level: Level | undefined;
+  try {
+    level = loadValue('object', 'level');
+    if (level != null) {
+      validateLevel(level);
+    }
+  } catch (err) {}
+
+  if (level == null) {
     level = LEVELS.BEGINNER;
   }
 

@@ -435,7 +435,7 @@ export const validateLevel = ({
   mines,
   topology,
   type,
-}: Level): IValidationError[] => {
+}: Level): void => {
   const errors = [];
   if (rows < MIN_LEVEL) {
     errors.push({ field: 'rows', value: rows, msg: 'Too small' });
@@ -459,7 +459,9 @@ export const validateLevel = ({
     errors.push({ field: 'type', value: type, msg: 'Invalid' });
   }
 
-  return errors;
+  if (errors.length > 0) {
+    throw new ValidationError('Invalid level', errors);
+  }
 };
 
 export class ValidationError extends GameError {
@@ -474,63 +476,65 @@ export function createGame(
   level: Level,
   onGameOver: () => void
 ): { board: GameRecord; nextState: NextStateFunction } {
-  const errors = validateLevel(level);
+  try {
+    validateLevel(level);
+    saveValue('object', 'level', level);
 
-  if (errors.length > 0) {
-    return {
-      board: createBoard({
-        level: createLevel(level),
-        cells: new Uint16Array(),
-        onGameOver,
-        state: GameState.ERROR,
-        error: Object.freeze(new ValidationError('Invalid level', errors)),
-      }),
-      nextState: (_cmd, [_coordinate, game]) => game,
-    };
-  }
+    const cells = createEmptyCells(level).map(zero);
 
-  saveValue('object', 'level', level);
-
-  const cells = createEmptyCells(level).map(zero);
-
-  const func: NextStateFunction = (cmd, [coordinate, game]) => {
-    try {
-      switch (game.state) {
-        case GameState.PAUSED:
-          return expectUnPause(cmd, game);
-      }
-      if (game.state === GameState.ERROR) {
-        return game;
-      }
-      return produce(nextState(cmd, [coordinate, game]), draft => {
-        draft.version++;
-      });
-    } catch (err) {
-      console.error(err);
-      return produce(game, mutable => {
-        mutable.error =
-          err instanceof GameError
-            ? err
-            : new GameError(`Command ${Cmd[cmd]} failed`, err);
-        mutable.state = GameState.ERROR;
-      });
-    }
-  };
-  return {
-    board: createBoard({ level: createLevel(level), cells, onGameOver }),
-    nextState: (cmd, [coordinate, game], version) => {
-      if (
-        game.state !== GameState.NOT_INITIALIZED &&
-        version !== game.version
-      ) {
+    const func: NextStateFunction = (cmd, [coordinate, game]) => {
+      try {
+        switch (game.state) {
+          case GameState.PAUSED:
+            return expectUnPause(cmd, game);
+        }
+        if (game.state === GameState.ERROR) {
+          return game;
+        }
+        return produce(nextState(cmd, [coordinate, game]), draft => {
+          draft.version++;
+        });
+      } catch (err) {
+        console.error(err);
         return produce(game, mutable => {
-          mutable.error = new GameError('Version mismatch');
+          mutable.error =
+            err instanceof GameError
+              ? err
+              : new GameError(`Command ${Cmd[cmd]} failed`, err);
           mutable.state = GameState.ERROR;
         });
       }
-      return func(cmd, [coordinate, game], version);
-    },
-  };
+    };
+    return {
+      board: createBoard({ level: createLevel(level), cells, onGameOver }),
+      nextState: (cmd, [coordinate, game], version) => {
+        if (
+          game.state !== GameState.NOT_INITIALIZED &&
+          version !== game.version
+        ) {
+          return produce(game, mutable => {
+            mutable.error = new GameError('Version mismatch');
+            mutable.state = GameState.ERROR;
+          });
+        }
+        return func(cmd, [coordinate, game], version);
+      },
+    };
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return {
+        board: createBoard({
+          level: createLevel(level),
+          cells: new Uint16Array(),
+          onGameOver,
+          state: GameState.ERROR,
+          error: err,
+        }),
+        nextState: (_cmd, [_coordinate, game]) => game,
+      };
+    }
+    throw err;
+  }
 }
 
 export const legend: () => {
