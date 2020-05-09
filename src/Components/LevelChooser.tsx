@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
   CellState,
   GameState,
@@ -17,6 +17,9 @@ import SvgCell from './Svg/Board/SvgCell';
 import CloseButton from './CloseButton';
 import FormatNumber from './FormatNumber';
 import { NumeralSystem, formatNumber } from '../lib';
+import { NumeralSystemContext } from '../store/contexts/settings';
+import { Store } from '../store';
+import { navigate } from '../router';
 
 interface LevelLite extends Omit<Level, 'type' | 'topology'> {}
 
@@ -41,10 +44,7 @@ const compareLevels = (a: LevelLite | Level, b: LevelLite | Level) =>
   a.cols === b.cols && a.rows === b.rows && a.mines === b.mines;
 
 type LevelChooserProps = {
-  level: Level;
   onChange: (level: Level) => void;
-  onCancel(): void;
-  numeralSystem: NumeralSystem;
 };
 
 const custom = 'Custom';
@@ -86,12 +86,11 @@ const formatLevel = ({
     */
 // `${v.name}: ${v.cols} x ${v.rows} (${v.mines})`;
 
-export const LevelChooser: React.FC<LevelChooserProps> = ({
-  onChange,
-  level: initialLevel,
-  onCancel,
-  numeralSystem,
-}) => {
+export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
+  const { numeralSystem } = useContext(NumeralSystemContext);
+  const store = useContext(Store);
+  const initialLevel: Level = store.game.board.level;
+  // const numeralSystem = initialState.numeralSystem;
   const [level, setLevel] = useState(initialLevel);
   const { rows, cols, mines, type, topology } = level;
   const maxM = maxMines({ rows, cols });
@@ -137,6 +136,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
         onSubmit={e => {
           e.preventDefault();
           onChange(level);
+          navigate('/');
         }}
         onReset={e => {
           e.preventDefault();
@@ -300,7 +300,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({
         </fieldset>
         <button type="submit">OK</button>
         <button type="reset">Reset</button>
-        <CloseButton close={onCancel} text="Cancel" />
+        <CloseButton text="Cancel" />
       </form>
     </div>
   );

@@ -5,48 +5,37 @@ import { renderThreats } from '../Svg/Board/getContent';
 import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
-import { ModalAction } from '../../store';
-import CloseButton from '../CloseButton';
 import { NumeralSystem } from '../../lib';
 import {
   NumeralSystemContext,
   useSettingsContext,
 } from '../../store/contexts/settings';
-import { useDomTokenList } from '../../Hooks';
+import { navigate } from '../../router';
+import CloseButton from '../CloseButton';
 
-type SettingsDialogProps = {
-  dispatch: React.Dispatch<ModalAction>;
-  containerDiv?: HTMLDivElement;
-};
+export type SettingsDialogProps = {};
 
-const SettingsDialog: React.FC<SettingsDialogProps> = ({
-  dispatch,
-  containerDiv,
-}) => {
+const SettingsDialog: React.FC<SettingsDialogProps> = () => {
   const { state: initialState, setState } = useSettingsContext();
   const [theme, setTheme] = React.useState(initialState.theme);
   const [numeralSystem, setNumeralSystem] = React.useState(
     initialState.numeralSystem
   );
-  useDomTokenList(
-    containerDiv,
-    theme.styles.map(t => t.Theme)
-  );
-  React.useEffect(() => {
-    const classes = theme.styles.map(t => t.Theme);
-    const classList = containerDiv?.classList;
-    classList?.add(...classes);
-    return () => classList?.remove(...classes);
-  });
 
-  const closeModal = React.useCallback(() => dispatch({ type: 'closeModal' }), [
-    dispatch,
-  ]);
+  const containerRef = React.useCallback(
+    (e: HTMLDivElement) => {
+      if (e != null) {
+        e.classList.remove(...e.classList.values());
+        e.classList.add('Page', ...theme.styles.map(t => t.Theme));
+      }
+    },
+    [theme.styles]
+  );
 
   const handleOnSubmit = (e: React.SyntheticEvent<any>) => {
     e.preventDefault();
     setState({ ...initialState, theme, numeralSystem });
-    closeModal();
+    navigate('/');
   };
   const handleOnReset = (e: React.SyntheticEvent<any>) => {
     e.preventDefault();
@@ -54,54 +43,56 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     setNumeralSystem(initialState.numeralSystem);
   };
   return (
-    <form
-      className="SettingsDialog"
-      onSubmit={handleOnSubmit}
-      onReset={handleOnReset}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-        }}
+    <div ref={containerRef}>
+      <form
+        className="SettingsDialog"
+        onSubmit={handleOnSubmit}
+        onReset={handleOnReset}
       >
-        <fieldset>
-          <legend>Numeral system</legend>
-          <NumeralSystemChooser
-            selected={numeralSystem}
-            onChange={setNumeralSystem}
-          />
-        </fieldset>
-        <fieldset>
-          <legend>Theme</legend>
-          <ThemeChooser theme={theme} onChange={setTheme} />
-        </fieldset>
-        <section className="SvgMinesweeper">
-          <div
-            style={{
-              width: '200px',
-              height: 'auto',
-            }}
-          >
-            <NumeralSystemContext.Provider
-              value={{ numeralSystem, setNumeralSystem: () => void 0 }}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+          }}
+        >
+          <fieldset>
+            <legend>Numeral system</legend>
+            <NumeralSystemChooser
+              selected={numeralSystem}
+              onChange={setNumeralSystem}
+            />
+          </fieldset>
+          <fieldset>
+            <legend>Theme</legend>
+            <ThemeChooser theme={theme} onChange={setTheme} />
+          </fieldset>
+          <section className="SvgMinesweeper">
+            <div
+              style={{
+                width: '200px',
+                height: 'auto',
+              }}
             >
-              <SvgBoard board={legend().board} rotated={false} />
-            </NumeralSystemContext.Provider>
-          </div>
-        </section>
-      </div>
-      <div>
-        <section>
-          <main>
-            <button type="submit">Apply changes</button>
-            <button type="reset">Reset</button>
-            <CloseButton close={closeModal} text="Cancel" />
-          </main>
-        </section>
-      </div>
-    </form>
+              <NumeralSystemContext.Provider
+                value={{ numeralSystem, setNumeralSystem: () => void 0 }}
+              >
+                <SvgBoard board={legend().board} rotated={false} />
+              </NumeralSystemContext.Provider>
+            </div>
+          </section>
+        </div>
+        <div>
+          <section>
+            <main>
+              <button type="submit">Apply changes</button>
+              <button type="reset">Reset</button>
+              <CloseButton text="Cancel" />
+            </main>
+          </section>
+        </div>
+      </form>
+    </div>
   );
 };
 

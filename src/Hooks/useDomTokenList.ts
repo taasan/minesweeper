@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 const useDomTokenList = (
-  element?: HTMLElement,
+  element: HTMLElement | null | undefined,
   tokens?: string[] | Readonly<string[]>
 ) => {
   useEffect(() => {

@@ -1,13 +1,19 @@
 import React, { AriaAttributes } from 'react';
+import { navigate } from '../router';
 
 type Props = {
   text: string;
   tooltip?: string;
-  close(): void;
+  close?(): void;
   aria?: AriaAttributes;
 };
 
-const CloseButton: React.FC<Props> = ({ close, text, tooltip, aria }) => (
+const CloseButton: React.FC<Props> = ({
+  close = () => navigate('/'),
+  text,
+  tooltip,
+  aria,
+}) => (
   <button
     {...aria}
     title={tooltip}

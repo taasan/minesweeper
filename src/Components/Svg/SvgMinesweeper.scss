@@ -55,6 +55,10 @@
       li:hover {
         color: var(--cell-threats-1-color);
       }
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
     }
     /**
  * Accordion (<details>)

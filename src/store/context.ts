@@ -58,37 +58,35 @@ export type IState = Readonly<{
   boardVersion: number;
 }>;
 
-export const initialState: () => IState = () => {
-  let level: Level | undefined;
-  try {
-    level = loadValue('object', 'level');
-    if (level != null) {
-      validateLevel(level);
-    }
-  } catch (err) {}
-
-  if (level == null) {
-    level = LEVELS.BEGINNER;
+let level: Level | undefined;
+try {
+  level = loadValue('object', 'level');
+  if (level != null) {
+    validateLevel(level);
   }
+} catch (err) {}
 
-  return {
-    game: {
-      ...createGame(level, onGameOver),
-    },
-    loading: false,
-    maxBoardDimensions: {
-      maxHeight: 'revert',
-      maxWidth: 'revert',
-    },
-    modalStack: [],
-    timingEvents: [],
-    elapsedTime: zero,
-    showMenu: false,
-    lives: 2,
-    containerRef: React.createRef(),
-    rotated: false,
-    boardVersion: 0,
-  };
+if (level == null) {
+  level = LEVELS.BEGINNER;
+}
+
+export const initialState: IState = {
+  game: {
+    ...createGame(level, onGameOver),
+  },
+  loading: false,
+  maxBoardDimensions: {
+    maxHeight: 'revert',
+    maxWidth: 'revert',
+  },
+  modalStack: [],
+  timingEvents: [],
+  elapsedTime: zero,
+  showMenu: false,
+  lives: 2,
+  containerRef: React.createRef(),
+  rotated: false,
+  boardVersion: 0,
 };
 
-export default React.createContext<() => IState>(initialState);
+export default React.createContext<IState>(initialState);

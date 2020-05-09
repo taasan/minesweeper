@@ -123,6 +123,9 @@ const menuActionReducer = (state: IState, action: MenuAction): IState => {
       showMenu = !showMenu;
       break;
   }
+  if (showMenu && state.game.board.state === GameState.PLAYING) {
+    state = commandActionReducer(state, { type: 'PAUSE' });
+  }
 
   return produce(state, draft => {
     draft.showMenu = showMenu;

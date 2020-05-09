@@ -3,39 +3,33 @@ import './SvgMinesweeper.scss';
 import {
   CellState,
   GameState,
-  Level,
   // legend,
 } from '../../Game';
 import ErrorBoundary from '../ErrorBoundary';
-import { useReducer } from 'react';
 import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '..';
-import { LevelChooser } from '../LevelChooser';
-import Modal from '../Modal';
 import { DISARMED_MINE, EXPLODED_MINE, getFlag } from '../../graphics';
-import SettingsDialog from '../Settings/SettingsDialog';
 import {
+  Action,
   CmdAction,
   FullscreenAction,
+  IState,
   LevelAction,
   MenuAction,
   ModalAction,
-  ModalType,
-  initialState,
-  reducer,
 } from '../../store';
-import { useTheme } from '../../Hooks';
 import { NumeralSystem, assertNever } from '../../lib';
 import FormatNumber from '../FormatNumber';
 import Timer from '../Timer';
-import SettingsContextProvider, {
+import {
   FitWindowContext,
   RotateContext,
   useSettingsContext,
 } from '../../store/contexts/settings';
 import { Store } from '../../store';
+import { Link } from '../../router';
 
-type IProps = { level: Level };
+export type IProps = { state: IState; dispatch: React.Dispatch<Action> };
 
 // TODO: Move
 const registerEvent = (event: string, callback: (_: any) => void) => {
@@ -43,33 +37,21 @@ const registerEvent = (event: string, callback: (_: any) => void) => {
   return () => window.removeEventListener(event, callback);
 };
 
-const SvgMinesweeper: React.FC<IProps> = () => {
-  const [state, dispatch] = useReducer(reducer, initialState());
-
-  const {
-    game,
-    modalStack,
-    containerRef,
-    elapsedTime,
-    showMenu,
-    lives,
-  } = state;
+const SvgMinesweeper: React.FC<IProps> = ({ state, dispatch }) => {
+  const { game, containerRef, elapsedTime, showMenu, lives } = state;
   const { board } = game;
 
   const {
-    theme,
     numeralSystem,
     fitWindow,
     rotate: rotated,
   } = useSettingsContext().state;
-  useTheme(theme);
 
   React.useEffect(() => {
     dispatch({ type: 'fitWindow' });
     // return registerEvent('resize', () => dispatch({ type: 'fitWindow' }));
-  }, []);
+  }, [dispatch]);
 
-  const modal = modalStack[modalStack.length - 1];
   React.useEffect(
     () =>
       registerEvent('keyup', (e: KeyboardEvent) => {
@@ -80,7 +62,7 @@ const SvgMinesweeper: React.FC<IProps> = () => {
         }
       }),
 
-    [board.state, containerRef]
+    [board.state, containerRef, dispatch]
   );
 
   React.useEffect(() => {
@@ -92,16 +74,13 @@ const SvgMinesweeper: React.FC<IProps> = () => {
         dispatch({ type: 'PAUSE' });
       }
     });
-  }, [board.state]);
+  }, [board.state, dispatch]);
 
   React.useEffect(() => {
     return registerEvent('blur', () => {
       dispatch({ type: 'PAUSE' });
     });
-  }, []);
-
-  const closeModal = () => dispatch({ type: 'closeModal' });
-  // const showModal = (m: ModalType) => dispatch({ type: 'showModal', modal: m });
+  }, [dispatch]);
 
   const done =
     board.state === GameState.GAME_OVER ||
@@ -129,11 +108,8 @@ const SvgMinesweeper: React.FC<IProps> = () => {
         level: board.level,
       });
     },
-    [board.level]
+    [board.level, dispatch]
   );
-  const [settingsModalDiv, setSettingsModalDiv] = React.useState<
-    HTMLDivElement
-  >();
 
   const boardStyle: React.CSSProperties = fitWindow
     ? { ...state.maxBoardDimensions }
@@ -170,30 +146,6 @@ const SvgMinesweeper: React.FC<IProps> = () => {
           />
         </ErrorBoundary>
       </div>
-      <Modal
-        isOpen={modal === ModalType.SELECT_LEVEL}
-        onRequestClose={closeModal}
-      >
-        <LevelChooser
-          onCancel={closeModal}
-          onChange={l => {
-            closeModal();
-            dispatch({
-              type: 'setLevel',
-              level: l,
-            });
-          }}
-          level={board.level}
-          numeralSystem={numeralSystem}
-        />
-      </Modal>
-      <Modal
-        isOpen={modal === ModalType.SETTINGS}
-        onRequestClose={closeModal}
-        overlayRef={setSettingsModalDiv}
-      >
-        <SettingsDialog dispatch={dispatch} containerDiv={settingsModalDiv} />
-      </Modal>
     </div>
   );
 };
@@ -244,7 +196,7 @@ const StatusBar = React.memo(
             });
         }
       }, [dispatch, gameState]);
-      const { lives } = React.useContext(Store)();
+      const { lives } = React.useContext(Store);
       const { rotate, setRotate } = React.useContext(RotateContext);
       const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
       const [fullScreen, setFullScreen] = React.useState(document.fullscreen);
@@ -294,24 +246,11 @@ const StatusBar = React.memo(
             </summary>
             <nav>
               <ul role="menu" className="Menu__List">
-                <li
-                  role="menuitem"
-                  onClick={() =>
-                    dispatch({
-                      type: 'showModal',
-                      modal: ModalType.SELECT_LEVEL,
-                    })
-                  }
-                >
-                  Select level
+                <li role="menuitem">
+                  <Link to="level.html">Select level</Link>
                 </li>
-                <li
-                  role="menuitem"
-                  onClick={() =>
-                    dispatch({ type: 'showModal', modal: ModalType.SETTINGS })
-                  }
-                >
-                  Settings
+                <li role="menuitem">
+                  <Link to="settings.html">Settings</Link>
                 </li>
                 <li role="menuitemcheckbox" aria-checked={fitWindow}>
                   <label>
@@ -388,6 +327,4 @@ function renderGameState(state: GameState, lives: number, remaining: number) {
   assertNever(state);
 }
 
-const ConnectedMinesweeper = SettingsContextProvider(SvgMinesweeper);
-
-export default ConnectedMinesweeper;
+export default SvgMinesweeper;

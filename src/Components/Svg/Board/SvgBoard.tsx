@@ -17,26 +17,8 @@ import { getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
 import { onContextMenu } from '../..';
 import { isEqual } from 'lodash';
-import { assertNever, hexOffset, hexagonPoints } from '../../../lib';
+import { assertNever, hexOffset } from '../../../lib';
 import { NumeralSystemContext } from '../../../store/contexts/settings';
-
-// @ts-ignore
-const hexPoints = () =>
-  hexagonPoints()
-    .map(({ x, y }) => `${(x * cellSize) / 2},${(y * cellSize) / 2}`)
-    .join(' ');
-
-const squarePoints = () => {
-  const gap = 2;
-  return [
-    [gap, gap],
-    [gap, cellSize - gap],
-    [cellSize - gap, cellSize - gap],
-    [cellSize - gap, gap],
-  ]
-    .map(([x, y]) => `${x},${y}`)
-    .join(' ');
-};
 
 type IProps = {
   board: GameRecord;
@@ -268,30 +250,6 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           <rect x="0" y="0" width="100%" height="100%" />
           {[...board.cells].map(mapCell)}
         </g>
-        <defs>
-          <circle
-            id="circle"
-            cx={cellSize / 2}
-            cy={cellSize / 2}
-            r={cellSize / 2 - 2}
-          />
-          <polygon
-            id={`${GridType[GridType.HEX]}`}
-            points={hexPoints()}
-            width={cellSize}
-            height={cellSize}
-            fillOpacity={1}
-            strokeWidth={0}
-          />
-          <polygon
-            id={`${GridType[GridType.SQUARE]}`}
-            points={squarePoints()}
-            width={cellSize}
-            height={cellSize}
-            fillOpacity={1}
-            strokeWidth={0}
-          />
-        </defs>
       </svg>
     );
   }
