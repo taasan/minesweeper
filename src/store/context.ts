@@ -1,4 +1,4 @@
-import { ModalType, onGameOver } from './reducer';
+import { Action, ModalType, onGameOver } from './reducer';
 import {
   GameRecord,
   GridType,
@@ -14,6 +14,7 @@ import React from 'react';
 import { ITheme } from '../Theme/theme';
 import { zero } from '../lib';
 import { loadValue } from './contexts/settings';
+import _ from 'lodash';
 
 type ILevels = {
   [keyof: string]: Level;
@@ -89,4 +90,10 @@ export const initialState: IState = {
   boardVersion: 0,
 };
 
-export default React.createContext<IState>(initialState);
+export default React.createContext<{
+  state: IState;
+  dispatch: React.Dispatch<Action>;
+}>({
+  state: initialState,
+  dispatch: _.noop,
+});

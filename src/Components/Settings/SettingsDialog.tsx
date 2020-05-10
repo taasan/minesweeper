@@ -6,10 +6,7 @@ import './SettingsDialog.scss';
 import './NumeralSystemChooser.scss';
 import ThemeChooser from './ThemeChooser';
 import { NumeralSystem } from '../../lib';
-import {
-  NumeralSystemContext,
-  useSettingsContext,
-} from '../../store/contexts/settings';
+import { useSettingsContext } from '../../store/contexts/settings';
 import { navigate } from '../../router';
 import CloseButton from '../CloseButton';
 
@@ -74,11 +71,11 @@ const SettingsDialog: React.FC<SettingsDialogProps> = () => {
                 height: 'auto',
               }}
             >
-              <NumeralSystemContext.Provider
-                value={{ numeralSystem, setNumeralSystem: () => void 0 }}
-              >
-                <SvgBoard board={legend().board} rotated={false} />
-              </NumeralSystemContext.Provider>
+              <SvgBoard
+                board={legend().board}
+                rotated={false}
+                numeralSystem={numeralSystem}
+              />
             </div>
           </section>
         </div>

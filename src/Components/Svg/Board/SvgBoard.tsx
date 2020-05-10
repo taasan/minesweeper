@@ -17,20 +17,18 @@ import { getContent } from './getContent';
 import SvgCell, { cellSize } from './SvgCell';
 import { onContextMenu } from '../..';
 import { isEqual } from 'lodash';
-import { assertNever, hexOffset } from '../../../lib';
-import { NumeralSystemContext } from '../../../store/contexts/settings';
+import { NumeralSystem, assertNever, hexOffset } from '../../../lib';
 
 type IProps = {
   board: GameRecord;
   rotated: boolean;
   dispatch?: Dispatch<CmdAction>;
   style?: React.CSSProperties;
+  numeralSystem: NumeralSystem;
 };
 
 const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
-  (props, ref) => {
-    const { dispatch, board, style } = props;
-    const { numeralSystem } = React.useContext(NumeralSystemContext);
+  ({ dispatch, board, style, numeralSystem, rotated }, ref) => {
     const boardState = board.state;
 
     switch (board.state) {
@@ -96,7 +94,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
     }
     // const { level } = board;
     const { cols, rows, topology } = board.level;
-    const rotated = props.rotated && rows !== cols;
+    const shouldRotate = rotated && rows !== cols;
 
     const done =
       boardState === GameState.GAME_OVER ||
@@ -212,7 +210,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
             width: width + cellSize * 2,
             height: height + cellSize * 2,
           };
-    const v2 = rotated
+    const v2 = shouldRotate
       ? {
           ...v,
           width: v.height,
@@ -220,11 +218,11 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         }
       : v;
     const classes = ['SvgBoard'];
-    if (rotated) {
+    if (shouldRotate) {
       classes.push('SvgBoard__rotated');
     }
     const viewBox = `${v2.x} ${v2.y} ${v2.width} ${v2.height}`;
-    const transform = rotated
+    const transform = shouldRotate
       ? `translate(${height} 0) rotate(90 0 0)`
       : undefined;
 
@@ -238,7 +236,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         viewBox={viewBox}
         data-grid={GridType[board.level.type]}
         data-s={GameState[boardState]}
-        data-r={rotated ? 't' : 'f'}
+        data-r={shouldRotate ? 't' : 'f'}
         data-s2={
           boardState === GameState.DEMO
             ? GameState[GameState.GAME_OVER]

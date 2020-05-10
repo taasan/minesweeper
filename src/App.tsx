@@ -1,9 +1,7 @@
 import React from 'react';
 import './App.css';
 // import Minesweeper, { LEVELS } from './Components/Minesweeper';
-import SvgMinesweeper, {
-  IProps as MinesweeperProps,
-} from './Components/Svg/SvgMinesweeper';
+import SvgMinesweeper from './Components/Svg/SvgMinesweeper';
 import { LevelAction, Store, initialState, reducer } from './store';
 import SettingsContextProvider, {
   ThemeContext,
@@ -19,9 +17,7 @@ import { hexagonPoints } from './lib';
 import { cellSize } from './Components/Svg/Board/SvgCell';
 import { GridType } from './Game';
 
-const Game = (props: MinesweeperProps & RouteComponentProps) => (
-  <SvgMinesweeper state={props.state} dispatch={props.dispatch} />
-);
+const Game = (_props: RouteComponentProps) => <SvgMinesweeper />;
 
 const Settings = (_props: SettingsDialogProps & RouteComponentProps) => (
   <SettingsDialog />
@@ -58,7 +54,7 @@ const squarePoints = () => {
 };
 
 const App: React.FC<{}> = () => {
-  const context = React.useContext(Store);
+  // const context = React.useContext(Store);
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { theme } = React.useContext(ThemeContext);
   useTheme(theme);
@@ -66,9 +62,9 @@ const App: React.FC<{}> = () => {
   return (
     <div className="App">
       <div>
-        <Store.Provider value={context}>
+        <Store.Provider value={{ state, dispatch }}>
           <Router basepath={BASE}>
-            <Game default state={state} dispatch={dispatch} />
+            <Game default />
             <Settings path="/settings.html" />
             <Levels dispatch={dispatch} path="/level.html" />
           </Router>

@@ -9,27 +9,17 @@ import ErrorBoundary from '../ErrorBoundary';
 import SvgBoard from './Board/SvgBoard';
 import { onContextMenu } from '..';
 import { DISARMED_MINE, EXPLODED_MINE, getFlag } from '../../graphics';
-import {
-  Action,
-  CmdAction,
-  FullscreenAction,
-  IState,
-  LevelAction,
-  MenuAction,
-  ModalAction,
-} from '../../store';
-import { NumeralSystem, assertNever } from '../../lib';
+import { assertNever } from '../../lib';
 import FormatNumber from '../FormatNumber';
 import Timer from '../Timer';
 import {
   FitWindowContext,
+  NumeralSystemContext,
   RotateContext,
   useSettingsContext,
 } from '../../store/contexts/settings';
 import { Store } from '../../store';
 import { Link } from '../../router';
-
-export type IProps = { state: IState; dispatch: React.Dispatch<Action> };
 
 // TODO: Move
 const registerEvent = (event: string, callback: (_: any) => void) => {
@@ -37,14 +27,16 @@ const registerEvent = (event: string, callback: (_: any) => void) => {
   return () => window.removeEventListener(event, callback);
 };
 
-const SvgMinesweeper: React.FC<IProps> = ({ state, dispatch }) => {
-  const { game, containerRef, elapsedTime, showMenu, lives } = state;
+const SvgMinesweeper: React.FC<{}> = () => {
+  const { state, dispatch } = React.useContext(Store);
+
+  const { game, containerRef } = state;
   const { board } = game;
 
   const {
-    numeralSystem,
     fitWindow,
     rotate: rotated,
+    numeralSystem,
   } = useSettingsContext().state;
 
   React.useEffect(() => {
@@ -123,19 +115,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ state, dispatch }) => {
         onPointerDown={handlePointerDown}
         onContextMenu={done ? handleRestartGame : onContextMenu}
       >
-        <StatusBar
-          remainingLives={lives - board.cellStates[CellState.EXPLODED]}
-          gameState={board.state}
-          remainingMines={
-            board.level.mines -
-            board.cellStates[CellState.FLAGGED] -
-            board.cellStates[CellState.EXPLODED]
-          }
-          dispatch={dispatch}
-          elapsedTime={elapsedTime}
-          numeralSystem={numeralSystem}
-          showMenu={showMenu}
-        />
+        <StatusBar />
         <ErrorBoundary>
           <SvgBoard
             rotated={rotated}
@@ -143,6 +123,7 @@ const SvgMinesweeper: React.FC<IProps> = ({ state, dispatch }) => {
             dispatch={dispatch}
             board={board}
             style={boardStyle}
+            numeralSystem={numeralSystem}
           />
         </ErrorBoundary>
       </div>
@@ -150,160 +131,142 @@ const SvgMinesweeper: React.FC<IProps> = ({ state, dispatch }) => {
   );
 };
 
-interface ControlsProps {
-  gameState: GameState;
-  remainingMines: number;
-  remainingLives: number;
-  dispatch: React.Dispatch<
-    ModalAction | CmdAction | LevelAction | MenuAction | FullscreenAction
-  >;
-  elapsedTime(): number;
-  numeralSystem: NumeralSystem;
-  showMenu: boolean;
-}
+const StatusBar = React.memo(() => {
+  const { state, dispatch } = React.useContext(Store);
 
-const StatusBar = React.memo(
-  React.forwardRef<HTMLDivElement, ControlsProps>(
-    (
-      {
-        dispatch,
-        elapsedTime,
-        numeralSystem,
-        showMenu,
-        gameState,
-        remainingMines: remaining,
-        remainingLives,
-      },
-      ref
-    ) => {
-      const handleGameStateClick = React.useCallback(() => {
-        switch (gameState) {
-          case GameState.PAUSED:
-            dispatch({
-              type: 'UNPAUSE',
-            });
-            break;
-          case GameState.PLAYING:
-            dispatch({
-              type: 'PAUSE',
-            });
-            break;
-          case GameState.COMPLETED:
-          case GameState.GAME_OVER:
-          case GameState.ERROR:
-            dispatch({
-              type: 'setLevel',
-            });
-        }
-      }, [dispatch, gameState]);
-      const { lives } = React.useContext(Store);
-      const { rotate, setRotate } = React.useContext(RotateContext);
-      const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
-      const [fullScreen, setFullScreen] = React.useState(document.fullscreen);
+  const { elapsedTime, showMenu, lives } = state;
+  const board = state.game.board;
+  const gameState = board.state;
+  const remaining =
+    board.level.mines -
+    board.cellStates[CellState.FLAGGED] -
+    board.cellStates[CellState.EXPLODED];
 
-      const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
-
-      React.useEffect(() => {
-        return registerEvent('fullscreenchange', () =>
-          setFullScreen(document.fullscreen)
-        );
-      }, []);
-
-      return (
-        <div className="SvgMinesweeper__Controls" ref={ref}>
-          <div role="button" onClick={handleGameStateClick} {...itemsProps}>
-            <Timer
-              numeralSystem={numeralSystem}
-              elapsedTime={elapsedTime}
-              running={gameState === GameState.PLAYING}
-            />
-          </div>
-          <div
-            {...itemsProps}
-            role="button"
-            onClick={handleGameStateClick}
-            aria-label={`Game state: ${GameState[gameState]}`}
-          >
-            {renderGameState(gameState, lives, remainingLives)}
-          </div>
-          <div {...itemsProps} role="button">
-            <FormatNumber numeralSystem={numeralSystem} n={remaining} />
-            <span role="img" aria-label="Remaining mines">
-              {remaining >= 0 ? getFlag() : '💩'}
-            </span>{' '}
-          </div>
-          <details open={showMenu}>
-            <summary
-              onClick={e => {
-                e.preventDefault();
-                dispatch({ type: 'toggleMenu' });
-              }}
-              {...itemsProps}
-            >
-              <span role="img" aria-label="menu">
-                🍔
-              </span>
-            </summary>
-            <nav>
-              <ul role="menu" className="Menu__List">
-                <li role="menuitem">
-                  <Link to="level.html">Select level</Link>
-                </li>
-                <li role="menuitem">
-                  <Link to="settings.html">Settings</Link>
-                </li>
-                <li role="menuitemcheckbox" aria-checked={fitWindow}>
-                  <label>
-                    <input
-                      onChange={React.useCallback(
-                        (e: React.SyntheticEvent<HTMLInputElement>) =>
-                          setFitWindow(e.currentTarget?.checked),
-                        [setFitWindow]
-                      )}
-                      type="checkbox"
-                      checked={fitWindow}
-                    />
-                    Fit to window
-                  </label>
-                </li>
-                <li role="menuitemcheckbox" aria-checked={rotate}>
-                  <label>
-                    <input
-                      onChange={React.useCallback(
-                        (e: React.SyntheticEvent<HTMLInputElement>) =>
-                          setRotate(e.currentTarget?.checked),
-                        [setRotate]
-                      )}
-                      type="checkbox"
-                      checked={rotate}
-                    />
-                    Rotate
-                  </label>
-                </li>
-                <li role="menuitemcheckbox" aria-checked={fullScreen}>
-                  <label>
-                    <input
-                      onChange={() =>
-                        dispatch({
-                          type: fullScreen
-                            ? 'exitFullscreen'
-                            : 'requestFullscreen',
-                        })
-                      }
-                      type="checkbox"
-                      checked={fullScreen}
-                    />
-                    Fullscreen
-                  </label>
-                </li>
-              </ul>
-            </nav>
-          </details>
-        </div>
-      );
+  const remainingLives = lives - board.cellStates[CellState.EXPLODED];
+  const { numeralSystem } = React.useContext(NumeralSystemContext);
+  const handleGameStateClick = React.useCallback(() => {
+    switch (gameState) {
+      case GameState.PAUSED:
+        dispatch({
+          type: 'UNPAUSE',
+        });
+        break;
+      case GameState.PLAYING:
+        dispatch({
+          type: 'PAUSE',
+        });
+        break;
+      case GameState.COMPLETED:
+      case GameState.GAME_OVER:
+      case GameState.ERROR:
+        dispatch({
+          type: 'setLevel',
+        });
     }
-  )
-);
+  }, [dispatch, gameState]);
+  const { rotate, setRotate } = React.useContext(RotateContext);
+  const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
+  const [fullScreen, setFullScreen] = React.useState(document.fullscreen);
+
+  const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
+
+  React.useEffect(() => {
+    return registerEvent('fullscreenchange', () =>
+      setFullScreen(document.fullscreen)
+    );
+  }, []);
+
+  return (
+    <div className="SvgMinesweeper__Controls">
+      <div role="button" onClick={handleGameStateClick} {...itemsProps}>
+        <Timer
+          numeralSystem={numeralSystem}
+          elapsedTime={elapsedTime}
+          running={gameState === GameState.PLAYING}
+        />
+      </div>
+      <div
+        {...itemsProps}
+        role="button"
+        onClick={handleGameStateClick}
+        aria-label={`Game state: ${GameState[gameState]}`}
+      >
+        {renderGameState(gameState, lives, remainingLives)}
+      </div>
+      <div {...itemsProps} role="button">
+        <FormatNumber numeralSystem={numeralSystem} n={remaining} />
+        <span role="img" aria-label="Remaining mines">
+          {remaining >= 0 ? getFlag() : '💩'}
+        </span>{' '}
+      </div>
+      <details open={showMenu}>
+        <summary
+          onClick={e => {
+            e.preventDefault();
+            dispatch({ type: 'toggleMenu' });
+          }}
+          {...itemsProps}
+        >
+          <span role="img" aria-label="menu">
+            🍔
+          </span>
+        </summary>
+        <nav>
+          <ul role="menu" className="Menu__List">
+            <li role="menuitem">
+              <Link to="level.html">Select level</Link>
+            </li>
+            <li role="menuitem">
+              <Link to="settings.html">Settings</Link>
+            </li>
+            <li role="menuitemcheckbox" aria-checked={fitWindow}>
+              <label>
+                <input
+                  onChange={React.useCallback(
+                    (e: React.SyntheticEvent<HTMLInputElement>) =>
+                      setFitWindow(e.currentTarget?.checked),
+                    [setFitWindow]
+                  )}
+                  type="checkbox"
+                  checked={fitWindow}
+                />
+                Fit to window
+              </label>
+            </li>
+            <li role="menuitemcheckbox" aria-checked={rotate}>
+              <label>
+                <input
+                  onChange={React.useCallback(
+                    (e: React.SyntheticEvent<HTMLInputElement>) =>
+                      setRotate(e.currentTarget?.checked),
+                    [setRotate]
+                  )}
+                  type="checkbox"
+                  checked={rotate}
+                />
+                Rotate
+              </label>
+            </li>
+            <li role="menuitemcheckbox" aria-checked={fullScreen}>
+              <label>
+                <input
+                  onChange={() =>
+                    dispatch({
+                      type: fullScreen ? 'exitFullscreen' : 'requestFullscreen',
+                    })
+                  }
+                  type="checkbox"
+                  checked={fullScreen}
+                />
+                Fullscreen
+              </label>
+            </li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  );
+});
 
 function renderGameState(state: GameState, lives: number, remaining: number) {
   switch (state) {

@@ -88,8 +88,8 @@ const formatLevel = ({
 
 export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
   const { numeralSystem } = useContext(NumeralSystemContext);
-  const store = useContext(Store);
-  const initialLevel: Level = store.game.board.level;
+  const { state: context } = useContext(Store);
+  const initialLevel: Level = context.game.board.level;
   // const numeralSystem = initialState.numeralSystem;
   const [level, setLevel] = useState(initialLevel);
   const { rows, cols, mines, type, topology } = level;
