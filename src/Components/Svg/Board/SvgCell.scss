@@ -33,7 +33,7 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
 }
 
 @function removeCover($gameState, $cellState) {
-  @if (contains($flagTypes, $cellState)) {
+  @if (contains(($flagTypes, $EXPLODED), $cellState)) {
     @return false;
   }
   @if ($gameState == $PAUSED) {
@@ -74,6 +74,7 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
 }
 
 .c {
+  pointer-events: all;
   font-family: monospace, 'color-emoji';
   user-select: none;
   font-weight: bold;
@@ -145,8 +146,15 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
   }
 }
 
-.SvgBoard[data-s='#{$PAUSED}'] .ct {
-  visibility: hidden;
+.SvgBoard[data-s='#{$PAUSED}'] {
+  .cc,
+  .cb {
+    fill: var(--cell-background, revert) !important;
+  }
+
+  .ct {
+    visibility: hidden;
+  }
 }
 
 /*
@@ -210,15 +218,14 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
 
 .SvgBoard[data-s='#{$GAME_OVER}'] .c[data-s='#{$FLAGGED}']:not([data-m]) .cc {
   fill: var(--cell-background-flagged-wrong, revert);
+  visibility: visible !important;
 }
 
 .SvgBoard[data-s='#{$DEMO}'] .c[data-s='#{$FLAGGED}']:not([data-m]) .cc {
   fill: var(--cell-background-flagged-wrong, revert);
+  visibility: visible !important;
 }
 
-.SvgBoard[data-s='#{$GAME_OVER}'] .c[data-m] .cc {
-  visibility: hidden;
-}
 /*
 .SvgBoard[data-s=#{$GAME_OVER}]
   .c[data-m]:not([data-s=#{$EXPLODED}]),

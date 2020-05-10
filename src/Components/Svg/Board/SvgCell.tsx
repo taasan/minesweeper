@@ -77,12 +77,20 @@ const SvgCell: FC<CellRecordProps> = props => {
   const role = /^\p{Number}$/u.test(content.toString()) ? undefined : 'img';
 
   const render = () => {
+    const background = <use href={`#${GridType[gridType]}`} className="cb" />;
     const cover = <use href={`#${GridType[gridType]}`} className="cc" />;
 
     switch (state) {
       case CellState.NEW:
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        return done ? <Text role={role} content={content} /> : cover;
+        return done ? (
+          <>
+            {cover}
+            <Text role={role} content={content} />
+          </>
+        ) : (
+          cover
+        );
       case CellState.FLAGGED:
       case CellState.UNCERTAIN:
         return (
@@ -93,14 +101,14 @@ const SvgCell: FC<CellRecordProps> = props => {
         );
       case CellState.OPEN:
         if (mine === undefined && threatCount === 0) {
-          return cover;
+          return background;
         }
       // eslint-disable-next-line no-fallthrough
       case CellState.EXPLODED:
         return (
           <>
+            {background}
             <Text role={role} content={content} />
-            {cover}
           </>
         );
     }
@@ -117,7 +125,6 @@ const SvgCell: FC<CellRecordProps> = props => {
       data-t={threatCount !== 0 && mine === undefined ? threatCount : undefined}
       data-m={mine !== undefined ? true : undefined}
     >
-      <use href={`#${GridType[gridType]}`} className="cb" />
       {render()}
       {/**}
       <text
