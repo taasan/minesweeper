@@ -2,6 +2,7 @@ import * as React from 'react';
 import './SvgBoard.css';
 import {
   CellRecord,
+  CellState,
   Coordinate,
   GameRecord,
   GameState,
@@ -10,6 +11,7 @@ import {
   ValidationError,
   calculateCoordinate,
   calculateIndex,
+  getState,
 } from '../../../Game';
 import { Dispatch } from 'react';
 import { CmdAction } from '../../../store';
@@ -168,6 +170,12 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         }
       }
 
+      const state = getState(cell);
+      const active =
+        !done &&
+        (boardState === GameState.PLAYING ||
+          boardState === GameState.NOT_INITIALIZED) &&
+        state !== CellState.EXPLODED;
       const jsx = (
         <SvgCell
           coordinate={calculateIndex(cols, {
@@ -175,7 +183,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
             col: (col + cols) % cols,
           })}
           gridType={board.level.type}
-          dispatch={dispatch}
+          dispatch={active ? dispatch : undefined}
           content={getContent(cell, boardState, numeralSystem)}
           cell={cell}
           done={done}
