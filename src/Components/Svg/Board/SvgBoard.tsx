@@ -197,18 +197,18 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           done={done}
         />
       );
-      const key = { key: `${x},${y}` };
+      const key = `${x},${y}`;
       return additional.length === 0 ? (
-        <svg {...key} x={x} y={y} width={cellSize} height={cellSize}>
+        <svg key={key} x={x} y={y} width={cellSize} height={cellSize}>
           {jsx}
         </svg>
       ) : (
-        <g {...key}>
+        <React.Fragment key={key}>
           {[...additional]}
           <svg x={x} y={y} width={cellSize} height={cellSize}>
             {jsx}
           </svg>
-        </g>
+        </React.Fragment>
       );
     };
 
