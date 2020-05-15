@@ -254,7 +254,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         data-grid={GridType[board.level.type]}
         data-s={GameState[boardState]}
         data-r={shouldRotate ? 't' : 'f'}
-        onContextMenu={onContextMenu}
+        onContextMenu={done ? undefined : onContextMenu}
       >
         <g transform={transform}>
           <rect x="0" y="0" width="100%" height="100%" />

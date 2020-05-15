@@ -119,8 +119,8 @@ const SvgCell: FC<CellRecordProps> = props => {
     <svg
       viewBox={`0 0 ${cellSize} ${cellSize}`}
       className="c"
-      onMouseDown={handleClick}
-      onContextMenu={handleContextMenu}
+      onMouseDown={done === true ? undefined : handleClick}
+      onContextMenu={done === true ? undefined : handleContextMenu}
       data-s={state}
       data-t={threatCount !== 0 && mine === undefined ? threatCount : undefined}
       data-m={mine !== undefined ? true : undefined}
