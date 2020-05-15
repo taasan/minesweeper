@@ -254,11 +254,6 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
         data-grid={GridType[board.level.type]}
         data-s={GameState[boardState]}
         data-r={shouldRotate ? 't' : 'f'}
-        data-s2={
-          boardState === GameState.DEMO
-            ? GameState[GameState.GAME_OVER]
-            : GameState[boardState]
-        }
         onContextMenu={onContextMenu}
       >
         <g transform={transform}>
