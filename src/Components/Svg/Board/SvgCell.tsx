@@ -95,7 +95,7 @@ const SvgCell: FC<CellRecordProps> = props => {
       case CellState.UNCERTAIN:
         return (
           <>
-            {cover}
+            {done === true && mine !== undefined ? background : cover}
             <Text role="img" content={content} />
           </>
         );
