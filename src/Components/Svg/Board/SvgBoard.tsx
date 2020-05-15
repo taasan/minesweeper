@@ -160,13 +160,21 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
       if (topology === Topology.TOROIDAL) {
         if (col === 0) {
           additional.push(mapCell(cell, { row, col: cols }));
+        } else if (col === 1) {
+          additional.push(mapCell(cell, { row, col: cols + 1 }));
         } else if (col === cols - 1) {
           additional.push(mapCell(cell, { row, col: -1 }));
+        } else if (col === cols - 2) {
+          additional.push(mapCell(cell, { row, col: -2 }));
         }
         if (row === 0) {
           additional.push(mapCell(cell, { col, row: rows }));
+        } else if (row === 1) {
+          additional.push(mapCell(cell, { col, row: rows + 1 }));
         } else if (row === rows - 1) {
           additional.push(mapCell(cell, { col, row: -1 }));
+        } else if (row === rows - 2) {
+          additional.push(mapCell(cell, { col, row: -2 }));
         }
       }
 
@@ -214,13 +222,14 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           }
         : {
             x: -cellSize,
-            y: -cellSize,
+            y: -(cellSize * 1.25),
             width: width + cellSize * 2,
-            height: height + cellSize * 2,
+            height: height + cellSize * 2.5,
           };
     const v2 = shouldRotate
       ? {
-          ...v,
+          x: v.y,
+          y: v.x,
           width: v.height,
           height: v.width,
         }
