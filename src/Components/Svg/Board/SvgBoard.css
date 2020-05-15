@@ -1,5 +1,6 @@
 .SvgBoard {
   fill: transparent;
+  border: solid var(--cell-background-open);
   /*
   box-shadow: 0 0 40px wheat, 0 0 10px purple;
   padding: 10px;

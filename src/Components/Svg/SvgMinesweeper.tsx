@@ -8,6 +8,7 @@ import { useSettingsContext } from '../../store/contexts/settings';
 import { Store } from '../../store';
 import StatusBar from './StatusBar';
 import registerEvent from './registerEvent';
+import { BOARD_BORDER_WIDTH } from '../../lib';
 
 const SvgMinesweeper: React.FC<{}> = () => {
   const { state, dispatch } = React.useContext(Store);
@@ -104,7 +105,7 @@ const SvgMinesweeper: React.FC<{}> = () => {
             ref={state.containerRef}
             dispatch={dispatch}
             board={board}
-            style={boardStyle}
+            style={{ borderWidth: `${BOARD_BORDER_WIDTH}px`, ...boardStyle }}
             numeralSystem={numeralSystem}
           />
         </ErrorBoundary>

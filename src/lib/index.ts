@@ -4,6 +4,7 @@ export { default as getFitWindowCss } from './getFitWindowCss';
 export { default as zero } from './zero';
 export { default as assertNever } from './assertNever';
 
+export * from './getFitWindowCss';
 export * from './NumeralSystem';
 export * from './hex';
 
