@@ -14,7 +14,6 @@ import {
   Content,
   DISARMED_MINE,
   EXPLODED_MINE,
-  FLAG,
   MINES,
   MISPLACED_FLAG,
   SvgSymbolKey,
@@ -47,7 +46,7 @@ export function getContent(
   const done = gameOver || gameWon || demo;
   const isFlagged = state === CellState.FLAGGED;
   if (!done && isFlagged) {
-    return getSymbol(FLAG);
+    return getSymbol(getFlag());
   }
   const isDisarmed = done && isMined && isFlagged && (gameWon || gameOver);
   if (gameWon && isMined && state !== CellState.FLAGGED) {
