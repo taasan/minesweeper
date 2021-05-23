@@ -3,13 +3,13 @@ import { NumeralSystem, isNumeralSystem } from '../../../lib';
 import useLocalStorage from './useLocalStorage';
 import _ from 'lodash';
 
-export type NumeralSystemContext = {
+export type INumeralSystemContext = {
   numeralSystem: NumeralSystem;
   setNumeralSystem: (NumeralSystem: NumeralSystem) => void;
 };
 const defaultNumeralSystem = NumeralSystem.ascii;
 
-export const NumeralSystemContext = createContext<NumeralSystemContext>({
+export const NumeralSystemContext = createContext<INumeralSystemContext>({
   numeralSystem: defaultNumeralSystem,
   setNumeralSystem: _.noop,
 });

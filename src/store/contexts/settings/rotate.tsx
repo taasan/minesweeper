@@ -2,13 +2,13 @@ import React, { createContext } from 'react';
 import useLocalStorage from './useLocalStorage';
 import _ from 'lodash';
 
-export type RotateContext = {
+export type IRotateContext = {
   rotate: boolean;
   setRotate: (rotate: boolean) => void;
 };
 const defaultRotate = false;
 
-export const RotateContext = createContext<RotateContext>({
+export const RotateContext = createContext<IRotateContext>({
   rotate: defaultRotate,
   setRotate: _.noop,
 });

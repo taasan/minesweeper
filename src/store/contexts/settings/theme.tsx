@@ -4,12 +4,12 @@ import { ITheme, isTheme } from '../../../Theme/theme';
 import useLocalStorage from './useLocalStorage';
 import _ from 'lodash';
 
-export type ThemeContext = {
+export type IThemeContext = {
   theme: ITheme;
   setTheme: (theme: ITheme) => void;
 };
 
-export const ThemeContext = createContext<ThemeContext>({
+export const ThemeContext = createContext<IThemeContext>({
   theme: defaultTheme,
   setTheme: _.noop,
 });

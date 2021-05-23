@@ -2,13 +2,13 @@ import React, { createContext } from 'react';
 import useLocalStorage from './useLocalStorage';
 import _ from 'lodash';
 
-export type FitWindowContext = {
+export type IFitWindowContext = {
   fitWindow: boolean;
   setFitWindow: (fitWindow: boolean) => void;
 };
 const defaultFitWindow = false;
 
-export const FitWindowContext = createContext<FitWindowContext>({
+export const FitWindowContext = createContext<IFitWindowContext>({
   fitWindow: defaultFitWindow,
   setFitWindow: _.noop,
 });

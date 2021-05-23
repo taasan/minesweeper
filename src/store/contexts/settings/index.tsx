@@ -1,10 +1,14 @@
 import React from 'react';
-import ThemeContextProvider, { ThemeContext } from './theme';
-import FitWindowContextProvider, { FitWindowContext } from './fitWindow';
+import ThemeContextProvider, { IThemeContext, ThemeContext } from './theme';
+import FitWindowContextProvider, {
+  FitWindowContext,
+  IFitWindowContext,
+} from './fitWindow';
 import NumeralSystemContextProvider, {
+  INumeralSystemContext,
   NumeralSystemContext,
 } from './numeralSystem';
-import RotateContextProvider, { RotateContext } from './rotate';
+import RotateContextProvider, { IRotateContext, RotateContext } from './rotate';
 import { OmitByValueType } from '../../../lib';
 
 export {
@@ -35,17 +39,18 @@ const useProviders = <T extends object>(
 
 export const createSettingsContext: <T extends object>(
   Child: React.FC<T>
-) => (props: T & JSX.IntrinsicAttributes) => JSX.Element = useProviders(
+) => // eslint-disable-next-line react-hooks/rules-of-hooks
+(props: T & JSX.IntrinsicAttributes) => JSX.Element = useProviders(
   FitWindowContextProvider,
   ThemeContextProvider,
   NumeralSystemContextProvider,
   RotateContextProvider
 );
 
-export type SettingsContext = ThemeContext &
-  NumeralSystemContext &
-  FitWindowContext &
-  RotateContext;
+export type SettingsContext = IThemeContext &
+  INumeralSystemContext &
+  IFitWindowContext &
+  IRotateContext;
 
 export type SettingsContextValues = OmitByValueType<SettingsContext, Function>;
 

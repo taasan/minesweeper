@@ -99,6 +99,7 @@ const SvgCell: FC<CellRecordProps> = props => {
             <Text role="img" content={content} />
           </>
         );
+      // @ts-ignore: noFallthroughCasesInSwitch
       case CellState.OPEN:
         if (mine === undefined && threatCount === 0) {
           return background;

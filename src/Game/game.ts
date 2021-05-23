@@ -66,7 +66,7 @@ const createBoard: (game: Partial<GameRecord>) => GameRecord = game =>
     version: 0,
     onGameOver: _.noop,
     ...draft,
-  }));
+  })) as GameRecord;
 
 const getCellStates = (cells: CellArray) =>
   createCellStateStats(_.countBy(cells, cell => getState(cell)));

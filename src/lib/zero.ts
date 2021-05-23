@@ -1,1 +1,3 @@
-export default () => 0;
+const zero = () => 0;
+
+export default zero;
