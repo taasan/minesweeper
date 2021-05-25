@@ -34,4 +34,6 @@ const symbols = Object.freeze({
   [EXPLODED_MINE]: '💥', // Exploded mine
 });
 
-export default (key: SvgSymbolKey) => symbols[key] ?? key;
+export default function a(key: SvgSymbolKey) {
+  return symbols[key] ?? key;
+}
