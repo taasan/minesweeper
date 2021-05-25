@@ -547,41 +547,43 @@ export const legend: () => {
   board: GameRecord;
   nextState: NextStateFunction;
 } = () => {
-  const cells = ([
-    ...[...new Array(8)].map((_ignore, i) => ({
-      state: CellState.OPEN,
-      threatCount: (i + 1) as NumThreats,
-    })),
-    {
-      state: CellState.NEW,
-    },
-    { state: CellState.OPEN, threatCount: 0 },
+  const cells = (
+    [
+      ...[...new Array(8)].map((_ignore, i) => ({
+        state: CellState.OPEN,
+        threatCount: (i + 1) as NumThreats,
+      })),
+      {
+        state: CellState.NEW,
+      },
+      { state: CellState.OPEN, threatCount: 0 },
 
-    {
-      state: CellState.FLAGGED,
-      mine: 1,
-    },
-    {
-      state: CellState.FLAGGED,
-      threatCount: 0,
-    },
-    {
-      state: CellState.UNCERTAIN,
-      mine: 1,
-    },
-    {
-      state: CellState.UNCERTAIN,
-      threatCount: 0,
-    },
-    {
-      state: CellState.EXPLODED,
-      mine: 2,
-    },
-    {
-      state: CellState.OPEN,
-      mine: 3,
-    },
-  ] as CellRecordObject[]).map(fromObject);
+      {
+        state: CellState.FLAGGED,
+        mine: 1,
+      },
+      {
+        state: CellState.FLAGGED,
+        threatCount: 0,
+      },
+      {
+        state: CellState.UNCERTAIN,
+        mine: 1,
+      },
+      {
+        state: CellState.UNCERTAIN,
+        threatCount: 0,
+      },
+      {
+        state: CellState.EXPLODED,
+        mine: 2,
+      },
+      {
+        state: CellState.OPEN,
+        mine: 3,
+      },
+    ] as CellRecordObject[]
+  ).map(fromObject);
 
   const cols = 4;
   const board = createBoard({

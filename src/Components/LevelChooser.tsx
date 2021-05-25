@@ -107,14 +107,15 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
     });
   }
 
-  const selectedLevel = predefinedLevels.find(v => compareLevels(level, v))
-    ?.name;
+  const selectedLevel = predefinedLevels.find(v =>
+    compareLevels(level, v)
+  )?.name;
 
   const handleTypeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setLevel({
         ...level,
-        type: (GridType[e.currentTarget.value as any] as unknown) as GridType,
+        type: GridType[e.currentTarget.value as any] as unknown as GridType,
       }),
     [level]
   );
@@ -123,9 +124,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
     (e: React.ChangeEvent<HTMLSelectElement>) =>
       setLevel({
         ...level,
-        topology: (Topology[
-          e.currentTarget.value as any
-        ] as unknown) as Topology,
+        topology: Topology[e.currentTarget.value as any] as unknown as Topology,
       }),
     [level]
   );
@@ -277,7 +276,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
                       })}
                       content={content}
                       coordinate={0}
-                      gridType={(GridType[name as any] as unknown) as GridType}
+                      gridType={GridType[name as any] as unknown as GridType}
                     />
                   </div>
                 </label>
@@ -287,7 +286,7 @@ export const LevelChooser: React.FC<LevelChooserProps> = ({ onChange }) => {
             {Object.keys(Topology)
               .filter(name => !isNaN(Number(name)))
               .map(k => {
-                const t: Topology = (k as unknown) as Topology;
+                const t: Topology = k as unknown as Topology;
                 const name = Topology[t];
 
                 return (

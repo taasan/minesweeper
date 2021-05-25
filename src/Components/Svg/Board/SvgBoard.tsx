@@ -63,9 +63,7 @@ const SvgBoard = React.forwardRef<Readonly<SVGSVGElement>, IProps>(
           // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
           board.error.cause.message ? (
             <p>{board.error.cause.message}</p>
-          ) : (
-            undefined
-          );
+          ) : undefined;
         if (board.error != null) {
           console.error(board.error);
         }

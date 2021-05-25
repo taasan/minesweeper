@@ -104,9 +104,7 @@ const NumeralSystemChooser: React.FC<NumeralSystemChooserProps> = React.memo(
       {Object.keys(NumeralSystem)
         .filter(name => isNaN(Number(name)))
         .map(name => {
-          const value = (NumeralSystem[
-            name as any
-          ] as unknown) as NumeralSystem;
+          const value = NumeralSystem[name as any] as unknown as NumeralSystem;
           return (
             <li key={value}>
               <label title={name}>

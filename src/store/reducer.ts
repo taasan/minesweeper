@@ -198,7 +198,7 @@ const commandActionReducer = (state: IState, action: CmdAction): IState => {
 
 type ReducerFunction<S, A> = (state: S, action: A) => S;
 
-const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
+const reducer_: ReducerFunction<IState, Action> = (state, action): IState => {
   if (action.type === 'POKE' || action.type === 'FLAG') {
     console.debug({
       ...action,
@@ -269,21 +269,23 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
 export const withLives: (
   lives: number,
   reducer: ReducerFunction<IState, Action>
-) => ReducerFunction<IState, Action> = (
-  lives: number,
-  // eslint-disable-next-line no-shadow
-  reducer: ReducerFunction<IState, Action>
-) => (state: IState, action: Action): IState => {
-  const newState = reducer(state, action);
-  if (
-    newState.game.board.state === GameState.GAME_OVER &&
-    lives >= newState.game.board.cellStates[CellState.EXPLODED]
-  ) {
-    return produce(newState, draft => {
-      draft.game.board.state = GameState.PLAYING;
-    });
-  }
-  return newState;
-};
+) => ReducerFunction<IState, Action> =
+  (
+    lives: number,
+    // eslint-disable-next-line no-shadow
+    reducer: ReducerFunction<IState, Action>
+  ) =>
+  (state: IState, action: Action): IState => {
+    const newState = reducer(state, action);
+    if (
+      newState.game.board.state === GameState.GAME_OVER &&
+      lives >= newState.game.board.cellStates[CellState.EXPLODED]
+    ) {
+      return produce(newState, draft => {
+        draft.game.board.state = GameState.PLAYING;
+      });
+    }
+    return newState;
+  };
 
-export default withLives(2, reducer);
+export default withLives(2, reducer_);

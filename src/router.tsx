@@ -10,12 +10,13 @@ import React from 'react';
 // Can't use subdirectories in route
 
 function base() {
-  const b = (process.env.PUBLIC_URL === '.'
-    ? window.location.pathname.substring(
-        0,
-        window.location.pathname.lastIndexOf('/') + 1
-      )
-    : process.env.PUBLIC_URL ?? '/'
+  const b = (
+    process.env.PUBLIC_URL === '.'
+      ? window.location.pathname.substring(
+          0,
+          window.location.pathname.lastIndexOf('/') + 1
+        )
+      : process.env.PUBLIC_URL ?? '/'
   )
     .split(/[/]+/)
     .join('/');

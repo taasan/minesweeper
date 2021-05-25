@@ -29,13 +29,14 @@ export * from './useLocalStorage';
 type Provider<P extends object> = (
   props: React.PropsWithChildren<P>
 ) => JSX.Element;
-const useProviders = <T extends object>(
-  ...Providers: Provider<React.Props<T>>[]
-) => (Child: React.FC<T>) => (props: T & JSX.IntrinsicAttributes) =>
-  Providers.reduce(
-    (acc, Provider) => <Provider>{acc}</Provider>,
-    <Child {...props} />
-  );
+const useProviders =
+  <T extends object>(...Providers: Provider<React.Props<T>>[]) =>
+  (Child: React.FC<T>) =>
+  (props: T & JSX.IntrinsicAttributes) =>
+    Providers.reduce(
+      (acc, Provider) => <Provider>{acc}</Provider>,
+      <Child {...props} />
+    );
 
 export const createSettingsContext: <T extends object>(
   Child: React.FC<T>
@@ -56,13 +57,10 @@ export type SettingsContextValues = OmitByValueType<SettingsContext, Function>;
 
 export const useSettingsContext = () => {
   const { theme: initialTheme, setTheme } = React.useContext(ThemeContext);
-  const { fitWindow: initialFitWindow, setFitWindow } = React.useContext(
-    FitWindowContext
-  );
-  const {
-    numeralSystem: initialNumeralSystem,
-    setNumeralSystem,
-  } = React.useContext(NumeralSystemContext);
+  const { fitWindow: initialFitWindow, setFitWindow } =
+    React.useContext(FitWindowContext);
+  const { numeralSystem: initialNumeralSystem, setNumeralSystem } =
+    React.useContext(NumeralSystemContext);
 
   const { rotate: initialRotate, setRotate } = React.useContext(RotateContext);
 
