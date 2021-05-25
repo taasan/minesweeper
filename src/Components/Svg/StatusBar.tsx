@@ -10,7 +10,6 @@ import Timer from '../Timer';
 import FormatNumber from '../FormatNumber';
 import { DISARMED_MINE, EXPLODED_MINE, getFlag } from '../../graphics';
 import { Link } from '../../router';
-import registerEvent from './registerEvent';
 import { assertNever } from '../../lib';
 
 const StatusBar = () => {
@@ -48,17 +47,8 @@ const StatusBar = () => {
   }, [dispatch, gameState]);
   const { rotate, setRotate } = React.useContext(RotateContext);
   const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
-  const [fullScreen, setFullScreen] = React.useState(
-    document.fullscreenElement != null
-  );
 
   const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
-
-  React.useEffect(() => {
-    return registerEvent('fullscreenchange', () =>
-      setFullScreen(document.fullscreenElement != null)
-    );
-  }, []);
 
   return (
     <div className="SvgMinesweeper__Controls">
@@ -133,20 +123,19 @@ const StatusBar = () => {
                 Rotate
               </label>
             </li>
-            <li role="menuitemcheckbox" aria-checked={fullScreen}>
-              <label>
-                <input
-                  onChange={() =>
+            {document.fullscreenEnabled && (
+              <li role="menuitem">
+                <button
+                  onClick={() =>
                     dispatch({
-                      type: fullScreen ? 'exitFullscreen' : 'requestFullscreen',
+                      type: 'toggleFullscreen',
                     })
                   }
-                  type="checkbox"
-                  checked={fullScreen}
-                />
-                Fullscreen
-              </label>
-            </li>
+                >
+                  Toggle fullscreen
+                </button>
+              </li>
+            )}
           </ul>
         </nav>
       </details>

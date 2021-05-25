@@ -69,13 +69,9 @@ export type FitWindowAction = {
   ref: RefObject<SVGSVGElement>;
 };
 
-export type FullscreenAction =
-  | {
-      type: 'requestFullscreen';
-    }
-  | {
-      type: 'exitFullscreen';
-    };
+export type FullscreenAction = {
+  type: 'toggleFullscreen';
+};
 
 export type ModalAction =
   | {
@@ -252,13 +248,10 @@ const reducer_: ReducerFunction<IState, Action> = (state, action): IState => {
     case 'hideMenu':
     case 'toggleMenu':
       return menuActionReducer(state, action);
-    case 'requestFullscreen':
+    case 'toggleFullscreen':
       if (document.fullscreenElement == null) {
         document.documentElement.requestFullscreen().catch();
-      }
-      return state;
-    case 'exitFullscreen':
-      if (document.fullscreenElement != null) {
+      } else {
         document.exitFullscreen().catch();
       }
       return state;
