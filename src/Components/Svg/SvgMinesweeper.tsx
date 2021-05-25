@@ -26,11 +26,6 @@ const SvgMinesweeper: React.FC<{}> = () => {
     dispatch({ type: 'fitWindow', ref: containerRef });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  React.useEffect(() => {
-    return registerEvent('resize', () =>
-      dispatch({ type: 'fitWindow', ref: containerRef })
-    );
-  }, [containerRef, dispatch]);
 
   React.useEffect(
     () =>
