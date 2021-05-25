@@ -14,6 +14,7 @@ import { IState, TimingEvent } from './context';
 import produce from 'immer';
 import { getFitWindowCss } from '../lib';
 import { chunk } from 'lodash';
+import { RefObject } from 'react';
 
 export type PauseAction =
   | {
@@ -65,6 +66,7 @@ export type LevelAction = {
 
 export type FitWindowAction = {
   type: 'fitWindow';
+  ref: RefObject<SVGSVGElement>;
 };
 
 export type FullscreenAction =
@@ -244,7 +246,7 @@ const reducer: ReducerFunction<IState, Action> = (state, action): IState => {
       });
     case 'fitWindow':
       return produce(state, draft => {
-        draft.maxBoardDimensions = getFitWindowCss(state.containerRef);
+        draft.maxBoardDimensions = getFitWindowCss(action.ref);
       });
     case 'showMenu':
     case 'hideMenu':

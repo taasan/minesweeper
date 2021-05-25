@@ -62,7 +62,9 @@ const App: React.FC<{}> = () => {
   return (
     <div className="App">
       <div>
-        <Store.Provider value={{ state, dispatch }}>
+        <Store.Provider
+          value={{ state, dispatch, containerRef: React.createRef() }}
+        >
           <Router basepath={BASE}>
             <Game default />
             <Settings path="/settings.html" />

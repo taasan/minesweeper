@@ -14,7 +14,7 @@ import registerEvent from './registerEvent';
 import { assertNever } from '../../lib';
 
 const StatusBar = () => {
-  const { state, dispatch } = React.useContext(Store);
+  const { state, dispatch, containerRef } = React.useContext(Store);
 
   const { elapsedTime, showMenu, lives } = state;
   const board = state.game.board;
@@ -105,9 +105,11 @@ const StatusBar = () => {
               <label>
                 <input
                   onChange={React.useCallback(
-                    (e: React.SyntheticEvent<HTMLInputElement>) =>
-                      setFitWindow(e.currentTarget?.checked),
-                    [setFitWindow]
+                    (e: React.SyntheticEvent<HTMLInputElement>) => {
+                      setFitWindow(e.currentTarget?.checked);
+                      dispatch({ type: 'fitWindow', ref: containerRef });
+                    },
+                    [containerRef, dispatch, setFitWindow]
                   )}
                   type="checkbox"
                   checked={fitWindow}

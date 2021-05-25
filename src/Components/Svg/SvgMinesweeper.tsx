@@ -11,9 +11,9 @@ import registerEvent from './registerEvent';
 import { BOARD_BORDER_WIDTH } from '../../lib';
 
 const SvgMinesweeper: React.FC<{}> = () => {
-  const { state, dispatch } = React.useContext(Store);
+  const { state, dispatch, containerRef } = React.useContext(Store);
 
-  const { game, containerRef } = state;
+  const { game } = state;
   const { board } = game;
 
   const {
@@ -23,9 +23,10 @@ const SvgMinesweeper: React.FC<{}> = () => {
   } = useSettingsContext().state;
 
   React.useEffect(() => {
-    dispatch({ type: 'fitWindow' });
-    // return registerEvent('resize', () => dispatch({ type: 'fitWindow' }));
-  }, [dispatch]);
+    return registerEvent('resize', () =>
+      dispatch({ type: 'fitWindow', ref: containerRef })
+    );
+  }, [containerRef, dispatch]);
 
   React.useEffect(
     () =>
@@ -102,7 +103,7 @@ const SvgMinesweeper: React.FC<{}> = () => {
         <ErrorBoundary>
           <SvgBoard
             rotated={rotated}
-            ref={state.containerRef}
+            ref={containerRef}
             dispatch={dispatch}
             board={board}
             style={{ borderWidth: `${BOARD_BORDER_WIDTH}px`, ...boardStyle }}
