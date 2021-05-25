@@ -48,13 +48,15 @@ const StatusBar = () => {
   }, [dispatch, gameState]);
   const { rotate, setRotate } = React.useContext(RotateContext);
   const { fitWindow, setFitWindow } = React.useContext(FitWindowContext);
-  const [fullScreen, setFullScreen] = React.useState(document.fullscreen);
+  const [fullScreen, setFullScreen] = React.useState(
+    document.fullscreenElement != null
+  );
 
   const itemsProps = { className: 'SvgMinesweeper__Controls__Item' };
 
   React.useEffect(() => {
     return registerEvent('fullscreenchange', () =>
-      setFullScreen(document.fullscreen)
+      setFullScreen(document.fullscreenElement != null)
     );
   }, []);
 

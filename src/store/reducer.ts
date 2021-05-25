@@ -253,12 +253,12 @@ const reducer_: ReducerFunction<IState, Action> = (state, action): IState => {
     case 'toggleMenu':
       return menuActionReducer(state, action);
     case 'requestFullscreen':
-      if (!document.fullscreen) {
+      if (document.fullscreenElement == null) {
         document.documentElement.requestFullscreen().catch();
       }
       return state;
     case 'exitFullscreen':
-      if (document.fullscreen) {
+      if (document.fullscreenElement != null) {
         document.exitFullscreen().catch();
       }
       return state;

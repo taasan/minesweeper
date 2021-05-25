@@ -35,7 +35,7 @@ const SvgMinesweeper: React.FC<{}> = () => {
   React.useEffect(
     () =>
       registerEvent('keyup', (e: KeyboardEvent) => {
-        if (e.keyCode === 80) {
+        if (e.key.toUpperCase() === 'P') {
           dispatch({
             type: board.state === GameState.PLAYING ? 'PAUSE' : 'UNPAUSE',
           });

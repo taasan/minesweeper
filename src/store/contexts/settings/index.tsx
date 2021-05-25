@@ -30,7 +30,7 @@ type Provider<P extends object> = (
   props: React.PropsWithChildren<P>
 ) => JSX.Element;
 const useProviders =
-  <T extends object>(...Providers: Provider<React.Props<T>>[]) =>
+  <T extends object>(...Providers: Provider<React.ClassAttributes<T>>[]) =>
   (Child: React.FC<T>) =>
   (props: T & JSX.IntrinsicAttributes) =>
     Providers.reduce(
