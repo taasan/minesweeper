@@ -130,8 +130,9 @@ $flagTypes: $FLAGGED, $UNCERTAIN;
   @for $i from 1 through 8 {
     &[data-t='#{$i}'][data-s='#{$OPEN}'] .ct {
       fill: var(--cell-threats-#{$i}-color);
-      text-shadow: 1px 1px 2px black, 0 0 40px var(--background-base3),
-        0 0 5px var(--cell-threats-#{$i}-color);
+      // På android på firefox eser elementet ut og gir klikk på feil element
+      // text-shadow: 1px 1px 2px black, 0 0 40px var(--background-base3),
+      //   0 0 5px var(--cell-threats-#{$i}-color);
       font-size: 1em;
     }
   }
